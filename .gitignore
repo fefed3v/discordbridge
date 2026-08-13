@@ -7,5 +7,4 @@ external/
 *.obj
 *.dll
 *.exe
-*.txt
 *.json
