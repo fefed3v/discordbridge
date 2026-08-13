@@ -3,8 +3,6 @@
 namespace DiscordBridge
 {
     bool InitializeAmxExports(void** pluginData);
-
     void ShutdownAmxExports();
-
     bool AreAmxExportsInitialized();
 }

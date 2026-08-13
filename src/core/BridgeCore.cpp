@@ -1,7 +1,5 @@
 #include "BridgeCore.hpp"
 
-#include <utility>
-
 namespace DiscordBridge
 {
     BridgeCore::~BridgeCore()
@@ -9,41 +7,29 @@ namespace DiscordBridge
         shutdown();
     }
 
-    bool BridgeCore::initialize(std::unique_ptr<PlatformAdapter> platform)
+    bool BridgeCore::initialize()
     {
-        if (initialized_ || !platform) return false;
-        if (!platform->initialize()) return false;
+        if (initialized_) return false;
 
-        platform_ = std::move(platform);
         initialized_ = true;
         return true;
     }
 
     void BridgeCore::shutdown()
     {
-        initialized_ = false;
         discordClient_.shutdown();
         pawnRuntime_.clear();
-
-        if (!platform_) return;
-        platform_->shutdown();
-        platform_.reset();
+        initialized_ = false;
     }
 
     void BridgeCore::process()
     {
-        if (!initialized_ || !platform_) return;
-        platform_->process();
+        if (!initialized_) return;
     }
 
     bool BridgeCore::isInitialized() const
     {
         return initialized_;
-    }
-
-    ServerPlatform BridgeCore::getPlatform() const
-    {
-        return platform_ ? platform_->getPlatform() : ServerPlatform::Unknown;
     }
 
     PawnRuntime& BridgeCore::getPawnRuntime()

@@ -13,6 +13,11 @@ namespace DiscordBridge
 {
     class DiscordClient final
     {
+    private:
+        std::unique_ptr<dpp::cluster> cluster_;
+        std::atomic_bool initialized_{false};
+        std::atomic_bool connected_{false};
+
     public:
         DiscordClient();
         ~DiscordClient();
@@ -27,10 +32,5 @@ namespace DiscordBridge
 
         bool isInitialized() const;
         bool isConnected() const;
-
-    private:
-        std::unique_ptr<dpp::cluster> cluster_;
-        std::atomic_bool initialized_{false};
-        std::atomic_bool connected_{false};
     };
 }
