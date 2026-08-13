@@ -1,0 +1,11 @@
+build/
+external/
+.vscode/
+*.user
+*.suo
+*.pdb
+*.obj
+*.dll
+*.exe
+*.txt
+*.json
