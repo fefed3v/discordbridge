@@ -1,5 +1,8 @@
 build/
 external/
+gamemodes/
+pawn/
+plugins/
 .vscode/
 *.user
 *.suo
@@ -8,3 +11,5 @@ external/
 *.dll
 *.exe
 *.json
+*.cfg
+*server_log.txt

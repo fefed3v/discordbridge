@@ -3,6 +3,7 @@
 
 #include "../core/BridgeCore.hpp"
 #include "../main/Version.hpp"
+#include "../pawn/natives/BasicNatives.hpp"
 #include "../pawn/natives/VersionNatives.hpp"
 
 #include <plugincommon.h>
@@ -80,17 +81,22 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX* amx)
     if (amx == nullptr) return AMX_ERR_PARAMS;
 
     DiscordBridge::BridgeCore* core = DiscordBridge::GetBridgeCore();
-
     if (core == nullptr || !core->isInitialized()) return AMX_ERR_INIT;
 
-    if (!core->getPawnRuntime().addAMX(amx)) return AMX_ERR_NONE;
+    core->getPawnRuntime().addAMX(amx);
 
-    const int result = DiscordBridge::RegisterVersionNatives(amx);
-
-    if (result != AMX_ERR_NONE)
+    const int versionResult = DiscordBridge::RegisterVersionNatives(amx);
+    if (versionResult != AMX_ERR_NONE && versionResult != AMX_ERR_NOTFOUND)
     {
         core->getPawnRuntime().removeAMX(amx);
-        return result;
+        return versionResult;
+    }
+
+    const int basicResult = DiscordBridge::RegisterBasicNatives(amx);
+    if (basicResult != AMX_ERR_NONE && basicResult != AMX_ERR_NOTFOUND)
+    {
+        core->getPawnRuntime().removeAMX(amx);
+        return basicResult;
     }
 
     return AMX_ERR_NONE;

@@ -73,6 +73,7 @@ add_library(DiscordBridge SHARED
 
     src/pawn/PawnRuntime.cpp
     src/pawn/natives/VersionNatives.cpp
+    src/pawn/natives/BasicNatives.cpp
 
     src/plugin/Plugin.cpp
     src/plugin/AmxExports.cpp
