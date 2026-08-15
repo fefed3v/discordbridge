@@ -58,6 +58,15 @@ namespace DiscordBridge
         std::deque<GuildMemberEvent> guildMemberAddEvents_;
         std::deque<GuildMemberEvent> guildMemberRemoveEvents_;
 
+        int currentStatus_{0};
+        int currentActivityType_{0};
+
+        std::string currentActivityName_;
+        std::string currentActivityState_;
+        std::string currentActivityUrl_;
+
+        bool currentAfk_{false};
+
         std::string token_;
 
     public:
@@ -83,6 +92,11 @@ namespace DiscordBridge
         bool consumeGuildMemberAddEvent(std::string& guildId, std::string& userId);
         bool consumeGuildMemberRemoveEvent(std::string& guildId, std::string& userId);
 
+        bool setStatus(int status);
+        bool setActivity(int type, const std::string& name, const std::string& state = "", const std::string& url = "");
+        bool clearActivity();
+        bool setPresence(int status, int activityType, const std::string& name, const std::string& state = "", const std::string& url = "", bool afk = false);
+
     private:
         void receiveLoop();
         void heartbeatLoop();
@@ -91,6 +105,7 @@ namespace DiscordBridge
         bool sendText(const std::string& payload);
         bool sendHeartbeat();
         bool sendIdentify();
+        bool sendPresence();
 
         void handlePayload(const std::string& payload);
         void closeHandles();

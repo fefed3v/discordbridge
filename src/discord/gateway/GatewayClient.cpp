@@ -43,6 +43,7 @@ namespace DiscordBridge
         }
 
         value = negative ? -result : result;
+
         return true;
     }
 
@@ -139,14 +140,29 @@ namespace DiscordBridge
 
             if (insideString)
             {
-                if (escaped) escaped = false;
-                else if (character == '\\') escaped = true;
-                else if (character == '"') insideString = false;
+                if (escaped)
+                {
+                    escaped = false;
+                }
+                else if (character == '\\')
+                {
+                    escaped = true;
+                }
+                else if (character == '"')
+                {
+                    insideString = false;
+                }
             }
             else
             {
-                if (character == '"') insideString = true;
-                else if (character == '{') ++depth;
+                if (character == '"')
+                {
+                    insideString = true;
+                }
+                else if (character == '{')
+                {
+                    ++depth;
+                }
                 else if (character == '}')
                 {
                     --depth;
@@ -164,9 +180,35 @@ namespace DiscordBridge
 
         if (objectEnd == std::string::npos) return false;
 
-        const std::string objectJson = json.substr(objectStart, objectEnd - objectStart + 1);
+        const std::string objectJson = json.substr(
+            objectStart,
+            objectEnd - objectStart + 1
+        );
 
         return FindString(objectJson, key, value);
+    }
+
+    static std::string EscapeJson(const std::string& value)
+    {
+        std::string result;
+        result.reserve(value.size());
+
+        for (const char character : value)
+        {
+            switch (character)
+            {
+                case '"': result += "\\\""; break;
+                case '\\': result += "\\\\"; break;
+                case '\n': result += "\\n"; break;
+                case '\r': result += "\\r"; break;
+                case '\t': result += "\\t"; break;
+                case '\b': result += "\\b"; break;
+                case '\f': result += "\\f"; break;
+                default: result.push_back(character); break;
+            }
+        }
+
+        return result;
     }
 
     GatewayClient::~GatewayClient()
@@ -217,7 +259,12 @@ namespace DiscordBridge
             return false;
         }
 
-        connection_ = WinHttpConnect(session_, host.c_str(), INTERNET_DEFAULT_HTTPS_PORT, 0);
+        connection_ = WinHttpConnect(
+            session_,
+            host.c_str(),
+            INTERNET_DEFAULT_HTTPS_PORT,
+            0
+        );
 
         if (connection_ == nullptr)
         {
@@ -243,14 +290,27 @@ namespace DiscordBridge
             return false;
         }
 
-        if (!WinHttpSetOption(request_, WINHTTP_OPTION_UPGRADE_TO_WEB_SOCKET, nullptr, 0))
+        if (!WinHttpSetOption(
+            request_,
+            WINHTTP_OPTION_UPGRADE_TO_WEB_SOCKET,
+            nullptr,
+            0
+        ))
         {
             closeHandles();
             token_.clear();
             return false;
         }
 
-        if (!WinHttpSendRequest(request_, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0))
+        if (!WinHttpSendRequest(
+            request_,
+            WINHTTP_NO_ADDITIONAL_HEADERS,
+            0,
+            WINHTTP_NO_REQUEST_DATA,
+            0,
+            0,
+            0
+        ))
         {
             closeHandles();
             token_.clear();
@@ -311,7 +371,10 @@ namespace DiscordBridge
 
         try
         {
-            receiveThread_ = std::thread(&GatewayClient::receiveLoop, this);
+            receiveThread_ = std::thread(
+                &GatewayClient::receiveLoop,
+                this
+            );
         }
         catch (...)
         {
@@ -353,8 +416,15 @@ namespace DiscordBridge
             WinHttpCloseHandle(socket);
         }
 
-        if (heartbeatThread_.joinable() && heartbeatThread_.get_id() != std::this_thread::get_id()) heartbeatThread_.join();
-        if (receiveThread_.joinable() && receiveThread_.get_id() != std::this_thread::get_id()) receiveThread_.join();
+        if (heartbeatThread_.joinable() && heartbeatThread_.get_id() != std::this_thread::get_id())
+        {
+            heartbeatThread_.join();
+        }
+
+        if (receiveThread_.joinable() && receiveThread_.get_id() != std::this_thread::get_id())
+        {
+            receiveThread_.join();
+        }
 
         closeHandles();
 
@@ -371,6 +441,13 @@ namespace DiscordBridge
         heartbeatInterval_ = 0;
         heartbeatAck_ = true;
         sequence_ = -1;
+
+        currentStatus_ = 0;
+        currentActivityType_ = 0;
+        currentActivityName_.clear();
+        currentActivityState_.clear();
+        currentActivityUrl_.clear();
+        currentAfk_ = false;
     }
 
     bool GatewayClient::isInitialized() const
@@ -437,6 +514,61 @@ namespace DiscordBridge
         userId = std::move(event.userId);
 
         return true;
+    }
+
+    bool GatewayClient::setStatus(int status)
+    {
+        if (status < 0 || status > 4) return false;
+
+        currentStatus_ = status;
+
+        if (!ready_) return true;
+
+        return sendPresence();
+    }
+
+    bool GatewayClient::setActivity(int type, const std::string& name, const std::string& state, const std::string& url)
+    {
+        if (type < 0 || type > 5) return false;
+        if (name.empty()) return false;
+
+        currentActivityType_ = type;
+        currentActivityName_ = name;
+        currentActivityState_ = state;
+        currentActivityUrl_ = url;
+
+        if (!ready_) return true;
+
+        return sendPresence();
+    }
+
+    bool GatewayClient::clearActivity()
+    {
+        currentActivityType_ = 0;
+        currentActivityName_.clear();
+        currentActivityState_.clear();
+        currentActivityUrl_.clear();
+
+        if (!ready_) return true;
+
+        return sendPresence();
+    }
+
+    bool GatewayClient::setPresence(int status, int activityType, const std::string& name, const std::string& state, const std::string& url, bool afk)
+    {
+        if (status < 0 || status > 4) return false;
+        if (activityType < 0 || activityType > 5) return false;
+
+        currentStatus_ = status;
+        currentActivityType_ = activityType;
+        currentActivityName_ = name;
+        currentActivityState_ = state;
+        currentActivityUrl_ = url;
+        currentAfk_ = afk;
+
+        if (!ready_) return true;
+
+        return sendPresence();
     }
 
     void GatewayClient::receiveLoop()
@@ -549,7 +681,10 @@ namespace DiscordBridge
             if (!running_) return false;
             if (bufferType == WINHTTP_WEB_SOCKET_CLOSE_BUFFER_TYPE) return false;
 
-            if (bytesRead > 0) payload.append(buffer.data(), bytesRead);
+            if (bytesRead > 0)
+            {
+                payload.append(buffer.data(), bytesRead);
+            }
 
             if (bufferType == WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE) return true;
             if (bufferType == WINHTTP_WEB_SOCKET_UTF8_FRAGMENT_BUFFER_TYPE) continue;
@@ -587,8 +722,14 @@ namespace DiscordBridge
 
         std::string payload = "{\"op\":1,\"d\":";
 
-        if (sequence < 0) payload += "null";
-        else payload += std::to_string(sequence);
+        if (sequence < 0)
+        {
+            payload += "null";
+        }
+        else
+        {
+            payload += std::to_string(sequence);
+        }
 
         payload += "}";
 
@@ -619,13 +760,72 @@ namespace DiscordBridge
         return sendText(payload);
     }
 
+    bool GatewayClient::sendPresence()
+    {
+        if (!running_) return false;
+        if (!ready_) return false;
+
+        const char* status = "online";
+
+        switch (currentStatus_)
+        {
+            case 0: status = "online"; break;
+            case 1: status = "idle"; break;
+            case 2: status = "dnd"; break;
+            case 3: status = "invisible"; break;
+            case 4: status = "offline"; break;
+            default: return false;
+        }
+
+        std::string activities = "[]";
+
+        if (!currentActivityName_.empty())
+        {
+            activities =
+                "[{"
+                "\"name\":\"" + EscapeJson(currentActivityName_) + "\","
+                "\"type\":" + std::to_string(currentActivityType_);
+
+            if (!currentActivityState_.empty())
+            {
+                activities +=
+                    ",\"state\":\"" +
+                    EscapeJson(currentActivityState_) +
+                    "\"";
+            }
+
+            if (!currentActivityUrl_.empty())
+            {
+                activities +=
+                    ",\"url\":\"" +
+                    EscapeJson(currentActivityUrl_) +
+                    "\"";
+            }
+
+            activities += "}]";
+        }
+
+        const std::string payload =
+            "{\"op\":3,\"d\":{"
+            "\"since\":null,"
+            "\"activities\":" + activities + ","
+            "\"status\":\"" + std::string(status) + "\","
+            "\"afk\":" + std::string(currentAfk_ ? "true" : "false") +
+            "}}";
+
+        return sendText(payload);
+    }
+
     void GatewayClient::handlePayload(const std::string& payload)
     {
         if (!running_) return;
 
         std::int64_t sequence = 0;
 
-        if (FindInteger(payload, "s", sequence)) sequence_ = sequence;
+        if (FindInteger(payload, "s", sequence))
+        {
+            sequence_ = sequence;
+        }
 
         std::int64_t opcode = -1;
 
@@ -645,7 +845,10 @@ namespace DiscordBridge
             {
                 try
                 {
-                    heartbeatThread_ = std::thread(&GatewayClient::heartbeatLoop, this);
+                    heartbeatThread_ = std::thread(
+                        &GatewayClient::heartbeatLoop,
+                        this
+                    );
                 }
                 catch (...)
                 {
@@ -701,6 +904,9 @@ namespace DiscordBridge
             ready_ = true;
             connected_ = true;
             readyEventPending_ = true;
+
+            sendPresence();
+
             return;
         }
 

@@ -41,6 +41,11 @@ namespace DiscordBridge
         bool consumeGuildMemberAddEvent(std::string& guildId, std::string& userId);
         bool consumeGuildMemberRemoveEvent(std::string& guildId, std::string& userId);
 
+        bool setStatus(int status);
+        bool setActivity(int type, const std::string& name, const std::string& state = "", const std::string& url = "");
+        bool clearActivity();
+        bool setPresence(int status, int activityType, const std::string& name, const std::string& state = "", const std::string& url = "", bool afk = false);
+
         const std::string& getToken() const;
         const GatewayInfo& getGatewayInfo() const;
     };

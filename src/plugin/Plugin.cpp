@@ -5,6 +5,7 @@
 #include "../main/Version.hpp"
 #include "../pawn/natives/BasicNatives.hpp"
 #include "../pawn/natives/VersionNatives.hpp"
+#include "../pawn/natives/PresenceNatives.hpp"
 
 #include <plugincommon.h>
 #include <amx/amx.h>
@@ -97,6 +98,14 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX* amx)
     {
         core->getPawnRuntime().removeAMX(amx);
         return basicResult;
+    }
+
+    const int presenceResult = DiscordBridge::RegisterPresenceNatives(amx);
+
+    if (presenceResult != AMX_ERR_NONE && presenceResult != AMX_ERR_NOTFOUND)
+    {
+        core->getPawnRuntime().removeAMX(amx);
+        return presenceResult;
     }
 
     return AMX_ERR_NONE;

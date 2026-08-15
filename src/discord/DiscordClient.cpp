@@ -142,6 +142,26 @@ namespace DiscordBridge
     {
         return gatewayClient_.consumeGuildMemberRemoveEvent(guildId, userId);
     }
+
+    bool DiscordClient::setStatus(int status)
+    {
+        return gatewayClient_.setStatus(status);
+    }
+
+    bool DiscordClient::setActivity(int type, const std::string& name, const std::string& state, const std::string& url)
+    {
+        return gatewayClient_.setActivity(type, name, state, url);
+    }
+
+    bool DiscordClient::clearActivity()
+    {
+        return gatewayClient_.clearActivity();
+    }
+
+    bool DiscordClient::setPresence(int status, int activityType, const std::string& name, const std::string& state, const std::string& url, bool afk)
+    {
+        return gatewayClient_.setPresence(status, activityType, name, state, url, afk);
+    }
     
     const std::string& DiscordClient::getToken() const
     {
