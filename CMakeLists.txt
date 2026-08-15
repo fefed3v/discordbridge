@@ -40,13 +40,12 @@ add_library(DiscordBridge SHARED
     src/discord/gateway/GatewayInfo.cpp
     src/discord/gateway/GatewayClient.cpp
     src/discord/events/DiscordEvents.cpp
-    src/discord/richpresence/RichPresenceData.cpp
-    src/discord/richpresence/RichPresenceClient.cpp
 
     src/pawn/PawnRuntime.cpp
-    src/pawn/natives/BasicNatives.cpp
     src/pawn/natives/VersionNatives.cpp
+    src/pawn/natives/BasicNatives.cpp
     src/pawn/natives/PresenceNatives.cpp
+    src/pawn/natives/MessageNatives.cpp
 
     src/plugin/Plugin.cpp
     src/plugin/AmxExports.cpp

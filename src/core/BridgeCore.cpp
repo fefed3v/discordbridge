@@ -53,6 +53,37 @@ namespace DiscordBridge
         {
             pawnRuntime_.dispatchGuildMemberRemove(guildId, userId);
         }
+
+        bool messageSuccess = false;
+        std::string sentChannelId;
+        std::string sentMessageId;
+
+        while (discordClient_.consumeMessageSentEvent(
+            messageSuccess,
+            sentChannelId,
+            sentMessageId
+        ))
+        {
+            pawnRuntime_.dispatchMessageSent(
+                messageSuccess,
+                sentChannelId,
+                sentMessageId
+            );
+        }
+
+        bool operationSuccess = false;
+        std::string operationChannelId;
+        std::string operationMessageId;
+
+        while (discordClient_.consumeMessageEditedEvent(operationSuccess, operationChannelId, operationMessageId))
+        {
+            pawnRuntime_.dispatchMessageEdited(operationSuccess, operationChannelId, operationMessageId);
+        }
+
+        while (discordClient_.consumeMessageDeletedEvent(operationSuccess, operationChannelId, operationMessageId))
+        {
+            pawnRuntime_.dispatchMessageDeleted(operationSuccess, operationChannelId, operationMessageId);
+        }
     }
     
     bool BridgeCore::isInitialized() const

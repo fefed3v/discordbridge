@@ -134,4 +134,14 @@ namespace DiscordBridge
 
         return response;
     }
+
+    HttpResponse HttpClient::patch(const std::wstring& host, const std::wstring& path, const std::wstring& headers, const std::string& body)
+    {
+        return request(L"PATCH", host, path, headers, body);
+    }
+
+    HttpResponse HttpClient::del(const std::wstring& host, const std::wstring& path, const std::wstring& headers)
+    {
+        return request(L"DELETE", host, path, headers, "");
+    }
 }

@@ -25,17 +25,31 @@ namespace DiscordBridge
 
         return result;
     }
-    
+
+    static bool PushPawnString(AMX* amx, const std::string& value, cell& address)
+    {
+        cell* physical = nullptr;
+
+        if (amx_Allot(amx, static_cast<int>(value.size()) + 1, &address, &physical) != AMX_ERR_NONE) return false;
+
+        if (amx_SetString(physical, value.c_str(), 0, 0, value.size() + 1) != AMX_ERR_NONE)
+        {
+            amx_Release(amx, address);
+            address = 0;
+            return false;
+        }
+
+        return true;
+    }
+
     bool PawnRuntime::addAMX(AMX* amx)
     {
         if (amx == nullptr) return false;
 
         const auto iterator = std::find(scripts_.begin(), scripts_.end(), amx);
-
         if (iterator != scripts_.end()) return false;
 
         scripts_.push_back(amx);
-
         return true;
     }
 
@@ -44,11 +58,9 @@ namespace DiscordBridge
         if (amx == nullptr) return false;
 
         const auto iterator = std::find(scripts_.begin(), scripts_.end(), amx);
-
         if (iterator == scripts_.end()) return false;
 
         scripts_.erase(iterator);
-
         return true;
     }
 
@@ -68,7 +80,6 @@ namespace DiscordBridge
             if (amx_FindPublic(amx, "DBridge_OnReady", &index) != AMX_ERR_NONE) continue;
 
             cell returnValue = 0;
-
             amx_Exec(amx, &returnValue, index);
         }
     }
@@ -89,28 +100,20 @@ namespace DiscordBridge
             cell channelAddress = 0;
             cell messageAddress = 0;
 
-            cell* userPhysical = nullptr;
-            cell* channelPhysical = nullptr;
-            cell* messagePhysical = nullptr;
+            if (!PushPawnString(amx, userId, userAddress)) continue;
 
-            if (amx_Allot(amx, static_cast<int>(userId.size()) + 1, &userAddress, &userPhysical) != AMX_ERR_NONE) continue;
-
-            if (amx_Allot(amx, static_cast<int>(channelId.size()) + 1, &channelAddress, &channelPhysical) != AMX_ERR_NONE)
+            if (!PushPawnString(amx, channelId, channelAddress))
             {
                 amx_Release(amx, userAddress);
                 continue;
             }
 
-            if (amx_Allot(amx, static_cast<int>(pawnMessage.size()) + 1, &messageAddress, &messagePhysical) != AMX_ERR_NONE)
+            if (!PushPawnString(amx, pawnMessage, messageAddress))
             {
                 amx_Release(amx, channelAddress);
                 amx_Release(amx, userAddress);
                 continue;
             }
-
-            amx_SetString(userPhysical, userId.c_str(), 0, 0, userId.size() + 1);
-            amx_SetString(channelPhysical, channelId.c_str(), 0, 0, channelId.size() + 1);
-            amx_SetString(messagePhysical, pawnMessage.c_str(), 0, 0, pawnMessage.size() + 1);
 
             amx_Push(amx, messageAddress);
             amx_Push(amx, channelAddress);
@@ -138,25 +141,18 @@ namespace DiscordBridge
             cell guildAddress = 0;
             cell userAddress = 0;
 
-            cell* guildPhysical = nullptr;
-            cell* userPhysical = nullptr;
+            if (!PushPawnString(amx, guildId, guildAddress)) continue;
 
-            if (amx_Allot(amx, static_cast<int>(guildId.size()) + 1, &guildAddress, &guildPhysical) != AMX_ERR_NONE) continue;
-
-            if (amx_Allot(amx, static_cast<int>(userId.size()) + 1, &userAddress, &userPhysical) != AMX_ERR_NONE)
+            if (!PushPawnString(amx, userId, userAddress))
             {
                 amx_Release(amx, guildAddress);
                 continue;
             }
 
-            amx_SetString(guildPhysical, guildId.c_str(), 0, 0, guildId.size() + 1);
-            amx_SetString(userPhysical, userId.c_str(), 0, 0, userId.size() + 1);
-
             amx_Push(amx, userAddress);
             amx_Push(amx, guildAddress);
 
             cell returnValue = 0;
-
             amx_Exec(amx, &returnValue, index);
 
             amx_Release(amx, userAddress);
@@ -177,29 +173,121 @@ namespace DiscordBridge
             cell guildAddress = 0;
             cell userAddress = 0;
 
-            cell* guildPhysical = nullptr;
-            cell* userPhysical = nullptr;
+            if (!PushPawnString(amx, guildId, guildAddress)) continue;
 
-            if (amx_Allot(amx, static_cast<int>(guildId.size()) + 1, &guildAddress, &guildPhysical) != AMX_ERR_NONE) continue;
-
-            if (amx_Allot(amx, static_cast<int>(userId.size()) + 1, &userAddress, &userPhysical) != AMX_ERR_NONE)
+            if (!PushPawnString(amx, userId, userAddress))
             {
                 amx_Release(amx, guildAddress);
                 continue;
             }
 
-            amx_SetString(guildPhysical, guildId.c_str(), 0, 0, guildId.size() + 1);
-            amx_SetString(userPhysical, userId.c_str(), 0, 0, userId.size() + 1);
-
             amx_Push(amx, userAddress);
             amx_Push(amx, guildAddress);
 
             cell returnValue = 0;
-
             amx_Exec(amx, &returnValue, index);
 
             amx_Release(amx, userAddress);
             amx_Release(amx, guildAddress);
+        }
+    }
+
+    void PawnRuntime::dispatchMessageSent(bool success, const std::string& channelId, const std::string& messageId)
+    {
+        for (AMX* amx : scripts_)
+        {
+            if (amx == nullptr) continue;
+
+            int index = -1;
+
+            if (amx_FindPublic(amx, "DBridge_OnMessageSent", &index) != AMX_ERR_NONE) continue;
+
+            cell channelAddress = 0;
+            cell messageAddress = 0;
+
+            if (!PushPawnString(amx, channelId, channelAddress)) continue;
+
+            if (!PushPawnString(amx, messageId, messageAddress))
+            {
+                amx_Release(amx, channelAddress);
+                continue;
+            }
+
+            amx_Push(amx, messageAddress);
+            amx_Push(amx, channelAddress);
+            amx_Push(amx, success ? 1 : 0);
+
+            cell returnValue = 0;
+            amx_Exec(amx, &returnValue, index);
+
+            amx_Release(amx, messageAddress);
+            amx_Release(amx, channelAddress);
+        }
+    }
+
+    void PawnRuntime::dispatchMessageEdited(bool success, const std::string& channelId, const std::string& messageId)
+    {
+        for (AMX* amx : scripts_)
+        {
+            if (amx == nullptr) continue;
+
+            int index = -1;
+
+            if (amx_FindPublic(amx, "DBridge_OnMessageEdited", &index) != AMX_ERR_NONE) continue;
+
+            cell channelAddress = 0;
+            cell messageAddress = 0;
+
+            if (!PushPawnString(amx, channelId, channelAddress)) continue;
+
+            if (!PushPawnString(amx, messageId, messageAddress))
+            {
+                amx_Release(amx, channelAddress);
+                continue;
+            }
+
+            amx_Push(amx, messageAddress);
+            amx_Push(amx, channelAddress);
+            amx_Push(amx, success ? 1 : 0);
+
+            cell returnValue = 0;
+            amx_Exec(amx, &returnValue, index);
+
+            amx_Release(amx, messageAddress);
+            amx_Release(amx, channelAddress);
+        }
+    }
+
+    void PawnRuntime::dispatchMessageDeleted(bool success, const std::string& channelId, const std::string& messageId)
+    {
+        for (AMX* amx : scripts_)
+        {
+            if (amx == nullptr) continue;
+
+            int index = -1;
+
+            if (amx_FindPublic(amx, "DBridge_OnMessageDeleted", &index) != AMX_ERR_NONE) continue;
+
+            cell channelAddress = 0;
+            cell messageAddress = 0;
+
+            if (!PushPawnString(amx, channelId, channelAddress)) continue;
+
+            if (!PushPawnString(amx, messageId, messageAddress))
+            {
+                amx_Release(amx, channelAddress);
+                continue;
+            }
+
+            amx_Push(amx, messageAddress);
+            amx_Push(amx, channelAddress);
+            amx_Push(amx, success ? 1 : 0);
+
+            cell returnValue = 0;
+            amx_Exec(amx, &returnValue, index);
+
+            amx_Release(amx, messageAddress);
+            amx_Release(amx, channelAddress);
         }
     }
 

@@ -6,6 +6,7 @@
 #include "../pawn/natives/BasicNatives.hpp"
 #include "../pawn/natives/VersionNatives.hpp"
 #include "../pawn/natives/PresenceNatives.hpp"
+#include "../pawn/natives/MessageNatives.hpp"
 
 #include <plugincommon.h>
 #include <amx/amx.h>
@@ -106,6 +107,14 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX* amx)
     {
         core->getPawnRuntime().removeAMX(amx);
         return presenceResult;
+    }
+
+    const int messageResult = DiscordBridge::RegisterMessageNatives(amx);
+
+    if (messageResult != AMX_ERR_NONE && messageResult != AMX_ERR_NOTFOUND)
+    {
+        core->getPawnRuntime().removeAMX(amx);
+        return messageResult;
     }
 
     return AMX_ERR_NONE;
