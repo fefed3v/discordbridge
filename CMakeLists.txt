@@ -46,6 +46,7 @@ set(DISCORD_BRIDGE_SOURCES
 
     ${SRC_DIR}/discord/DiscordClient.cpp
     ${SRC_DIR}/discord/Embed.cpp
+    ${SRC_DIR}/discord/Button.cpp
     ${SRC_DIR}/discord/Gateway.cpp
     ${SRC_DIR}/discord/HttpClient.cpp
 

@@ -171,6 +171,51 @@ namespace DiscordBridge
             return false;
         }
 
+        bool FindNestedObjectString(const std::string& json, const std::string& parentKey, const std::string& objectKey, const std::string& key, std::string& value)
+        {
+            const std::string search = "\"" + parentKey + "\"";
+            std::size_t position = json.find(search);
+            if (position == std::string::npos) return false;
+
+            position = json.find(':', position + search.size());
+            if (position == std::string::npos) return false;
+
+            const std::size_t objectStart = json.find('{', position + 1);
+            if (objectStart == std::string::npos) return false;
+
+            position = objectStart + 1;
+
+            int depth = 1;
+            bool insideString = false;
+            bool escaped = false;
+
+            while (position < json.size())
+            {
+                const char character = json[position];
+
+                if (insideString)
+                {
+                    if (escaped) escaped = false;
+                    else if (character == '\\') escaped = true;
+                    else if (character == '"') insideString = false;
+                }
+                else
+                {
+                    if (character == '"') insideString = true;
+                    else if (character == '{') ++depth;
+                    else if (character == '}' && --depth == 0)
+                    {
+                        const std::string parentJson = json.substr(objectStart, position - objectStart + 1);
+                        return FindObjectString(parentJson, objectKey, key, value);
+                    }
+                }
+
+                ++position;
+            }
+
+            return false;
+        }
+
         std::string EscapeJson(const std::string& value)
         {
             std::string result;
@@ -371,11 +416,30 @@ namespace DiscordBridge
         return consumeGuildMemberEvent(guildMemberRemoveEvents_, guildId, userId);
     }
 
+    bool Gateway::consumeButtonClickEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId)
+    {
+        std::lock_guard<std::mutex> lock(eventMutex_);
+
+        if (buttonClickEvents_.empty()) return false;
+
+        ButtonClickEvent event = std::move(buttonClickEvents_.front());
+        buttonClickEvents_.pop_front();
+
+        interactionId = std::move(event.interactionId);
+        interactionToken = std::move(event.interactionToken);
+        userId = std::move(event.userId);
+        channelId = std::move(event.channelId);
+        customId = std::move(event.customId);
+
+        return true;
+    }
+
     bool Gateway::setStatus(int status)
     {
         if (!GetStatusName(status)) return false;
 
         currentStatus_ = status;
+
         return !ready_ || sendPresence();
     }
 
@@ -422,6 +486,7 @@ namespace DiscordBridge
         while (running_)
         {
             if (!receivePayload(payload) || !running_) break;
+
             handlePayload(payload);
         }
 
@@ -469,6 +534,7 @@ namespace DiscordBridge
         payload.clear();
 
         HINTERNET socket = webSocket_;
+
         if (!running_ || !socket) return false;
 
         std::vector<char> buffer(8192);
@@ -505,7 +571,13 @@ namespace DiscordBridge
         if (!running_) return false;
 
         const std::int64_t sequence = sequence_.load();
-        const std::string payload = "{\"op\":1,\"d\":" + std::string(sequence < 0 ? "null" : std::to_string(sequence)) + "}";
+
+        std::string payload = "{\"op\":1,\"d\":";
+
+        if (sequence < 0) payload += "null";
+        else payload += std::to_string(sequence);
+
+        payload += "}";
 
         return sendText(payload);
     }
@@ -524,6 +596,7 @@ namespace DiscordBridge
         if (!running_ || !ready_) return false;
 
         const char* status = GetStatusName(currentStatus_);
+
         if (!status) return false;
 
         std::string activities = "[]";
@@ -548,9 +621,11 @@ namespace DiscordBridge
         if (!running_) return;
 
         std::int64_t sequence = 0;
+
         if (FindInteger(payload, "s", sequence)) sequence_ = sequence;
 
         std::int64_t opcode = -1;
+
         if (!FindInteger(payload, "op", opcode)) return;
 
         switch (opcode)
@@ -603,6 +678,7 @@ namespace DiscordBridge
     void Gateway::handleDispatch(const std::string& payload)
     {
         std::string eventName;
+
         if (!FindString(payload, "t", eventName)) return;
 
         if (eventName == "READY")
@@ -610,7 +686,35 @@ namespace DiscordBridge
             ready_ = true;
             connected_ = true;
             readyEventPending_ = true;
+
             sendPresence();
+
+            return;
+        }
+
+        if (eventName == "INTERACTION_CREATE")
+        {
+            std::int64_t interactionType = 0;
+            std::int64_t componentType = 0;
+
+            if (!FindInteger(payload, "type", interactionType) || interactionType != 3) return;
+            if (!FindInteger(payload, "component_type", componentType) || componentType != 2) return;
+
+            ButtonClickEvent event;
+
+            if (!FindString(payload, "id", event.interactionId)) return;
+            if (!FindString(payload, "token", event.interactionToken)) return;
+            if (!FindString(payload, "channel_id", event.channelId)) return;
+            if (!FindString(payload, "custom_id", event.customId)) return;
+
+            if (!FindNestedObjectString(payload, "member", "user", "id", event.userId))
+            {
+                if (!FindObjectString(payload, "user", "id", event.userId)) return;
+            }
+
+            std::lock_guard<std::mutex> lock(eventMutex_);
+            buttonClickEvents_.push_back(std::move(event));
+
             return;
         }
 
@@ -618,10 +722,13 @@ namespace DiscordBridge
         {
             MessageCreateEvent event;
 
-            if (!FindObjectString(payload, "author", "id", event.userId) || !FindString(payload, "channel_id", event.channelId) || !FindString(payload, "content", event.message)) return;
+            if (!FindObjectString(payload, "author", "id", event.userId)) return;
+            if (!FindString(payload, "channel_id", event.channelId)) return;
+            if (!FindString(payload, "content", event.message)) return;
 
             std::lock_guard<std::mutex> lock(eventMutex_);
             messageEvents_.push_back(std::move(event));
+
             return;
         }
 
@@ -629,10 +736,12 @@ namespace DiscordBridge
         {
             GuildMemberEvent event;
 
-            if (!FindString(payload, "guild_id", event.guildId) || !FindObjectString(payload, "user", "id", event.userId)) return;
+            if (!FindString(payload, "guild_id", event.guildId)) return;
+            if (!FindObjectString(payload, "user", "id", event.userId)) return;
 
             std::lock_guard<std::mutex> lock(eventMutex_);
             guildMemberAddEvents_.push_back(std::move(event));
+
             return;
         }
 
@@ -640,7 +749,8 @@ namespace DiscordBridge
         {
             GuildMemberEvent event;
 
-            if (!FindString(payload, "guild_id", event.guildId) || !FindObjectString(payload, "user", "id", event.userId)) return;
+            if (!FindString(payload, "guild_id", event.guildId)) return;
+            if (!FindObjectString(payload, "user", "id", event.userId)) return;
 
             std::lock_guard<std::mutex> lock(eventMutex_);
             guildMemberRemoveEvents_.push_back(std::move(event));
@@ -680,6 +790,7 @@ namespace DiscordBridge
         running_ = false;
         connected_ = false;
         ready_ = false;
+
         heartbeatCondition_.notify_all();
     }
 
@@ -719,8 +830,10 @@ namespace DiscordBridge
         sequence_ = -1;
 
         std::lock_guard<std::mutex> lock(eventMutex_);
+
         messageEvents_.clear();
         guildMemberAddEvents_.clear();
         guildMemberRemoveEvents_.clear();
+        buttonClickEvents_.clear();
     }
 }

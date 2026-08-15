@@ -20,8 +20,12 @@ namespace DiscordBridge
         if (!initialized_) return;
 
         discordClient_.shutdown();
+
+        actionRowManager_.clear();
+        buttonManager_.clear();
         embedManager_.clear();
         pawnRuntime_.clear();
+
         initialized_ = false;
     }
 
@@ -44,6 +48,12 @@ namespace DiscordBridge
         while (discordClient_.consumeGuildMemberAddEvent(guildId, userId)) pawnRuntime_.dispatchGuildMemberAdd(guildId, userId);
         while (discordClient_.consumeGuildMemberRemoveEvent(guildId, userId)) pawnRuntime_.dispatchGuildMemberRemove(guildId, userId);
 
+        std::string interactionId;
+        std::string interactionToken;
+        std::string customId;
+
+        while (discordClient_.consumeButtonClickEvent(interactionId, interactionToken, userId, channelId, customId)) pawnRuntime_.dispatchButtonClick(userId, channelId, customId);
+
         bool success = false;
         std::string messageId;
 
@@ -51,6 +61,7 @@ namespace DiscordBridge
         while (discordClient_.consumeMessageEditedEvent(success, channelId, messageId)) pawnRuntime_.dispatchMessageEdited(success, channelId, messageId);
         while (discordClient_.consumeMessageDeletedEvent(success, channelId, messageId)) pawnRuntime_.dispatchMessageDeleted(success, channelId, messageId);
         while (discordClient_.consumeEmbedSentEvent(success, channelId, messageId)) pawnRuntime_.dispatchEmbedSent(success, channelId, messageId);
+        while (discordClient_.consumeComponentsSentEvent(success, channelId, messageId)) pawnRuntime_.dispatchComponentsSent(success, channelId, messageId);
     }
 
     bool BridgeCore::isInitialized() const
@@ -86,5 +97,25 @@ namespace DiscordBridge
     const EmbedManager& BridgeCore::getEmbedManager() const
     {
         return embedManager_;
+    }
+
+    ButtonManager& BridgeCore::getButtonManager()
+    {
+        return buttonManager_;
+    }
+
+    const ButtonManager& BridgeCore::getButtonManager() const
+    {
+        return buttonManager_;
+    }
+
+    ActionRowManager& BridgeCore::getActionRowManager()
+    {
+        return actionRowManager_;
+    }
+
+    const ActionRowManager& BridgeCore::getActionRowManager() const
+    {
+        return actionRowManager_;
     }
 }

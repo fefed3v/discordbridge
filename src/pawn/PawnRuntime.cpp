@@ -17,12 +17,14 @@ namespace DiscordBridge
             if (wideSize <= 0) return value;
 
             std::wstring wide(static_cast<std::size_t>(wideSize), L'\0');
+
             if (MultiByteToWideChar(CP_UTF8, 0, value.data(), static_cast<int>(value.size()), wide.data(), wideSize) <= 0) return value;
 
             const int ansiSize = WideCharToMultiByte(CP_ACP, 0, wide.data(), wideSize, nullptr, 0, nullptr, nullptr);
             if (ansiSize <= 0) return value;
 
             std::string result(static_cast<std::size_t>(ansiSize), '\0');
+
             if (WideCharToMultiByte(CP_ACP, 0, wide.data(), wideSize, result.data(), ansiSize, nullptr, nullptr) <= 0) return value;
 
             return result;
@@ -38,6 +40,7 @@ namespace DiscordBridge
 
             amx_Release(amx, address);
             address = 0;
+
             return false;
         }
 
@@ -51,6 +54,7 @@ namespace DiscordBridge
             for (AMX* amx : scripts)
             {
                 int index = -1;
+
                 if (!FindPublic(amx, callback, index)) continue;
 
                 cell firstAddress = 0;
@@ -75,11 +79,52 @@ namespace DiscordBridge
             }
         }
 
+        void DispatchThreeStrings(const std::vector<AMX*>& scripts, const char* callback, const std::string& first, const std::string& second, const std::string& third)
+        {
+            for (AMX* amx : scripts)
+            {
+                int index = -1;
+
+                if (!FindPublic(amx, callback, index)) continue;
+
+                cell firstAddress = 0;
+                cell secondAddress = 0;
+                cell thirdAddress = 0;
+
+                if (!PushPawnString(amx, first, firstAddress)) continue;
+
+                if (!PushPawnString(amx, second, secondAddress))
+                {
+                    amx_Release(amx, firstAddress);
+                    continue;
+                }
+
+                if (!PushPawnString(amx, third, thirdAddress))
+                {
+                    amx_Release(amx, secondAddress);
+                    amx_Release(amx, firstAddress);
+                    continue;
+                }
+
+                amx_Push(amx, thirdAddress);
+                amx_Push(amx, secondAddress);
+                amx_Push(amx, firstAddress);
+
+                cell returnValue = 0;
+                amx_Exec(amx, &returnValue, index);
+
+                amx_Release(amx, thirdAddress);
+                amx_Release(amx, secondAddress);
+                amx_Release(amx, firstAddress);
+            }
+        }
+
         void DispatchResult(const std::vector<AMX*>& scripts, const char* callback, bool success, const std::string& channelId, const std::string& messageId)
         {
             for (AMX* amx : scripts)
             {
                 int index = -1;
+
                 if (!FindPublic(amx, callback, index)) continue;
 
                 cell channelAddress = 0;
@@ -119,6 +164,7 @@ namespace DiscordBridge
         if (!amx) return false;
 
         const auto iterator = std::find(scripts_.begin(), scripts_.end(), amx);
+
         if (iterator == scripts_.end()) return false;
 
         scripts_.erase(iterator);
@@ -135,6 +181,7 @@ namespace DiscordBridge
         for (AMX* amx : scripts_)
         {
             int index = -1;
+
             if (!FindPublic(amx, "DBridge_OnReady", index)) continue;
 
             cell returnValue = 0;
@@ -144,43 +191,7 @@ namespace DiscordBridge
 
     void PawnRuntime::dispatchMessageCreate(const std::string& userId, const std::string& channelId, const std::string& message)
     {
-        const std::string pawnMessage = Utf8ToAnsi(message);
-
-        for (AMX* amx : scripts_)
-        {
-            int index = -1;
-            if (!FindPublic(amx, "DBridge_OnMessageCreate", index)) continue;
-
-            cell userAddress = 0;
-            cell channelAddress = 0;
-            cell messageAddress = 0;
-
-            if (!PushPawnString(amx, userId, userAddress)) continue;
-
-            if (!PushPawnString(amx, channelId, channelAddress))
-            {
-                amx_Release(amx, userAddress);
-                continue;
-            }
-
-            if (!PushPawnString(amx, pawnMessage, messageAddress))
-            {
-                amx_Release(amx, channelAddress);
-                amx_Release(amx, userAddress);
-                continue;
-            }
-
-            amx_Push(amx, messageAddress);
-            amx_Push(amx, channelAddress);
-            amx_Push(amx, userAddress);
-
-            cell returnValue = 0;
-            amx_Exec(amx, &returnValue, index);
-
-            amx_Release(amx, messageAddress);
-            amx_Release(amx, channelAddress);
-            amx_Release(amx, userAddress);
-        }
+        DispatchThreeStrings(scripts_, "DBridge_OnMessageCreate", userId, channelId, Utf8ToAnsi(message));
     }
 
     void PawnRuntime::dispatchGuildMemberAdd(const std::string& guildId, const std::string& userId)
@@ -211,6 +222,16 @@ namespace DiscordBridge
     void PawnRuntime::dispatchEmbedSent(bool success, const std::string& channelId, const std::string& messageId)
     {
         DispatchResult(scripts_, "DBridge_OnEmbedSent", success, channelId, messageId);
+    }
+
+    void PawnRuntime::dispatchComponentsSent(bool success, const std::string& channelId, const std::string& messageId)
+    {
+        DispatchResult(scripts_, "DBridge_OnComponentsSent", success, channelId, messageId);
+    }
+
+    void PawnRuntime::dispatchButtonClick(const std::string& userId, const std::string& channelId, const std::string& customId)
+    {
+        DispatchThreeStrings(scripts_, "DBridge_OnButtonClick", userId, channelId, customId);
     }
 
     std::size_t PawnRuntime::size() const

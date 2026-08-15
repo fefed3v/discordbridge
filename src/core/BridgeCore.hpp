@@ -1,28 +1,17 @@
 #pragma once
 
+#include "../discord/Button.hpp"
 #include "../discord/DiscordClient.hpp"
 #include "../discord/Embed.hpp"
 #include "../pawn/PawnRuntime.hpp"
 
 namespace DiscordBridge
 {
-    class BridgeCore final
+    class BridgeCore
     {
-    private:
-        bool initialized_{false};
-
-        PawnRuntime pawnRuntime_;
-        DiscordClient discordClient_;
-        EmbedManager embedManager_;
-
     public:
         BridgeCore() = default;
         ~BridgeCore();
-
-        BridgeCore(const BridgeCore&) = delete;
-        BridgeCore& operator=(const BridgeCore&) = delete;
-        BridgeCore(BridgeCore&&) = delete;
-        BridgeCore& operator=(BridgeCore&&) = delete;
 
         bool initialize();
         void shutdown();
@@ -38,5 +27,20 @@ namespace DiscordBridge
 
         EmbedManager& getEmbedManager();
         const EmbedManager& getEmbedManager() const;
+
+        ButtonManager& getButtonManager();
+        const ButtonManager& getButtonManager() const;
+
+        ActionRowManager& getActionRowManager();
+        const ActionRowManager& getActionRowManager() const;
+
+    private:
+        bool initialized_{false};
+
+        PawnRuntime pawnRuntime_;
+        DiscordClient discordClient_;
+        EmbedManager embedManager_;
+        ButtonManager buttonManager_;
+        ActionRowManager actionRowManager_;
     };
 }

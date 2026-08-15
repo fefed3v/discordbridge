@@ -43,6 +43,15 @@ namespace DiscordBridge
             std::string userId;
         };
 
+        struct ButtonClickEvent
+        {
+            std::string interactionId;
+            std::string interactionToken;
+            std::string userId;
+            std::string channelId;
+            std::string customId;
+        };
+
         HINTERNET session_{nullptr};
         HINTERNET connection_{nullptr};
         HINTERNET request_{nullptr};
@@ -58,6 +67,7 @@ namespace DiscordBridge
         std::deque<MessageCreateEvent> messageEvents_;
         std::deque<GuildMemberEvent> guildMemberAddEvents_;
         std::deque<GuildMemberEvent> guildMemberRemoveEvents_;
+        std::deque<ButtonClickEvent> buttonClickEvents_;
 
         std::atomic_bool initialized_{false};
         std::atomic_bool connected_{false};
@@ -98,6 +108,7 @@ namespace DiscordBridge
         bool consumeMessageCreateEvent(std::string& userId, std::string& channelId, std::string& message);
         bool consumeGuildMemberAddEvent(std::string& guildId, std::string& userId);
         bool consumeGuildMemberRemoveEvent(std::string& guildId, std::string& userId);
+        bool consumeButtonClickEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId);
 
         bool setStatus(int status);
         bool setActivity(int type, const std::string& name, const std::string& state = "", const std::string& url = "");
