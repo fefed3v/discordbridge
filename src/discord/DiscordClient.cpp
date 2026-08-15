@@ -6,84 +6,124 @@
 
 namespace DiscordBridge
 {
-    static std::wstring Utf8ToWide(const std::string& value)
+    namespace
     {
-        if (value.empty()) return {};
+        constexpr wchar_t DISCORD_HOST[] = L"discord.com";
+        constexpr wchar_t API_BASE[] = L"/api/v10";
+        constexpr wchar_t USER_AGENT[] = L"DiscordBridge/0.0.1";
 
-        const int size = MultiByteToWideChar(CP_UTF8, 0, value.data(), static_cast<int>(value.size()), nullptr, 0);
-        if (size <= 0) return {};
-
-        std::wstring result(static_cast<std::size_t>(size), L'\0');
-
-        if (MultiByteToWideChar(CP_UTF8, 0, value.data(), static_cast<int>(value.size()), result.data(), size) <= 0) return {};
-
-        return result;
-    }
-
-    static std::string AnsiToUtf8(const std::string& value)
-    {
-        if (value.empty()) return {};
-
-        const int wideSize = MultiByteToWideChar(CP_ACP, 0, value.data(), static_cast<int>(value.size()), nullptr, 0);
-        if (wideSize <= 0) return value;
-
-        std::wstring wide(static_cast<std::size_t>(wideSize), L'\0');
-
-        if (MultiByteToWideChar(CP_ACP, 0, value.data(), static_cast<int>(value.size()), wide.data(), wideSize) <= 0) return value;
-
-        const int utf8Size = WideCharToMultiByte(CP_UTF8, 0, wide.data(), wideSize, nullptr, 0, nullptr, nullptr);
-        if (utf8Size <= 0) return value;
-
-        std::string result(static_cast<std::size_t>(utf8Size), '\0');
-
-        if (WideCharToMultiByte(CP_UTF8, 0, wide.data(), wideSize, result.data(), utf8Size, nullptr, nullptr) <= 0) return value;
-
-        return result;
-    }
-
-    static std::string EscapeJson(const std::string& value)
-    {
-        std::string result;
-        result.reserve(value.size());
-
-        for (const char character : value)
+        std::wstring Utf8ToWide(const std::string& value)
         {
-            switch (character)
-            {
-                case '"': result += "\\\""; break;
-                case '\\': result += "\\\\"; break;
-                case '\n': result += "\\n"; break;
-                case '\r': result += "\\r"; break;
-                case '\t': result += "\\t"; break;
-                case '\b': result += "\\b"; break;
-                case '\f': result += "\\f"; break;
-                default: result.push_back(character); break;
-            }
+            if (value.empty()) return {};
+
+            const int size = MultiByteToWideChar(CP_UTF8, 0, value.data(), static_cast<int>(value.size()), nullptr, 0);
+            if (size <= 0) return {};
+
+            std::wstring result(static_cast<std::size_t>(size), L'\0');
+            if (MultiByteToWideChar(CP_UTF8, 0, value.data(), static_cast<int>(value.size()), result.data(), size) <= 0) return {};
+
+            return result;
         }
 
-        return result;
-    }
+        std::string AnsiToUtf8(const std::string& value)
+        {
+            if (value.empty()) return {};
 
-    static bool FindJsonString(const std::string& json, const std::string& key, std::string& value)
-    {
-        const std::string search = "\"" + key + "\"";
+            const int wideSize = MultiByteToWideChar(CP_ACP, 0, value.data(), static_cast<int>(value.size()), nullptr, 0);
+            if (wideSize <= 0) return value;
 
-        std::size_t position = json.find(search);
-        if (position == std::string::npos) return false;
+            std::wstring wide(static_cast<std::size_t>(wideSize), L'\0');
+            if (MultiByteToWideChar(CP_ACP, 0, value.data(), static_cast<int>(value.size()), wide.data(), wideSize) <= 0) return value;
 
-        position = json.find(':', position + search.size());
-        if (position == std::string::npos) return false;
+            const int utf8Size = WideCharToMultiByte(CP_UTF8, 0, wide.data(), wideSize, nullptr, 0, nullptr, nullptr);
+            if (utf8Size <= 0) return value;
 
-        position = json.find('"', position + 1);
-        if (position == std::string::npos) return false;
+            std::string result(static_cast<std::size_t>(utf8Size), '\0');
+            if (WideCharToMultiByte(CP_UTF8, 0, wide.data(), wideSize, result.data(), utf8Size, nullptr, nullptr) <= 0) return value;
 
-        ++position;
+            return result;
+        }
 
-        const std::size_t end = json.find('"', position);
-        if (end == std::string::npos) return false;
+        std::string EscapeJson(const std::string& value)
+        {
+            std::string result;
+            result.reserve(value.size());
 
-        value = json.substr(position, end - position);
-        return true;
+            for (const char character : value)
+            {
+                switch (character)
+                {
+                    case '"': result += "\\\""; break;
+                    case '\\': result += "\\\\"; break;
+                    case '\n': result += "\\n"; break;
+                    case '\r': result += "\\r"; break;
+                    case '\t': result += "\\t"; break;
+                    case '\b': result += "\\b"; break;
+                    case '\f': result += "\\f"; break;
+                    default: result.push_back(character); break;
+                }
+            }
+
+            return result;
+        }
+
+        bool FindJsonString(const std::string& json, const std::string& key, std::string& value)
+        {
+            const std::string search = "\"" + key + "\"";
+
+            std::size_t position = json.find(search);
+            if (position == std::string::npos) return false;
+
+            position = json.find(':', position + search.size());
+            if (position == std::string::npos) return false;
+
+            position = json.find('"', position + 1);
+            if (position == std::string::npos) return false;
+
+            const std::size_t end = json.find('"', ++position);
+            if (end == std::string::npos) return false;
+
+            value.assign(json, position, end - position);
+            return true;
+        }
+
+        std::wstring CreateHeaders(const std::string& token, bool contentType = false)
+        {
+            const std::wstring tokenWide = Utf8ToWide(token);
+            if (tokenWide.empty()) return {};
+
+            std::wstring headers = L"Authorization: Bot " + tokenWide + L"\r\n";
+
+            if (contentType) headers += L"Content-Type: application/json\r\n";
+
+            headers += L"Accept: application/json\r\nUser-Agent: ";
+            headers += USER_AGENT;
+            headers += L"\r\n";
+
+            return headers;
+        }
+
+        std::wstring CreateMessagePath(const std::string& channelId, const std::string& messageId = {})
+        {
+            const std::wstring channelWide = Utf8ToWide(channelId);
+            if (channelWide.empty()) return {};
+
+            std::wstring path = API_BASE;
+            path += L"/channels/";
+            path += channelWide;
+            path += L"/messages";
+
+            if (!messageId.empty())
+            {
+                const std::wstring messageWide = Utf8ToWide(messageId);
+                if (messageWide.empty()) return {};
+
+                path += L"/";
+                path += messageWide;
+            }
+
+            return path;
+        }
     }
 
     DiscordClient::~DiscordClient()
@@ -93,31 +133,21 @@ namespace DiscordBridge
 
     bool DiscordClient::initialize(const std::string& token)
     {
-        if (initialized_) return false;
-        if (token.empty()) return false;
+        if (initialized_ || token.empty()) return false;
 
         token_ = token;
 
-        const std::wstring tokenWide = Utf8ToWide(token_);
-        if (tokenWide.empty())
+        const std::wstring headers = CreateHeaders(token_);
+        if (headers.empty())
         {
             token_.clear();
             return false;
         }
 
-        const std::wstring headers = L"Authorization: Bot " + tokenWide + L"\r\nAccept: application/json\r\nUser-Agent: DiscordBridge/0.0.1\r\n";
-
-        const HttpResponse response = httpClient_.get(L"discord.com", L"/api/v10/gateway/bot", headers);
-
-        if (!response.success)
-        {
-            token_.clear();
-            return false;
-        }
+        const HttpResponse response = httpClient_.get(DISCORD_HOST, std::wstring(API_BASE) + L"/gateway/bot", headers);
 
         GatewayInfo gatewayInfo;
-
-        if (!ParseGatewayInfo(response.body, gatewayInfo))
+        if (!response.success || !ParseGatewayInfo(response.body, gatewayInfo))
         {
             token_.clear();
             return false;
@@ -127,7 +157,7 @@ namespace DiscordBridge
 
         if (!gateway_.connect(gatewayInfo_, token_))
         {
-            gatewayInfo_ = GatewayInfo{};
+            gatewayInfo_ = {};
             token_.clear();
             return false;
         }
@@ -142,14 +172,13 @@ namespace DiscordBridge
         {
             restRunning_ = false;
             gateway_.disconnect();
-            gatewayInfo_ = GatewayInfo{};
+            gatewayInfo_ = {};
             token_.clear();
             return false;
         }
 
         initialized_ = true;
         connected_ = false;
-
         return true;
     }
 
@@ -157,8 +186,8 @@ namespace DiscordBridge
     {
         initialized_ = false;
         connected_ = false;
-
         restRunning_ = false;
+
         outgoingCondition_.notify_all();
 
         if (restThread_.joinable() && restThread_.get_id() != std::this_thread::get_id()) restThread_.join();
@@ -174,15 +203,13 @@ namespace DiscordBridge
         }
 
         gateway_.disconnect();
-
-        gatewayInfo_ = GatewayInfo{};
+        gatewayInfo_ = {};
         token_.clear();
     }
 
     void DiscordClient::process()
     {
-        if (!initialized_) return;
-        connected_ = gateway_.isReady();
+        if (initialized_) connected_ = gateway_.isReady();
     }
 
     bool DiscordClient::isInitialized() const
@@ -276,13 +303,11 @@ namespace DiscordBridge
 
     bool DiscordClient::sendMessage(const std::string& channelId, const std::string& message)
     {
-        if (!initialized_ || !restRunning_) return false;
-        if (channelId.empty() || message.empty()) return false;
-        if (message.size() > 2000) return false;
+        if (!initialized_ || !restRunning_ || channelId.empty() || message.empty() || message.size() > 2000) return false;
 
         {
             std::lock_guard<std::mutex> lock(outgoingMutex_);
-            messageOperations_.push_back(MessageOperation{MessageOperationType::Send, channelId, "", message});
+            messageOperations_.push_back({MessageOperationType::Send, channelId, {}, message});
         }
 
         outgoingCondition_.notify_one();
@@ -291,13 +316,11 @@ namespace DiscordBridge
 
     bool DiscordClient::editMessage(const std::string& channelId, const std::string& messageId, const std::string& content)
     {
-        if (!initialized_ || !restRunning_) return false;
-        if (channelId.empty() || messageId.empty() || content.empty()) return false;
-        if (content.size() > 2000) return false;
+        if (!initialized_ || !restRunning_ || channelId.empty() || messageId.empty() || content.empty() || content.size() > 2000) return false;
 
         {
             std::lock_guard<std::mutex> lock(outgoingMutex_);
-            messageOperations_.push_back(MessageOperation{MessageOperationType::Edit, channelId, messageId, content});
+            messageOperations_.push_back({MessageOperationType::Edit, channelId, messageId, content});
         }
 
         outgoingCondition_.notify_one();
@@ -306,12 +329,11 @@ namespace DiscordBridge
 
     bool DiscordClient::deleteMessage(const std::string& channelId, const std::string& messageId)
     {
-        if (!initialized_ || !restRunning_) return false;
-        if (channelId.empty() || messageId.empty()) return false;
+        if (!initialized_ || !restRunning_ || channelId.empty() || messageId.empty()) return false;
 
         {
             std::lock_guard<std::mutex> lock(outgoingMutex_);
-            messageOperations_.push_back(MessageOperation{MessageOperationType::Delete, channelId, messageId, ""});
+            messageOperations_.push_back({MessageOperationType::Delete, channelId, messageId, {}});
         }
 
         outgoingCondition_.notify_one();
@@ -320,12 +342,11 @@ namespace DiscordBridge
 
     bool DiscordClient::sendEmbed(const std::string& channelId, const std::string& embedJson)
     {
-        if (!initialized_ || !restRunning_) return false;
-        if (channelId.empty() || embedJson.empty()) return false;
+        if (!initialized_ || !restRunning_ || channelId.empty() || embedJson.empty()) return false;
 
         {
             std::lock_guard<std::mutex> lock(outgoingMutex_);
-            messageOperations_.push_back(MessageOperation{MessageOperationType::SendEmbed, channelId, "", embedJson});
+            messageOperations_.push_back({MessageOperationType::SendEmbed, channelId, {}, embedJson});
         }
 
         outgoingCondition_.notify_one();
@@ -334,17 +355,15 @@ namespace DiscordBridge
 
     void DiscordClient::restLoop()
     {
-        while (restRunning_)
+        while (true)
         {
             MessageOperation operation;
 
             {
                 std::unique_lock<std::mutex> lock(outgoingMutex_);
-
                 outgoingCondition_.wait(lock, [this]() { return !restRunning_.load() || !messageOperations_.empty(); });
 
                 if (!restRunning_ && messageOperations_.empty()) break;
-                if (messageOperations_.empty()) continue;
 
                 operation = std::move(messageOperations_.front());
                 messageOperations_.pop_front();
@@ -372,10 +391,8 @@ namespace DiscordBridge
                     break;
             }
 
-            {
-                std::lock_guard<std::mutex> lock(resultMutex_);
-                messageOperationResults_.push_back(MessageOperationResult{operation.type, success, operation.channelId, messageId});
-            }
+            std::lock_guard<std::mutex> lock(resultMutex_);
+            messageOperationResults_.push_back({operation.type, success, std::move(operation.channelId), std::move(messageId)});
         }
     }
 
@@ -385,21 +402,17 @@ namespace DiscordBridge
 
         if (token_.empty() || channelId.empty() || message.empty()) return false;
 
-        const std::wstring tokenWide = Utf8ToWide(token_);
-        const std::wstring channelWide = Utf8ToWide(channelId);
+        const std::wstring path = CreateMessagePath(channelId);
+        const std::wstring headers = CreateHeaders(token_, true);
 
-        if (tokenWide.empty() || channelWide.empty()) return false;
+        if (path.empty() || headers.empty()) return false;
 
-        const std::wstring headers = L"Authorization: Bot " + tokenWide + L"\r\nContent-Type: application/json\r\nAccept: application/json\r\nUser-Agent: DiscordBridge/0.0.1\r\n";
         const std::string body = "{\"content\":\"" + EscapeJson(AnsiToUtf8(message)) + "\"}";
-        const std::wstring path = L"/api/v10/channels/" + channelWide + L"/messages";
-
-        const HttpResponse response = httpClient_.post(L"discord.com", path, headers, body);
+        const HttpResponse response = httpClient_.post(DISCORD_HOST, path, headers, body);
 
         if (!response.success) return false;
 
         FindJsonString(response.body, "id", messageId);
-
         return true;
     }
 
@@ -407,33 +420,25 @@ namespace DiscordBridge
     {
         if (token_.empty() || channelId.empty() || messageId.empty() || content.empty()) return false;
 
-        const std::wstring tokenWide = Utf8ToWide(token_);
-        const std::wstring channelWide = Utf8ToWide(channelId);
-        const std::wstring messageWide = Utf8ToWide(messageId);
+        const std::wstring path = CreateMessagePath(channelId, messageId);
+        const std::wstring headers = CreateHeaders(token_, true);
 
-        if (tokenWide.empty() || channelWide.empty() || messageWide.empty()) return false;
+        if (path.empty() || headers.empty()) return false;
 
-        const std::wstring headers = L"Authorization: Bot " + tokenWide + L"\r\nContent-Type: application/json\r\nAccept: application/json\r\nUser-Agent: DiscordBridge/0.0.1\r\n";
         const std::string body = "{\"content\":\"" + EscapeJson(AnsiToUtf8(content)) + "\"}";
-        const std::wstring path = L"/api/v10/channels/" + channelWide + L"/messages/" + messageWide;
-
-        return httpClient_.patch(L"discord.com", path, headers, body).success;
+        return httpClient_.patch(DISCORD_HOST, path, headers, body).success;
     }
 
     bool DiscordClient::deleteMessageRequest(const std::string& channelId, const std::string& messageId)
     {
         if (token_.empty() || channelId.empty() || messageId.empty()) return false;
 
-        const std::wstring tokenWide = Utf8ToWide(token_);
-        const std::wstring channelWide = Utf8ToWide(channelId);
-        const std::wstring messageWide = Utf8ToWide(messageId);
+        const std::wstring path = CreateMessagePath(channelId, messageId);
+        const std::wstring headers = CreateHeaders(token_);
 
-        if (tokenWide.empty() || channelWide.empty() || messageWide.empty()) return false;
+        if (path.empty() || headers.empty()) return false;
 
-        const std::wstring headers = L"Authorization: Bot " + tokenWide + L"\r\nAccept: application/json\r\nUser-Agent: DiscordBridge/0.0.1\r\n";
-        const std::wstring path = L"/api/v10/channels/" + channelWide + L"/messages/" + messageWide;
-
-        return httpClient_.del(L"discord.com", path, headers).success;
+        return httpClient_.del(DISCORD_HOST, path, headers).success;
     }
 
     bool DiscordClient::sendEmbedRequest(const std::string& channelId, const std::string& embedJson, std::string& messageId)
@@ -442,21 +447,17 @@ namespace DiscordBridge
 
         if (token_.empty() || channelId.empty() || embedJson.empty()) return false;
 
-        const std::wstring tokenWide = Utf8ToWide(token_);
-        const std::wstring channelWide = Utf8ToWide(channelId);
+        const std::wstring path = CreateMessagePath(channelId);
+        const std::wstring headers = CreateHeaders(token_, true);
 
-        if (tokenWide.empty() || channelWide.empty()) return false;
+        if (path.empty() || headers.empty()) return false;
 
-        const std::wstring headers = L"Authorization: Bot " + tokenWide + L"\r\nContent-Type: application/json\r\nAccept: application/json\r\nUser-Agent: DiscordBridge/0.0.1\r\n";
         const std::string body = "{\"embeds\":[" + embedJson + "]}";
-        const std::wstring path = L"/api/v10/channels/" + channelWide + L"/messages";
-
-        const HttpResponse response = httpClient_.post(L"discord.com", path, headers, body);
+        const HttpResponse response = httpClient_.post(DISCORD_HOST, path, headers, body);
 
         if (!response.success) return false;
 
         FindJsonString(response.body, "id", messageId);
-
         return true;
     }
 

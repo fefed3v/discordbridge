@@ -2,27 +2,37 @@
 
 namespace DiscordBridge
 {
-    static std::string EscapeJson(const std::string& value)
+    namespace
     {
-        std::string result;
-        result.reserve(value.size());
-
-        for (const char character : value)
+        std::string EscapeJson(const std::string& value)
         {
-            switch (character)
+            std::string result;
+            result.reserve(value.size());
+
+            for (const char character : value)
             {
-                case '"': result += "\\\""; break;
-                case '\\': result += "\\\\"; break;
-                case '\n': result += "\\n"; break;
-                case '\r': result += "\\r"; break;
-                case '\t': result += "\\t"; break;
-                case '\b': result += "\\b"; break;
-                case '\f': result += "\\f"; break;
-                default: result.push_back(character); break;
+                switch (character)
+                {
+                    case '"': result += "\\\""; break;
+                    case '\\': result += "\\\\"; break;
+                    case '\n': result += "\\n"; break;
+                    case '\r': result += "\\r"; break;
+                    case '\t': result += "\\t"; break;
+                    case '\b': result += "\\b"; break;
+                    case '\f': result += "\\f"; break;
+                    default: result.push_back(character); break;
+                }
             }
+
+            return result;
         }
 
-        return result;
+        void AppendProperty(std::string& json, bool& comma, const std::string& property)
+        {
+            if (comma) json += ',';
+            json += property;
+            comma = true;
+        }
     }
 
     bool EmbedAuthor::empty() const
@@ -70,9 +80,7 @@ namespace DiscordBridge
 
     void Embed::setAuthor(const std::string& name, const std::string& url, const std::string& iconUrl)
     {
-        author_.name = name;
-        author_.url = url;
-        author_.iconUrl = iconUrl;
+        author_ = {name, url, iconUrl};
     }
 
     void Embed::clearAuthor()
@@ -102,8 +110,7 @@ namespace DiscordBridge
 
     void Embed::setFooter(const std::string& text, const std::string& iconUrl)
     {
-        footer_.text = text;
-        footer_.iconUrl = iconUrl;
+        footer_ = {text, iconUrl};
     }
 
     void Embed::clearFooter()
@@ -113,10 +120,9 @@ namespace DiscordBridge
 
     bool Embed::addField(const std::string& name, const std::string& value, bool inlineField)
     {
-        if (name.empty() || value.empty()) return false;
-        if (fields_.size() >= 25) return false;
+        if (name.empty() || value.empty() || fields_.size() >= 25) return false;
 
-        fields_.push_back(EmbedField{name, value, inlineField});
+        fields_.push_back({name, value, inlineField});
         return true;
     }
 
@@ -132,9 +138,7 @@ namespace DiscordBridge
         url_.clear();
         thumbnailUrl_.clear();
         imageUrl_.clear();
-
         color_ = 0;
-
         author_.clear();
         footer_.clear();
         fields_.clear();
@@ -142,14 +146,7 @@ namespace DiscordBridge
 
     bool Embed::empty() const
     {
-        return title_.empty() &&
-               description_.empty() &&
-               url_.empty() &&
-               thumbnailUrl_.empty() &&
-               imageUrl_.empty() &&
-               author_.empty() &&
-               footer_.empty() &&
-               fields_.empty();
+        return title_.empty() && description_.empty() && url_.empty() && thumbnailUrl_.empty() && imageUrl_.empty() && author_.empty() && footer_.empty() && fields_.empty();
     }
 
     const std::string& Embed::getTitle() const
@@ -202,98 +199,53 @@ namespace DiscordBridge
         std::string json = "{";
         bool comma = false;
 
-        const auto appendComma = [&]()
-        {
-            if (comma) json += ",";
-            comma = true;
-        };
-
-        if (!title_.empty())
-        {
-            appendComma();
-            json += "\"title\":\"" + EscapeJson(title_) + "\"";
-        }
-
-        if (!description_.empty())
-        {
-            appendComma();
-            json += "\"description\":\"" + EscapeJson(description_) + "\"";
-        }
-
-        if (!url_.empty())
-        {
-            appendComma();
-            json += "\"url\":\"" + EscapeJson(url_) + "\"";
-        }
-
-        if (color_ != 0)
-        {
-            appendComma();
-            json += "\"color\":" + std::to_string(color_);
-        }
+        if (!title_.empty()) AppendProperty(json, comma, "\"title\":\"" + EscapeJson(title_) + "\"");
+        if (!description_.empty()) AppendProperty(json, comma, "\"description\":\"" + EscapeJson(description_) + "\"");
+        if (!url_.empty()) AppendProperty(json, comma, "\"url\":\"" + EscapeJson(url_) + "\"");
+        if (color_ != 0) AppendProperty(json, comma, "\"color\":" + std::to_string(color_));
 
         if (!author_.empty())
         {
-            appendComma();
+            std::string author = "\"author\":{\"name\":\"" + EscapeJson(author_.name) + "\"";
+            if (!author_.url.empty()) author += ",\"url\":\"" + EscapeJson(author_.url) + "\"";
+            if (!author_.iconUrl.empty()) author += ",\"icon_url\":\"" + EscapeJson(author_.iconUrl) + "\"";
+            author += "}";
 
-            json += "\"author\":{";
-            json += "\"name\":\"" + EscapeJson(author_.name) + "\"";
-
-            if (!author_.url.empty()) json += ",\"url\":\"" + EscapeJson(author_.url) + "\"";
-            if (!author_.iconUrl.empty()) json += ",\"icon_url\":\"" + EscapeJson(author_.iconUrl) + "\"";
-
-            json += "}";
+            AppendProperty(json, comma, author);
         }
 
-        if (!thumbnailUrl_.empty())
-        {
-            appendComma();
-            json += "\"thumbnail\":{\"url\":\"" + EscapeJson(thumbnailUrl_) + "\"}";
-        }
-
-        if (!imageUrl_.empty())
-        {
-            appendComma();
-            json += "\"image\":{\"url\":\"" + EscapeJson(imageUrl_) + "\"}";
-        }
+        if (!thumbnailUrl_.empty()) AppendProperty(json, comma, "\"thumbnail\":{\"url\":\"" + EscapeJson(thumbnailUrl_) + "\"}");
+        if (!imageUrl_.empty()) AppendProperty(json, comma, "\"image\":{\"url\":\"" + EscapeJson(imageUrl_) + "\"}");
 
         if (!footer_.empty())
         {
-            appendComma();
+            std::string footer = "\"footer\":{\"text\":\"" + EscapeJson(footer_.text) + "\"";
+            if (!footer_.iconUrl.empty()) footer += ",\"icon_url\":\"" + EscapeJson(footer_.iconUrl) + "\"";
+            footer += "}";
 
-            json += "\"footer\":{";
-            json += "\"text\":\"" + EscapeJson(footer_.text) + "\"";
-
-            if (!footer_.iconUrl.empty()) json += ",\"icon_url\":\"" + EscapeJson(footer_.iconUrl) + "\"";
-
-            json += "}";
+            AppendProperty(json, comma, footer);
         }
 
         if (!fields_.empty())
         {
-            appendComma();
-
-            json += "\"fields\":[";
+            std::string fields = "\"fields\":[";
 
             for (std::size_t index = 0; index < fields_.size(); ++index)
             {
-                if (index > 0) json += ",";
+                if (index > 0) fields += ',';
 
                 const EmbedField& field = fields_[index];
 
-                json += "{";
-                json += "\"name\":\"" + EscapeJson(field.name) + "\",";
-                json += "\"value\":\"" + EscapeJson(field.value) + "\",";
-                json += "\"inline\":";
-                json += field.inlineField ? "true" : "false";
-                json += "}";
+                fields += "{\"name\":\"" + EscapeJson(field.name) + "\",\"value\":\"" + EscapeJson(field.value) + "\",\"inline\":";
+                fields += field.inlineField ? "true" : "false";
+                fields += "}";
             }
 
-            json += "]";
+            fields += "]";
+            AppendProperty(json, comma, fields);
         }
 
         json += "}";
-
         return json;
     }
 
@@ -301,35 +253,44 @@ namespace DiscordBridge
     {
         if (nextHandle_ == 0) nextHandle_ = 1;
 
-        EmbedHandle handle = nextHandle_;
-        while (embeds_.find(handle) != embeds_.end())
+        const EmbedHandle start = nextHandle_;
+        EmbedHandle handle = start;
+
+        do
         {
+            if (embeds_.find(handle) == embeds_.end())
+            {
+                embeds_.emplace(handle, std::make_unique<Embed>());
+
+                nextHandle_ = handle + 1;
+                if (nextHandle_ == 0) nextHandle_ = 1;
+
+                return handle;
+            }
+
             ++handle;
             if (handle == 0) handle = 1;
-            if (handle == nextHandle_) return 0;
         }
+        while (handle != start);
 
-        embeds_.emplace(handle, std::make_unique<Embed>());
-        nextHandle_ = handle + 1;
-        if (nextHandle_ == 0) nextHandle_ = 1;
-        return handle;
+        return 0;
     }
 
     bool EmbedManager::destroy(EmbedHandle handle)
     {
-        return handle != 0 && embeds_.erase(handle) > 0;
+        return handle != 0 && embeds_.erase(handle) != 0;
     }
 
     Embed* EmbedManager::get(EmbedHandle handle)
     {
         const auto iterator = embeds_.find(handle);
-        return iterator == embeds_.end() ? nullptr : iterator->second.get();
+        return iterator != embeds_.end() ? iterator->second.get() : nullptr;
     }
 
     const Embed* EmbedManager::get(EmbedHandle handle) const
     {
         const auto iterator = embeds_.find(handle);
-        return iterator == embeds_.end() ? nullptr : iterator->second.get();
+        return iterator != embeds_.end() ? iterator->second.get() : nullptr;
     }
 
     void EmbedManager::clear()
@@ -342,5 +303,4 @@ namespace DiscordBridge
     {
         return embeds_.size();
     }
-
 }

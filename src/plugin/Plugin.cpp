@@ -1,23 +1,28 @@
 #include "Plugin.hpp"
 
 #include "AmxExports.hpp"
-
-#include "../core/BridgeCore.hpp"
 #include "../Version.hpp"
-
+#include "../core/BridgeCore.hpp"
 #include "../pawn/Natives.hpp"
 
 #include <plugincommon.h>
 
 #include <memory>
-#include <utility>
 
 namespace DiscordBridge
 {
     using LogprintfFunction = void (*)(const char* format, ...);
 
-    static LogprintfFunction logprintf = nullptr;
-    static std::unique_ptr<BridgeCore> bridgeCore;
+    namespace
+    {
+        LogprintfFunction logprintf = nullptr;
+        std::unique_ptr<BridgeCore> bridgeCore;
+
+        void Log(const char* message)
+        {
+            if (logprintf) logprintf("%s", message);
+        }
+    }
 
     BridgeCore* GetBridgeCore()
     {
@@ -32,15 +37,15 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports()
 
 PLUGIN_EXPORT bool PLUGIN_CALL Load(void** ppData)
 {
-    if (ppData == nullptr) return false;
+    if (!ppData) return false;
 
     DiscordBridge::logprintf = reinterpret_cast<DiscordBridge::LogprintfFunction>(ppData[PLUGIN_DATA_LOGPRINTF]);
 
-    if (DiscordBridge::logprintf != nullptr) DiscordBridge::logprintf("[DiscordBridge] Loading Patch %s...", DiscordBridge::VERSION_STRING);
+    if (DiscordBridge::logprintf) DiscordBridge::logprintf("[DiscordBridge] Loading Patch %s...", DiscordBridge::VERSION_STRING);
 
     if (!DiscordBridge::InitializeAmxExports(ppData))
     {
-        if (DiscordBridge::logprintf != nullptr) DiscordBridge::logprintf("[DiscordBridge] Failed to initialize AMX exports.");
+        DiscordBridge::Log("[DiscordBridge] Failed to initialize AMX exports.");
         DiscordBridge::logprintf = nullptr;
         return false;
     }
@@ -49,16 +54,14 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void** ppData)
 
     if (!DiscordBridge::bridgeCore->initialize())
     {
-        if (DiscordBridge::logprintf != nullptr) DiscordBridge::logprintf("[DiscordBridge] Failed to initialize BridgeCore.");
-
+        DiscordBridge::Log("[DiscordBridge] Failed to initialize BridgeCore.");
         DiscordBridge::bridgeCore.reset();
         DiscordBridge::ShutdownAmxExports();
         DiscordBridge::logprintf = nullptr;
         return false;
     }
 
-    if (DiscordBridge::logprintf != nullptr) DiscordBridge::logprintf("[DiscordBridge] BridgeCore initialized.");
-
+    DiscordBridge::Log("[DiscordBridge] BridgeCore initialized.");
     return true;
 }
 
@@ -71,19 +74,16 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload()
     }
 
     DiscordBridge::ShutdownAmxExports();
-
-    if (DiscordBridge::logprintf != nullptr) DiscordBridge::logprintf("[DiscordBridge] Plugin unloaded.");
-
+    DiscordBridge::Log("[DiscordBridge] Plugin unloaded.");
     DiscordBridge::logprintf = nullptr;
 }
 
 PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX* amx)
 {
-    if (amx == nullptr) return AMX_ERR_PARAMS;
+    if (!amx) return AMX_ERR_PARAMS;
 
     DiscordBridge::BridgeCore* core = DiscordBridge::GetBridgeCore();
-
-    if (core == nullptr || !core->isInitialized()) return AMX_ERR_INIT;
+    if (!core || !core->isInitialized()) return AMX_ERR_INIT;
 
     if (!core->getPawnRuntime().addAMX(amx)) return AMX_ERR_NONE;
 
@@ -100,11 +100,9 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX* amx)
 
 PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX* amx)
 {
-    if (amx == nullptr) return AMX_ERR_PARAMS;
+    if (!amx) return AMX_ERR_PARAMS;
 
-    DiscordBridge::BridgeCore* core = DiscordBridge::GetBridgeCore();
-
-    if (core != nullptr) core->getPawnRuntime().removeAMX(amx);
+    if (DiscordBridge::BridgeCore* core = DiscordBridge::GetBridgeCore()) core->getPawnRuntime().removeAMX(amx);
 
     return AMX_ERR_NONE;
 }
@@ -112,8 +110,5 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX* amx)
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick()
 {
     DiscordBridge::BridgeCore* core = DiscordBridge::GetBridgeCore();
-
-    if (core == nullptr || !core->isInitialized()) return;
-
-    core->process();
+    if (core && core->isInitialized()) core->process();
 }

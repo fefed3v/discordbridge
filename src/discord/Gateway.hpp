@@ -107,14 +107,22 @@ namespace DiscordBridge
     private:
         void receiveLoop();
         void heartbeatLoop();
+
         void handlePayload(const std::string& payload);
-        void closeHandles();
-        void resetState();
+        void handleHello(const std::string& payload);
+        void handleDispatch(const std::string& payload);
 
         bool receivePayload(std::string& payload);
         bool sendText(const std::string& payload);
         bool sendHeartbeat();
         bool sendIdentify();
         bool sendPresence();
+
+        bool consumeGuildMemberEvent(std::deque<GuildMemberEvent>& events, std::string& guildId, std::string& userId);
+        bool failConnection();
+
+        void stopConnection();
+        void closeHandles();
+        void resetState();
     };
 }

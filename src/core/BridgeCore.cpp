@@ -22,7 +22,6 @@ namespace DiscordBridge
         discordClient_.shutdown();
         embedManager_.clear();
         pawnRuntime_.clear();
-
         initialized_ = false;
     }
 
@@ -32,73 +31,28 @@ namespace DiscordBridge
 
         discordClient_.process();
 
-        if (discordClient_.consumeReadyEvent())
-        {
-            pawnRuntime_.dispatchReady();
-        }
+        if (discordClient_.consumeReadyEvent()) pawnRuntime_.dispatchReady();
 
         std::string userId;
         std::string channelId;
         std::string message;
 
-        while (discordClient_.consumeMessageCreateEvent(userId, channelId, message))
-        {
-            pawnRuntime_.dispatchMessageCreate(userId, channelId, message);
-        }
+        while (discordClient_.consumeMessageCreateEvent(userId, channelId, message)) pawnRuntime_.dispatchMessageCreate(userId, channelId, message);
 
         std::string guildId;
 
-        while (discordClient_.consumeGuildMemberAddEvent(guildId, userId))
-        {
-            pawnRuntime_.dispatchGuildMemberAdd(guildId, userId);
-        }
+        while (discordClient_.consumeGuildMemberAddEvent(guildId, userId)) pawnRuntime_.dispatchGuildMemberAdd(guildId, userId);
+        while (discordClient_.consumeGuildMemberRemoveEvent(guildId, userId)) pawnRuntime_.dispatchGuildMemberRemove(guildId, userId);
 
-        while (discordClient_.consumeGuildMemberRemoveEvent(guildId, userId))
-        {
-            pawnRuntime_.dispatchGuildMemberRemove(guildId, userId);
-        }
+        bool success = false;
+        std::string messageId;
 
-        bool messageSuccess = false;
-        std::string sentChannelId;
-        std::string sentMessageId;
-
-        while (discordClient_.consumeMessageSentEvent(
-            messageSuccess,
-            sentChannelId,
-            sentMessageId
-        ))
-        {
-            pawnRuntime_.dispatchMessageSent(
-                messageSuccess,
-                sentChannelId,
-                sentMessageId
-            );
-        }
-
-        bool operationSuccess = false;
-        std::string operationChannelId;
-        std::string operationMessageId;
-
-        while (discordClient_.consumeMessageEditedEvent(operationSuccess, operationChannelId, operationMessageId))
-        {
-            pawnRuntime_.dispatchMessageEdited(operationSuccess, operationChannelId, operationMessageId);
-        }
-
-        while (discordClient_.consumeMessageDeletedEvent(operationSuccess, operationChannelId, operationMessageId))
-        {
-            pawnRuntime_.dispatchMessageDeleted(operationSuccess, operationChannelId, operationMessageId);
-        }
-
-        bool embedSuccess = false;
-        std::string embedChannelId;
-        std::string embedMessageId;
-
-        while (discordClient_.consumeEmbedSentEvent(embedSuccess, embedChannelId, embedMessageId))
-        {
-            pawnRuntime_.dispatchEmbedSent(embedSuccess, embedChannelId, embedMessageId);
-        }
+        while (discordClient_.consumeMessageSentEvent(success, channelId, messageId)) pawnRuntime_.dispatchMessageSent(success, channelId, messageId);
+        while (discordClient_.consumeMessageEditedEvent(success, channelId, messageId)) pawnRuntime_.dispatchMessageEdited(success, channelId, messageId);
+        while (discordClient_.consumeMessageDeletedEvent(success, channelId, messageId)) pawnRuntime_.dispatchMessageDeleted(success, channelId, messageId);
+        while (discordClient_.consumeEmbedSentEvent(success, channelId, messageId)) pawnRuntime_.dispatchEmbedSent(success, channelId, messageId);
     }
-    
+
     bool BridgeCore::isInitialized() const
     {
         return initialized_;
