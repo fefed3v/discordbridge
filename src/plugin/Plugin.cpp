@@ -1,17 +1,20 @@
 #include "Plugin.hpp"
+
 #include "AmxExports.hpp"
 
 #include "../core/BridgeCore.hpp"
 #include "../main/Version.hpp"
-#include "../pawn/natives/BasicNatives.hpp"
+
 #include "../pawn/natives/VersionNatives.hpp"
+#include "../pawn/natives/BasicNatives.hpp"
 #include "../pawn/natives/PresenceNatives.hpp"
 #include "../pawn/natives/MessageNatives.hpp"
+#include "../pawn/natives/EmbedNatives.hpp"
 
 #include <plugincommon.h>
-#include <amx/amx.h>
 
 #include <memory>
+#include <utility>
 
 namespace DiscordBridge
 {
@@ -83,38 +86,49 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX* amx)
     if (amx == nullptr) return AMX_ERR_PARAMS;
 
     DiscordBridge::BridgeCore* core = DiscordBridge::GetBridgeCore();
+
     if (core == nullptr || !core->isInitialized()) return AMX_ERR_INIT;
 
-    core->getPawnRuntime().addAMX(amx);
+    if (!core->getPawnRuntime().addAMX(amx)) return AMX_ERR_NONE;
 
-    const int versionResult = DiscordBridge::RegisterVersionNatives(amx);
-    if (versionResult != AMX_ERR_NONE && versionResult != AMX_ERR_NOTFOUND)
+    int result = DiscordBridge::RegisterVersionNatives(amx);
+
+    if (result != AMX_ERR_NONE && result != AMX_ERR_NOTFOUND)
     {
         core->getPawnRuntime().removeAMX(amx);
-        return versionResult;
+        return result;
     }
 
-    const int basicResult = DiscordBridge::RegisterBasicNatives(amx);
-    if (basicResult != AMX_ERR_NONE && basicResult != AMX_ERR_NOTFOUND)
+    result = DiscordBridge::RegisterBasicNatives(amx);
+
+    if (result != AMX_ERR_NONE && result != AMX_ERR_NOTFOUND)
     {
         core->getPawnRuntime().removeAMX(amx);
-        return basicResult;
+        return result;
     }
 
-    const int presenceResult = DiscordBridge::RegisterPresenceNatives(amx);
+    result = DiscordBridge::RegisterPresenceNatives(amx);
 
-    if (presenceResult != AMX_ERR_NONE && presenceResult != AMX_ERR_NOTFOUND)
+    if (result != AMX_ERR_NONE && result != AMX_ERR_NOTFOUND)
     {
         core->getPawnRuntime().removeAMX(amx);
-        return presenceResult;
+        return result;
     }
 
-    const int messageResult = DiscordBridge::RegisterMessageNatives(amx);
+    result = DiscordBridge::RegisterMessageNatives(amx);
 
-    if (messageResult != AMX_ERR_NONE && messageResult != AMX_ERR_NOTFOUND)
+    if (result != AMX_ERR_NONE && result != AMX_ERR_NOTFOUND)
     {
         core->getPawnRuntime().removeAMX(amx);
-        return messageResult;
+        return result;
+    }
+
+    result = DiscordBridge::RegisterEmbedNatives(amx);
+
+    if (result != AMX_ERR_NONE && result != AMX_ERR_NOTFOUND)
+    {
+        core->getPawnRuntime().removeAMX(amx);
+        return result;
     }
 
     return AMX_ERR_NONE;

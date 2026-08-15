@@ -291,6 +291,39 @@ namespace DiscordBridge
         }
     }
 
+    void PawnRuntime::dispatchEmbedSent(bool success, const std::string& channelId, const std::string& messageId)
+    {
+        for (AMX* amx : scripts_)
+        {
+            if (amx == nullptr) continue;
+
+            int index = -1;
+
+            if (amx_FindPublic(amx, "DBridge_OnEmbedSent", &index) != AMX_ERR_NONE) continue;
+
+            cell channelAddress = 0;
+            cell messageAddress = 0;
+
+            if (!PushPawnString(amx, channelId, channelAddress)) continue;
+
+            if (!PushPawnString(amx, messageId, messageAddress))
+            {
+                amx_Release(amx, channelAddress);
+                continue;
+            }
+
+            amx_Push(amx, messageAddress);
+            amx_Push(amx, channelAddress);
+            amx_Push(amx, success ? 1 : 0);
+
+            cell returnValue = 0;
+            amx_Exec(amx, &returnValue, index);
+
+            amx_Release(amx, messageAddress);
+            amx_Release(amx, channelAddress);
+        }
+    }
+
     std::size_t PawnRuntime::size() const
     {
         return scripts_.size();

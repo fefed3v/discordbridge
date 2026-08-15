@@ -17,8 +17,12 @@ namespace DiscordBridge
 
     void BridgeCore::shutdown()
     {
+        if (!initialized_) return;
+
         discordClient_.shutdown();
+        embedManager_.clear();
         pawnRuntime_.clear();
+
         initialized_ = false;
     }
 
@@ -84,6 +88,15 @@ namespace DiscordBridge
         {
             pawnRuntime_.dispatchMessageDeleted(operationSuccess, operationChannelId, operationMessageId);
         }
+
+        bool embedSuccess = false;
+        std::string embedChannelId;
+        std::string embedMessageId;
+
+        while (discordClient_.consumeEmbedSentEvent(embedSuccess, embedChannelId, embedMessageId))
+        {
+            pawnRuntime_.dispatchEmbedSent(embedSuccess, embedChannelId, embedMessageId);
+        }
     }
     
     bool BridgeCore::isInitialized() const
@@ -109,5 +122,15 @@ namespace DiscordBridge
     const DiscordClient& BridgeCore::getDiscordClient() const
     {
         return discordClient_;
+    }
+
+    EmbedManager& BridgeCore::getEmbedManager()
+    {
+        return embedManager_;
+    }
+
+    const EmbedManager& BridgeCore::getEmbedManager() const
+    {
+        return embedManager_;
     }
 }

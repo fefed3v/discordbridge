@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../discord/DiscordClient.hpp"
+#include "../discord/embed/EmbedManager.hpp"
 #include "../pawn/PawnRuntime.hpp"
 
 namespace DiscordBridge
@@ -8,9 +9,11 @@ namespace DiscordBridge
     class BridgeCore final
     {
     private:
+        bool initialized_{false};
+
         PawnRuntime pawnRuntime_;
         DiscordClient discordClient_;
-        bool initialized_{false};
+        EmbedManager embedManager_;
 
     public:
         BridgeCore() = default;
@@ -32,5 +35,8 @@ namespace DiscordBridge
 
         DiscordClient& getDiscordClient();
         const DiscordClient& getDiscordClient() const;
+
+        EmbedManager& getEmbedManager();
+        const EmbedManager& getEmbedManager() const;
     };
 }

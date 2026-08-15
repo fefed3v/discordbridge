@@ -31,6 +31,8 @@ namespace DiscordBridge
         void dispatchMessageEdited(bool success, const std::string& channelId, const std::string& messageId);
         void dispatchMessageDeleted(bool success, const std::string& channelId, const std::string& messageId);
 
+        void dispatchEmbedSent(bool success, const std::string& channelId, const std::string& messageId);
+
         std::size_t size() const;
     };
 }

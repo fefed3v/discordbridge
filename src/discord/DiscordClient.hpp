@@ -20,7 +20,8 @@ namespace DiscordBridge
         {
             Send,
             Edit,
-            Delete
+            Delete,
+            SendEmbed
         };
 
         struct MessageOperation
@@ -82,6 +83,7 @@ namespace DiscordBridge
         bool consumeMessageSentEvent(bool& success, std::string& channelId, std::string& messageId);
         bool consumeMessageEditedEvent(bool& success, std::string& channelId, std::string& messageId);
         bool consumeMessageDeletedEvent(bool& success, std::string& channelId, std::string& messageId);
+        bool consumeEmbedSentEvent(bool& success, std::string& channelId, std::string& messageId);
 
         bool setStatus(int status);
         bool setActivity(int type, const std::string& name, const std::string& state = "", const std::string& url = "");
@@ -91,6 +93,7 @@ namespace DiscordBridge
         bool sendMessage(const std::string& channelId, const std::string& message);
         bool editMessage(const std::string& channelId, const std::string& messageId, const std::string& content);
         bool deleteMessage(const std::string& channelId, const std::string& messageId);
+        bool sendEmbed(const std::string& channelId, const std::string& embedJson);
 
         const std::string& getToken() const;
         const GatewayInfo& getGatewayInfo() const;
@@ -101,6 +104,7 @@ namespace DiscordBridge
         bool sendMessageRequest(const std::string& channelId, const std::string& message, std::string& messageId);
         bool editMessageRequest(const std::string& channelId, const std::string& messageId, const std::string& content);
         bool deleteMessageRequest(const std::string& channelId, const std::string& messageId);
+        bool sendEmbedRequest(const std::string& channelId, const std::string& embedJson, std::string& messageId);
 
         bool consumeMessageOperationResult(MessageOperationType type, bool& success, std::string& channelId, std::string& messageId);
     };

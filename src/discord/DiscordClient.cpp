@@ -83,7 +83,6 @@ namespace DiscordBridge
         if (end == std::string::npos) return false;
 
         value = json.substr(position, end - position);
-
         return true;
     }
 
@@ -231,6 +230,11 @@ namespace DiscordBridge
         return consumeMessageOperationResult(MessageOperationType::Delete, success, channelId, messageId);
     }
 
+    bool DiscordClient::consumeEmbedSentEvent(bool& success, std::string& channelId, std::string& messageId)
+    {
+        return consumeMessageOperationResult(MessageOperationType::SendEmbed, success, channelId, messageId);
+    }
+
     bool DiscordClient::consumeMessageOperationResult(MessageOperationType type, bool& success, std::string& channelId, std::string& messageId)
     {
         std::lock_guard<std::mutex> lock(resultMutex_);
@@ -244,7 +248,6 @@ namespace DiscordBridge
             messageId = std::move(iterator->messageId);
 
             messageOperationResults_.erase(iterator);
-
             return true;
         }
 
@@ -283,7 +286,6 @@ namespace DiscordBridge
         }
 
         outgoingCondition_.notify_one();
-
         return true;
     }
 
@@ -299,7 +301,6 @@ namespace DiscordBridge
         }
 
         outgoingCondition_.notify_one();
-
         return true;
     }
 
@@ -314,7 +315,20 @@ namespace DiscordBridge
         }
 
         outgoingCondition_.notify_one();
+        return true;
+    }
 
+    bool DiscordClient::sendEmbed(const std::string& channelId, const std::string& embedJson)
+    {
+        if (!initialized_ || !restRunning_) return false;
+        if (channelId.empty() || embedJson.empty()) return false;
+
+        {
+            std::lock_guard<std::mutex> lock(outgoingMutex_);
+            messageOperations_.push_back(MessageOperation{MessageOperationType::SendEmbed, channelId, "", embedJson});
+        }
+
+        outgoingCondition_.notify_one();
         return true;
     }
 
@@ -351,6 +365,10 @@ namespace DiscordBridge
 
                 case MessageOperationType::Delete:
                     success = deleteMessageRequest(operation.channelId, operation.messageId);
+                    break;
+
+                case MessageOperationType::SendEmbed:
+                    success = sendEmbedRequest(operation.channelId, operation.content, messageId);
                     break;
             }
 
@@ -416,6 +434,30 @@ namespace DiscordBridge
         const std::wstring path = L"/api/v10/channels/" + channelWide + L"/messages/" + messageWide;
 
         return httpClient_.del(L"discord.com", path, headers).success;
+    }
+
+    bool DiscordClient::sendEmbedRequest(const std::string& channelId, const std::string& embedJson, std::string& messageId)
+    {
+        messageId.clear();
+
+        if (token_.empty() || channelId.empty() || embedJson.empty()) return false;
+
+        const std::wstring tokenWide = Utf8ToWide(token_);
+        const std::wstring channelWide = Utf8ToWide(channelId);
+
+        if (tokenWide.empty() || channelWide.empty()) return false;
+
+        const std::wstring headers = L"Authorization: Bot " + tokenWide + L"\r\nContent-Type: application/json\r\nAccept: application/json\r\nUser-Agent: DiscordBridge/0.0.1\r\n";
+        const std::string body = "{\"embeds\":[" + embedJson + "]}";
+        const std::wstring path = L"/api/v10/channels/" + channelWide + L"/messages";
+
+        const HttpResponse response = httpClient_.post(L"discord.com", path, headers, body);
+
+        if (!response.success) return false;
+
+        FindJsonString(response.body, "id", messageId);
+
+        return true;
     }
 
     const std::string& DiscordClient::getToken() const
