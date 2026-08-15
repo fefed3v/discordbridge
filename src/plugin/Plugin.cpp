@@ -3,13 +3,9 @@
 #include "AmxExports.hpp"
 
 #include "../core/BridgeCore.hpp"
-#include "../main/Version.hpp"
+#include "../Version.hpp"
 
-#include "../pawn/natives/VersionNatives.hpp"
-#include "../pawn/natives/BasicNatives.hpp"
-#include "../pawn/natives/PresenceNatives.hpp"
-#include "../pawn/natives/MessageNatives.hpp"
-#include "../pawn/natives/EmbedNatives.hpp"
+#include "../pawn/Natives.hpp"
 
 #include <plugincommon.h>
 
@@ -91,39 +87,7 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX* amx)
 
     if (!core->getPawnRuntime().addAMX(amx)) return AMX_ERR_NONE;
 
-    int result = DiscordBridge::RegisterVersionNatives(amx);
-
-    if (result != AMX_ERR_NONE && result != AMX_ERR_NOTFOUND)
-    {
-        core->getPawnRuntime().removeAMX(amx);
-        return result;
-    }
-
-    result = DiscordBridge::RegisterBasicNatives(amx);
-
-    if (result != AMX_ERR_NONE && result != AMX_ERR_NOTFOUND)
-    {
-        core->getPawnRuntime().removeAMX(amx);
-        return result;
-    }
-
-    result = DiscordBridge::RegisterPresenceNatives(amx);
-
-    if (result != AMX_ERR_NONE && result != AMX_ERR_NOTFOUND)
-    {
-        core->getPawnRuntime().removeAMX(amx);
-        return result;
-    }
-
-    result = DiscordBridge::RegisterMessageNatives(amx);
-
-    if (result != AMX_ERR_NONE && result != AMX_ERR_NOTFOUND)
-    {
-        core->getPawnRuntime().removeAMX(amx);
-        return result;
-    }
-
-    result = DiscordBridge::RegisterEmbedNatives(amx);
+    const int result = DiscordBridge::RegisterNatives(amx);
 
     if (result != AMX_ERR_NONE && result != AMX_ERR_NOTFOUND)
     {

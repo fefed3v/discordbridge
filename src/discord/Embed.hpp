@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace DiscordBridge
@@ -88,4 +90,22 @@ namespace DiscordBridge
 
         std::string toJson() const;
     };
+
+    using EmbedHandle = std::uint32_t;
+
+    class EmbedManager final
+    {
+    private:
+        std::unordered_map<EmbedHandle, std::unique_ptr<Embed>> embeds_;
+        EmbedHandle nextHandle_{1};
+
+    public:
+        EmbedHandle create();
+        bool destroy(EmbedHandle handle);
+        Embed* get(EmbedHandle handle);
+        const Embed* get(EmbedHandle handle) const;
+        void clear();
+        std::size_t size() const;
+    };
+
 }

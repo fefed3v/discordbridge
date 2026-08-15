@@ -1,8 +1,7 @@
 #pragma once
 
-#include "gateway/GatewayClient.hpp"
-#include "gateway/GatewayInfo.hpp"
-#include "http/HttpClient.hpp"
+#include "Gateway.hpp"
+#include "HttpClient.hpp"
 
 #include <atomic>
 #include <condition_variable>
@@ -44,7 +43,7 @@ namespace DiscordBridge
 
         HttpClient httpClient_;
         GatewayInfo gatewayInfo_;
-        GatewayClient gatewayClient_;
+        Gateway gateway_;
 
         std::mutex outgoingMutex_;
         std::condition_variable outgoingCondition_;

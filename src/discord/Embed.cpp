@@ -296,4 +296,51 @@ namespace DiscordBridge
 
         return json;
     }
+
+    EmbedHandle EmbedManager::create()
+    {
+        if (nextHandle_ == 0) nextHandle_ = 1;
+
+        EmbedHandle handle = nextHandle_;
+        while (embeds_.find(handle) != embeds_.end())
+        {
+            ++handle;
+            if (handle == 0) handle = 1;
+            if (handle == nextHandle_) return 0;
+        }
+
+        embeds_.emplace(handle, std::make_unique<Embed>());
+        nextHandle_ = handle + 1;
+        if (nextHandle_ == 0) nextHandle_ = 1;
+        return handle;
+    }
+
+    bool EmbedManager::destroy(EmbedHandle handle)
+    {
+        return handle != 0 && embeds_.erase(handle) > 0;
+    }
+
+    Embed* EmbedManager::get(EmbedHandle handle)
+    {
+        const auto iterator = embeds_.find(handle);
+        return iterator == embeds_.end() ? nullptr : iterator->second.get();
+    }
+
+    const Embed* EmbedManager::get(EmbedHandle handle) const
+    {
+        const auto iterator = embeds_.find(handle);
+        return iterator == embeds_.end() ? nullptr : iterator->second.get();
+    }
+
+    void EmbedManager::clear()
+    {
+        embeds_.clear();
+        nextHandle_ = 1;
+    }
+
+    std::size_t EmbedManager::size() const
+    {
+        return embeds_.size();
+    }
+
 }

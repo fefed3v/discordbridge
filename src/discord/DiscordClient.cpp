@@ -125,7 +125,7 @@ namespace DiscordBridge
 
         gatewayInfo_ = std::move(gatewayInfo);
 
-        if (!gatewayClient_.connect(gatewayInfo_, token_))
+        if (!gateway_.connect(gatewayInfo_, token_))
         {
             gatewayInfo_ = GatewayInfo{};
             token_.clear();
@@ -141,7 +141,7 @@ namespace DiscordBridge
         catch (...)
         {
             restRunning_ = false;
-            gatewayClient_.disconnect();
+            gateway_.disconnect();
             gatewayInfo_ = GatewayInfo{};
             token_.clear();
             return false;
@@ -173,7 +173,7 @@ namespace DiscordBridge
             messageOperationResults_.clear();
         }
 
-        gatewayClient_.disconnect();
+        gateway_.disconnect();
 
         gatewayInfo_ = GatewayInfo{};
         token_.clear();
@@ -182,7 +182,7 @@ namespace DiscordBridge
     void DiscordClient::process()
     {
         if (!initialized_) return;
-        connected_ = gatewayClient_.isReady();
+        connected_ = gateway_.isReady();
     }
 
     bool DiscordClient::isInitialized() const
@@ -192,27 +192,27 @@ namespace DiscordBridge
 
     bool DiscordClient::isConnected() const
     {
-        return gatewayClient_.isReady();
+        return gateway_.isReady();
     }
 
     bool DiscordClient::consumeReadyEvent()
     {
-        return gatewayClient_.consumeReadyEvent();
+        return gateway_.consumeReadyEvent();
     }
 
     bool DiscordClient::consumeMessageCreateEvent(std::string& userId, std::string& channelId, std::string& message)
     {
-        return gatewayClient_.consumeMessageCreateEvent(userId, channelId, message);
+        return gateway_.consumeMessageCreateEvent(userId, channelId, message);
     }
 
     bool DiscordClient::consumeGuildMemberAddEvent(std::string& guildId, std::string& userId)
     {
-        return gatewayClient_.consumeGuildMemberAddEvent(guildId, userId);
+        return gateway_.consumeGuildMemberAddEvent(guildId, userId);
     }
 
     bool DiscordClient::consumeGuildMemberRemoveEvent(std::string& guildId, std::string& userId)
     {
-        return gatewayClient_.consumeGuildMemberRemoveEvent(guildId, userId);
+        return gateway_.consumeGuildMemberRemoveEvent(guildId, userId);
     }
 
     bool DiscordClient::consumeMessageSentEvent(bool& success, std::string& channelId, std::string& messageId)
@@ -256,22 +256,22 @@ namespace DiscordBridge
 
     bool DiscordClient::setStatus(int status)
     {
-        return gatewayClient_.setStatus(status);
+        return gateway_.setStatus(status);
     }
 
     bool DiscordClient::setActivity(int type, const std::string& name, const std::string& state, const std::string& url)
     {
-        return gatewayClient_.setActivity(type, name, state, url);
+        return gateway_.setActivity(type, name, state, url);
     }
 
     bool DiscordClient::clearActivity()
     {
-        return gatewayClient_.clearActivity();
+        return gateway_.clearActivity();
     }
 
     bool DiscordClient::setPresence(int status, int activityType, const std::string& name, const std::string& state, const std::string& url, bool afk)
     {
-        return gatewayClient_.setPresence(status, activityType, name, state, url, afk);
+        return gateway_.setPresence(status, activityType, name, state, url, afk);
     }
 
     bool DiscordClient::sendMessage(const std::string& channelId, const std::string& message)

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../discord/DiscordClient.hpp"
-#include "../discord/embed/EmbedManager.hpp"
+#include "../discord/Embed.hpp"
 #include "../pawn/PawnRuntime.hpp"
 
 namespace DiscordBridge
