@@ -125,6 +125,84 @@ namespace DiscordBridge
         }
     }
 
+    void PawnRuntime::dispatchGuildMemberAdd(const std::string& guildId, const std::string& userId)
+    {
+        for (AMX* amx : scripts_)
+        {
+            if (amx == nullptr) continue;
+
+            int index = -1;
+
+            if (amx_FindPublic(amx, "DBridge_OnGuildMemberAdd", &index) != AMX_ERR_NONE) continue;
+
+            cell guildAddress = 0;
+            cell userAddress = 0;
+
+            cell* guildPhysical = nullptr;
+            cell* userPhysical = nullptr;
+
+            if (amx_Allot(amx, static_cast<int>(guildId.size()) + 1, &guildAddress, &guildPhysical) != AMX_ERR_NONE) continue;
+
+            if (amx_Allot(amx, static_cast<int>(userId.size()) + 1, &userAddress, &userPhysical) != AMX_ERR_NONE)
+            {
+                amx_Release(amx, guildAddress);
+                continue;
+            }
+
+            amx_SetString(guildPhysical, guildId.c_str(), 0, 0, guildId.size() + 1);
+            amx_SetString(userPhysical, userId.c_str(), 0, 0, userId.size() + 1);
+
+            amx_Push(amx, userAddress);
+            amx_Push(amx, guildAddress);
+
+            cell returnValue = 0;
+
+            amx_Exec(amx, &returnValue, index);
+
+            amx_Release(amx, userAddress);
+            amx_Release(amx, guildAddress);
+        }
+    }
+
+    void PawnRuntime::dispatchGuildMemberRemove(const std::string& guildId, const std::string& userId)
+    {
+        for (AMX* amx : scripts_)
+        {
+            if (amx == nullptr) continue;
+
+            int index = -1;
+
+            if (amx_FindPublic(amx, "DBridge_OnGuildMemberRemove", &index) != AMX_ERR_NONE) continue;
+
+            cell guildAddress = 0;
+            cell userAddress = 0;
+
+            cell* guildPhysical = nullptr;
+            cell* userPhysical = nullptr;
+
+            if (amx_Allot(amx, static_cast<int>(guildId.size()) + 1, &guildAddress, &guildPhysical) != AMX_ERR_NONE) continue;
+
+            if (amx_Allot(amx, static_cast<int>(userId.size()) + 1, &userAddress, &userPhysical) != AMX_ERR_NONE)
+            {
+                amx_Release(amx, guildAddress);
+                continue;
+            }
+
+            amx_SetString(guildPhysical, guildId.c_str(), 0, 0, guildId.size() + 1);
+            amx_SetString(userPhysical, userId.c_str(), 0, 0, userId.size() + 1);
+
+            amx_Push(amx, userAddress);
+            amx_Push(amx, guildAddress);
+
+            cell returnValue = 0;
+
+            amx_Exec(amx, &returnValue, index);
+
+            amx_Release(amx, userAddress);
+            amx_Release(amx, guildAddress);
+        }
+    }
+
     std::size_t PawnRuntime::size() const
     {
         return scripts_.size();

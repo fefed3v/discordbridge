@@ -38,6 +38,8 @@ namespace DiscordBridge
         bool consumeReadyEvent();
 
         bool consumeMessageCreateEvent(std::string& userId, std::string& channelId, std::string& message);
+        bool consumeGuildMemberAddEvent(std::string& guildId, std::string& userId);
+        bool consumeGuildMemberRemoveEvent(std::string& guildId, std::string& userId);
 
         const std::string& getToken() const;
         const GatewayInfo& getGatewayInfo() const;

@@ -24,6 +24,8 @@ namespace DiscordBridge
         void dispatchReady();
 
         void dispatchMessageCreate(const std::string& userId, const std::string& channelId, const std::string& message);
+        void dispatchGuildMemberAdd(const std::string& guildId, const std::string& userId);
+        void dispatchGuildMemberRemove(const std::string& guildId, const std::string& userId);
 
         std::size_t size() const;
     };

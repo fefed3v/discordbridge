@@ -46,8 +46,17 @@ namespace DiscordBridge
             std::string message;
         };
 
+        struct GuildMemberEvent
+        {
+            std::string guildId;
+            std::string userId;
+        };
+
         std::mutex eventMutex_;
+
         std::deque<MessageCreateEvent> messageEvents_;
+        std::deque<GuildMemberEvent> guildMemberAddEvents_;
+        std::deque<GuildMemberEvent> guildMemberRemoveEvents_;
 
         std::string token_;
 
@@ -70,6 +79,9 @@ namespace DiscordBridge
         bool consumeReadyEvent();
 
         bool consumeMessageCreateEvent(std::string& userId, std::string& channelId, std::string& message);
+
+        bool consumeGuildMemberAddEvent(std::string& guildId, std::string& userId);
+        bool consumeGuildMemberRemoveEvent(std::string& guildId, std::string& userId);
 
     private:
         void receiveLoop();

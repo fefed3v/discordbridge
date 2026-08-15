@@ -41,6 +41,18 @@ namespace DiscordBridge
         {
             pawnRuntime_.dispatchMessageCreate(userId, channelId, message);
         }
+
+        std::string guildId;
+
+        while (discordClient_.consumeGuildMemberAddEvent(guildId, userId))
+        {
+            pawnRuntime_.dispatchGuildMemberAdd(guildId, userId);
+        }
+
+        while (discordClient_.consumeGuildMemberRemoveEvent(guildId, userId))
+        {
+            pawnRuntime_.dispatchGuildMemberRemove(guildId, userId);
+        }
     }
     
     bool BridgeCore::isInitialized() const

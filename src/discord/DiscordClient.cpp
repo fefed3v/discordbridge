@@ -133,6 +133,16 @@ namespace DiscordBridge
         return gatewayClient_.consumeMessageCreateEvent(userId, channelId, message);
     }
 
+    bool DiscordClient::consumeGuildMemberAddEvent(std::string& guildId, std::string& userId)
+    {
+        return gatewayClient_.consumeGuildMemberAddEvent(guildId, userId);
+    }
+
+    bool DiscordClient::consumeGuildMemberRemoveEvent(std::string& guildId, std::string& userId)
+    {
+        return gatewayClient_.consumeGuildMemberRemoveEvent(guildId, userId);
+    }
+    
     const std::string& DiscordClient::getToken() const
     {
         return token_;

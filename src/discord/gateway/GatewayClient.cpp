@@ -127,11 +127,11 @@ namespace DiscordBridge
         if (objectStart == std::string::npos) return false;
 
         std::size_t position = objectStart + 1;
+        std::size_t objectEnd = std::string::npos;
+
         int depth = 1;
         bool insideString = false;
         bool escaped = false;
-
-        std::size_t objectEnd = std::string::npos;
 
         while (position < json.size())
         {
@@ -139,29 +139,14 @@ namespace DiscordBridge
 
             if (insideString)
             {
-                if (escaped)
-                {
-                    escaped = false;
-                }
-                else if (character == '\\')
-                {
-                    escaped = true;
-                }
-                else if (character == '"')
-                {
-                    insideString = false;
-                }
+                if (escaped) escaped = false;
+                else if (character == '\\') escaped = true;
+                else if (character == '"') insideString = false;
             }
             else
             {
-                if (character == '"')
-                {
-                    insideString = true;
-                }
-                else if (character == '{')
-                {
-                    ++depth;
-                }
+                if (character == '"') insideString = true;
+                else if (character == '{') ++depth;
                 else if (character == '}')
                 {
                     --depth;
@@ -179,10 +164,7 @@ namespace DiscordBridge
 
         if (objectEnd == std::string::npos) return false;
 
-        const std::string objectJson = json.substr(
-            objectStart,
-            objectEnd - objectStart + 1
-        );
+        const std::string objectJson = json.substr(objectStart, objectEnd - objectStart + 1);
 
         return FindString(objectJson, key, value);
     }
@@ -211,7 +193,10 @@ namespace DiscordBridge
 
         {
             std::lock_guard<std::mutex> lock(eventMutex_);
+
             messageEvents_.clear();
+            guildMemberAddEvents_.clear();
+            guildMemberRemoveEvents_.clear();
         }
 
         const std::wstring host = L"gateway.discord.gg";
@@ -232,12 +217,7 @@ namespace DiscordBridge
             return false;
         }
 
-        connection_ = WinHttpConnect(
-            session_,
-            host.c_str(),
-            INTERNET_DEFAULT_HTTPS_PORT,
-            0
-        );
+        connection_ = WinHttpConnect(session_, host.c_str(), INTERNET_DEFAULT_HTTPS_PORT, 0);
 
         if (connection_ == nullptr)
         {
@@ -263,27 +243,14 @@ namespace DiscordBridge
             return false;
         }
 
-        if (!WinHttpSetOption(
-            request_,
-            WINHTTP_OPTION_UPGRADE_TO_WEB_SOCKET,
-            nullptr,
-            0
-        ))
+        if (!WinHttpSetOption(request_, WINHTTP_OPTION_UPGRADE_TO_WEB_SOCKET, nullptr, 0))
         {
             closeHandles();
             token_.clear();
             return false;
         }
 
-        if (!WinHttpSendRequest(
-            request_,
-            WINHTTP_NO_ADDITIONAL_HEADERS,
-            0,
-            WINHTTP_NO_REQUEST_DATA,
-            0,
-            0,
-            0
-        ))
+        if (!WinHttpSendRequest(request_, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0))
         {
             closeHandles();
             token_.clear();
@@ -386,21 +353,17 @@ namespace DiscordBridge
             WinHttpCloseHandle(socket);
         }
 
-        if (heartbeatThread_.joinable() && heartbeatThread_.get_id() != std::this_thread::get_id())
-        {
-            heartbeatThread_.join();
-        }
-
-        if (receiveThread_.joinable() && receiveThread_.get_id() != std::this_thread::get_id())
-        {
-            receiveThread_.join();
-        }
+        if (heartbeatThread_.joinable() && heartbeatThread_.get_id() != std::this_thread::get_id()) heartbeatThread_.join();
+        if (receiveThread_.joinable() && receiveThread_.get_id() != std::this_thread::get_id()) receiveThread_.join();
 
         closeHandles();
 
         {
             std::lock_guard<std::mutex> lock(eventMutex_);
+
             messageEvents_.clear();
+            guildMemberAddEvents_.clear();
+            guildMemberRemoveEvents_.clear();
         }
 
         token_.clear();
@@ -442,6 +405,36 @@ namespace DiscordBridge
         userId = std::move(event.userId);
         channelId = std::move(event.channelId);
         message = std::move(event.message);
+
+        return true;
+    }
+
+    bool GatewayClient::consumeGuildMemberAddEvent(std::string& guildId, std::string& userId)
+    {
+        std::lock_guard<std::mutex> lock(eventMutex_);
+
+        if (guildMemberAddEvents_.empty()) return false;
+
+        GuildMemberEvent event = std::move(guildMemberAddEvents_.front());
+        guildMemberAddEvents_.pop_front();
+
+        guildId = std::move(event.guildId);
+        userId = std::move(event.userId);
+
+        return true;
+    }
+
+    bool GatewayClient::consumeGuildMemberRemoveEvent(std::string& guildId, std::string& userId)
+    {
+        std::lock_guard<std::mutex> lock(eventMutex_);
+
+        if (guildMemberRemoveEvents_.empty()) return false;
+
+        GuildMemberEvent event = std::move(guildMemberRemoveEvents_.front());
+        guildMemberRemoveEvents_.pop_front();
+
+        guildId = std::move(event.guildId);
+        userId = std::move(event.userId);
 
         return true;
     }
@@ -554,26 +547,12 @@ namespace DiscordBridge
 
             if (result != NO_ERROR) return false;
             if (!running_) return false;
+            if (bufferType == WINHTTP_WEB_SOCKET_CLOSE_BUFFER_TYPE) return false;
 
-            if (bufferType == WINHTTP_WEB_SOCKET_CLOSE_BUFFER_TYPE)
-            {
-                return false;
-            }
+            if (bytesRead > 0) payload.append(buffer.data(), bytesRead);
 
-            if (bytesRead > 0)
-            {
-                payload.append(buffer.data(), bytesRead);
-            }
-
-            if (bufferType == WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE)
-            {
-                return true;
-            }
-
-            if (bufferType == WINHTTP_WEB_SOCKET_UTF8_FRAGMENT_BUFFER_TYPE)
-            {
-                continue;
-            }
+            if (bufferType == WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE) return true;
+            if (bufferType == WINHTTP_WEB_SOCKET_UTF8_FRAGMENT_BUFFER_TYPE) continue;
 
             return false;
         }
@@ -608,14 +587,8 @@ namespace DiscordBridge
 
         std::string payload = "{\"op\":1,\"d\":";
 
-        if (sequence < 0)
-        {
-            payload += "null";
-        }
-        else
-        {
-            payload += std::to_string(sequence);
-        }
+        if (sequence < 0) payload += "null";
+        else payload += std::to_string(sequence);
 
         payload += "}";
 
@@ -652,21 +625,12 @@ namespace DiscordBridge
 
         std::int64_t sequence = 0;
 
-        if (FindInteger(payload, "s", sequence))
-        {
-            sequence_ = sequence;
-        }
+        if (FindInteger(payload, "s", sequence)) sequence_ = sequence;
 
         std::int64_t opcode = -1;
 
-        if (!FindInteger(payload, "op", opcode))
-        {
-            return;
-        }
+        if (!FindInteger(payload, "op", opcode)) return;
 
-        /*
-         * OP 10 - HELLO
-         */
         if (opcode == 10)
         {
             std::int64_t interval = 0;
@@ -681,10 +645,7 @@ namespace DiscordBridge
             {
                 try
                 {
-                    heartbeatThread_ = std::thread(
-                        &GatewayClient::heartbeatLoop,
-                        this
-                    );
+                    heartbeatThread_ = std::thread(&GatewayClient::heartbeatLoop, this);
                 }
                 catch (...)
                 {
@@ -709,9 +670,6 @@ namespace DiscordBridge
             return;
         }
 
-        /*
-         * OP 1 - HEARTBEAT REQUEST
-         */
         if (opcode == 1)
         {
             if (!sendHeartbeat())
@@ -726,71 +684,35 @@ namespace DiscordBridge
             return;
         }
 
-        /*
-         * OP 11 - HEARTBEAT ACK
-         */
         if (opcode == 11)
         {
             heartbeatAck_ = true;
             return;
         }
 
-        /*
-         * OP 0 - DISPATCH
-         */
         if (opcode != 0) return;
 
         std::string eventName;
 
-        if (!FindString(payload, "t", eventName))
-        {
-            return;
-        }
+        if (!FindString(payload, "t", eventName)) return;
 
-        /*
-         * READY
-         */
         if (eventName == "READY")
         {
             ready_ = true;
             connected_ = true;
-
-            /*
-             * O ProcessTick do SA-MP consumirá essa flag e
-             * executará DBridge_OnReady na thread principal.
-             */
             readyEventPending_ = true;
-
             return;
         }
 
-        /*
-         * MESSAGE_CREATE
-         */
         if (eventName == "MESSAGE_CREATE")
         {
             std::string userId;
             std::string channelId;
             std::string message;
 
-            if (!FindObjectString(payload, "author", "id", userId))
-            {
-                return;
-            }
-
-            if (!FindString(payload, "channel_id", channelId))
-            {
-                return;
-            }
-
-            /*
-             * O content pode ser vazio, mas a propriedade precisa
-             * existir no payload.
-             */
-            if (!FindString(payload, "content", message))
-            {
-                return;
-            }
+            if (!FindObjectString(payload, "author", "id", userId)) return;
+            if (!FindString(payload, "channel_id", channelId)) return;
+            if (!FindString(payload, "content", message)) return;
 
             {
                 std::lock_guard<std::mutex> lock(eventMutex_);
@@ -800,6 +722,50 @@ namespace DiscordBridge
                         std::move(userId),
                         std::move(channelId),
                         std::move(message)
+                    }
+                );
+            }
+
+            return;
+        }
+
+        if (eventName == "GUILD_MEMBER_ADD")
+        {
+            std::string guildId;
+            std::string userId;
+
+            if (!FindString(payload, "guild_id", guildId)) return;
+            if (!FindObjectString(payload, "user", "id", userId)) return;
+
+            {
+                std::lock_guard<std::mutex> lock(eventMutex_);
+
+                guildMemberAddEvents_.push_back(
+                    GuildMemberEvent{
+                        std::move(guildId),
+                        std::move(userId)
+                    }
+                );
+            }
+
+            return;
+        }
+
+        if (eventName == "GUILD_MEMBER_REMOVE")
+        {
+            std::string guildId;
+            std::string userId;
+
+            if (!FindString(payload, "guild_id", guildId)) return;
+            if (!FindObjectString(payload, "user", "id", userId)) return;
+
+            {
+                std::lock_guard<std::mutex> lock(eventMutex_);
+
+                guildMemberRemoveEvents_.push_back(
+                    GuildMemberEvent{
+                        std::move(guildId),
+                        std::move(userId)
                     }
                 );
             }
