@@ -32,6 +32,7 @@ namespace DiscordBridge
         std::atomic_bool connected_{false};
         std::atomic_bool running_{false};
         std::atomic_bool ready_{false};
+        std::atomic_bool readyEventPending_{false};
         std::atomic_bool heartbeatAck_{true};
 
         std::atomic<std::int64_t> sequence_{-1};
@@ -54,6 +55,8 @@ namespace DiscordBridge
         bool isInitialized() const;
         bool isConnected() const;
         bool isReady() const;
+
+        bool consumeReadyEvent();
 
     private:
         void receiveLoop();

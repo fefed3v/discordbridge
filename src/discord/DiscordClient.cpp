@@ -123,6 +123,11 @@ namespace DiscordBridge
         return gatewayClient_.isReady();
     }
 
+    bool DiscordClient::consumeReadyEvent()
+    {
+        return gatewayClient_.consumeReadyEvent();
+    }
+
     const std::string& DiscordClient::getToken() const
     {
         return token_;

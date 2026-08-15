@@ -35,6 +35,7 @@ namespace DiscordBridge
 
         bool isInitialized() const;
         bool isConnected() const;
+        bool consumeReadyEvent();
 
         const std::string& getToken() const;
         const GatewayInfo& getGatewayInfo() const;

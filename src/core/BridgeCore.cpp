@@ -27,8 +27,13 @@ namespace DiscordBridge
         if (!initialized_) return;
 
         discordClient_.process();
-    }
 
+        if (discordClient_.consumeReadyEvent())
+        {
+            pawnRuntime_.dispatchReady();
+        }
+    }
+    
     bool BridgeCore::isInitialized() const
     {
         return initialized_;

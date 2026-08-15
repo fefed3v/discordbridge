@@ -42,7 +42,6 @@ namespace DiscordBridge
         }
 
         value = negative ? -result : result;
-
         return true;
     }
 
@@ -65,7 +64,6 @@ namespace DiscordBridge
         if (end == std::string::npos) return false;
 
         value = json.substr(position, end - position);
-
         return true;
     }
 
@@ -82,6 +80,15 @@ namespace DiscordBridge
 
         token_ = token;
 
+        initialized_ = true;
+        connected_ = true;
+        running_ = true;
+        ready_ = false;
+        readyEventPending_ = false;
+        heartbeatAck_ = true;
+        heartbeatInterval_ = 0;
+        sequence_ = -1;
+
         const std::wstring host = L"gateway.discord.gg";
         const std::wstring path = L"/?v=10&encoding=json";
 
@@ -96,6 +103,7 @@ namespace DiscordBridge
         if (session_ == nullptr)
         {
             closeHandles();
+            token_.clear();
             return false;
         }
 
@@ -109,6 +117,7 @@ namespace DiscordBridge
         if (connection_ == nullptr)
         {
             closeHandles();
+            token_.clear();
             return false;
         }
 
@@ -125,6 +134,7 @@ namespace DiscordBridge
         if (request_ == nullptr)
         {
             closeHandles();
+            token_.clear();
             return false;
         }
 
@@ -136,6 +146,7 @@ namespace DiscordBridge
         ))
         {
             closeHandles();
+            token_.clear();
             return false;
         }
 
@@ -150,12 +161,14 @@ namespace DiscordBridge
         ))
         {
             closeHandles();
+            token_.clear();
             return false;
         }
 
         if (!WinHttpReceiveResponse(request_, nullptr))
         {
             closeHandles();
+            token_.clear();
             return false;
         }
 
@@ -172,12 +185,14 @@ namespace DiscordBridge
         ))
         {
             closeHandles();
+            token_.clear();
             return false;
         }
 
         if (statusCode != 101)
         {
             closeHandles();
+            token_.clear();
             return false;
         }
 
@@ -186,6 +201,7 @@ namespace DiscordBridge
         if (webSocket_ == nullptr)
         {
             closeHandles();
+            token_.clear();
             return false;
         }
 
@@ -200,43 +216,64 @@ namespace DiscordBridge
         heartbeatInterval_ = 0;
         sequence_ = -1;
 
-        receiveThread_ = std::thread(&GatewayClient::receiveLoop, this);
+        try
+        {
+            receiveThread_ = std::thread(&GatewayClient::receiveLoop, this);
+        }
+        catch (...)
+        {
+            running_ = false;
+            connected_ = false;
+            initialized_ = false;
+
+            closeHandles();
+            token_.clear();
+
+            return false;
+        }
 
         return true;
     }
 
     void GatewayClient::disconnect()
     {
-        if (!initialized_ && !running_ && webSocket_ == nullptr)
-        {
-            token_.clear();
-            heartbeatInterval_ = 0;
-            heartbeatAck_ = true;
-            sequence_ = -1;
-            return;
-        }
-
         running_ = false;
         ready_ = false;
+        readyEventPending_ = false;
         connected_ = false;
         initialized_ = false;
 
-        if (webSocket_ != nullptr)
+        heartbeatCondition_.notify_all();
+
+        HINTERNET socket = webSocket_;
+        webSocket_ = nullptr;
+
+        if (socket != nullptr)
         {
             WinHttpWebSocketShutdown(
-                webSocket_,
+                socket,
                 WINHTTP_WEB_SOCKET_SUCCESS_CLOSE_STATUS,
                 nullptr,
                 0
             );
+
+            WinHttpCloseHandle(socket);
         }
 
-        if (receiveThread_.joinable()) receiveThread_.join();
-        if (heartbeatThread_.joinable()) heartbeatThread_.join();
+        if (heartbeatThread_.joinable() && heartbeatThread_.get_id() != std::this_thread::get_id())
+        {
+            heartbeatThread_.join();
+        }
+
+        if (receiveThread_.joinable() && receiveThread_.get_id() != std::this_thread::get_id())
+        {
+            receiveThread_.join();
+        }
 
         closeHandles();
 
         token_.clear();
+
         heartbeatInterval_ = 0;
         heartbeatAck_ = true;
         sequence_ = -1;
@@ -257,6 +294,11 @@ namespace DiscordBridge
         return ready_;
     }
 
+    bool GatewayClient::consumeReadyEvent()
+    {
+        return readyEventPending_.exchange(false);
+    }
+
     void GatewayClient::receiveLoop()
     {
         std::string payload;
@@ -265,43 +307,78 @@ namespace DiscordBridge
         {
             if (!receivePayload(payload))
             {
-                running_ = false;
-                connected_ = false;
-                ready_ = false;
                 break;
             }
 
+            if (!running_) break;
+
             handlePayload(payload);
         }
+
+        running_ = false;
+        connected_ = false;
+        ready_ = false;
+
+        heartbeatCondition_.notify_all();
     }
 
     void GatewayClient::heartbeatLoop()
     {
-        const std::uint32_t interval = heartbeatInterval_;
-
-        if (interval == 0) return;
+        std::unique_lock<std::mutex> lock(heartbeatMutex_);
 
         while (running_)
         {
-            std::this_thread::sleep_for(std::chrono::milliseconds(interval));
+            const std::uint32_t interval = heartbeatInterval_.load();
 
-            if (!running_) break;
+            if (interval == 0)
+            {
+                heartbeatCondition_.wait(
+                    lock,
+                    [this]()
+                    {
+                        return !running_.load() || heartbeatInterval_.load() > 0;
+                    }
+                );
+
+                continue;
+            }
+
+            const bool interrupted = heartbeatCondition_.wait_for(
+                lock,
+                std::chrono::milliseconds(interval),
+                [this]()
+                {
+                    return !running_.load();
+                }
+            );
+
+            if (interrupted || !running_) break;
 
             if (!heartbeatAck_)
             {
                 running_ = false;
                 connected_ = false;
                 ready_ = false;
+
+                heartbeatCondition_.notify_all();
                 break;
             }
 
             heartbeatAck_ = false;
 
-            if (!sendHeartbeat())
+            lock.unlock();
+
+            const bool sent = sendHeartbeat();
+
+            lock.lock();
+
+            if (!sent)
             {
                 running_ = false;
                 connected_ = false;
                 ready_ = false;
+
+                heartbeatCondition_.notify_all();
                 break;
             }
         }
@@ -311,7 +388,11 @@ namespace DiscordBridge
     {
         payload.clear();
 
-        if (webSocket_ == nullptr) return false;
+        if (!running_) return false;
+
+        HINTERNET socket = webSocket_;
+
+        if (socket == nullptr) return false;
 
         std::vector<char> buffer(8192);
 
@@ -321,7 +402,7 @@ namespace DiscordBridge
             WINHTTP_WEB_SOCKET_BUFFER_TYPE bufferType{};
 
             const DWORD result = WinHttpWebSocketReceive(
-                webSocket_,
+                socket,
                 buffer.data(),
                 static_cast<DWORD>(buffer.size()),
                 &bytesRead,
@@ -329,7 +410,7 @@ namespace DiscordBridge
             );
 
             if (result != NO_ERROR) return false;
-
+            if (!running_) return false;
             if (bufferType == WINHTTP_WEB_SOCKET_CLOSE_BUFFER_TYPE) return false;
 
             if (bytesRead > 0)
@@ -337,9 +418,15 @@ namespace DiscordBridge
                 payload.append(buffer.data(), bytesRead);
             }
 
-            if (bufferType == WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE) return true;
+            if (bufferType == WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE)
+            {
+                return true;
+            }
 
-            if (bufferType == WINHTTP_WEB_SOCKET_UTF8_FRAGMENT_BUFFER_TYPE) continue;
+            if (bufferType == WINHTTP_WEB_SOCKET_UTF8_FRAGMENT_BUFFER_TYPE)
+            {
+                continue;
+            }
 
             return false;
         }
@@ -349,12 +436,15 @@ namespace DiscordBridge
 
     bool GatewayClient::sendText(const std::string& payload)
     {
-        if (webSocket_ == nullptr) return false;
-        if (payload.empty()) return false;
         if (!running_) return false;
+        if (payload.empty()) return false;
+
+        HINTERNET socket = webSocket_;
+
+        if (socket == nullptr) return false;
 
         const DWORD result = WinHttpWebSocketSend(
-            webSocket_,
+            socket,
             WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE,
             const_cast<char*>(payload.data()),
             static_cast<DWORD>(payload.size())
@@ -365,12 +455,20 @@ namespace DiscordBridge
 
     bool GatewayClient::sendHeartbeat()
     {
-        const std::int64_t sequence = sequence_;
+        if (!running_) return false;
+
+        const std::int64_t sequence = sequence_.load();
 
         std::string payload = "{\"op\":1,\"d\":";
 
-        if (sequence < 0) payload += "null";
-        else payload += std::to_string(sequence);
+        if (sequence < 0)
+        {
+            payload += "null";
+        }
+        else
+        {
+            payload += std::to_string(sequence);
+        }
 
         payload += "}";
 
@@ -379,6 +477,9 @@ namespace DiscordBridge
 
     bool GatewayClient::sendIdentify()
     {
+        if (!running_) return false;
+        if (token_.empty()) return false;
+
         constexpr std::uint32_t intents =
             (1u << 0) |
             (1u << 1) |
@@ -400,6 +501,8 @@ namespace DiscordBridge
 
     void GatewayClient::handlePayload(const std::string& payload)
     {
+        if (!running_) return;
+
         std::int64_t sequence = 0;
 
         if (FindInteger(payload, "s", sequence))
@@ -409,7 +512,10 @@ namespace DiscordBridge
 
         std::int64_t opcode = -1;
 
-        if (!FindInteger(payload, "op", opcode)) return;
+        if (!FindInteger(payload, "op", opcode))
+        {
+            return;
+        }
 
         if (opcode == 10)
         {
@@ -423,17 +529,31 @@ namespace DiscordBridge
 
             if (!heartbeatThread_.joinable())
             {
-                heartbeatThread_ = std::thread(
-                    &GatewayClient::heartbeatLoop,
-                    this
-                );
+                try
+                {
+                    heartbeatThread_ = std::thread(
+                        &GatewayClient::heartbeatLoop,
+                        this
+                    );
+                }
+                catch (...)
+                {
+                    running_ = false;
+                    connected_ = false;
+                    ready_ = false;
+                    return;
+                }
             }
+
+            heartbeatCondition_.notify_all();
 
             if (!sendIdentify())
             {
                 running_ = false;
                 connected_ = false;
                 ready_ = false;
+
+                heartbeatCondition_.notify_all();
             }
 
             return;
@@ -441,7 +561,15 @@ namespace DiscordBridge
 
         if (opcode == 1)
         {
-            sendHeartbeat();
+            if (!sendHeartbeat())
+            {
+                running_ = false;
+                connected_ = false;
+                ready_ = false;
+
+                heartbeatCondition_.notify_all();
+            }
+
             return;
         }
 
@@ -455,12 +583,16 @@ namespace DiscordBridge
 
         std::string eventName;
 
-        if (!FindString(payload, "t", eventName)) return;
+        if (!FindString(payload, "t", eventName))
+        {
+            return;
+        }
 
         if (eventName == "READY")
         {
             ready_ = true;
             connected_ = true;
+            readyEventPending_ = true;
             return;
         }
     }
