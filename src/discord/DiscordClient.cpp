@@ -128,6 +128,11 @@ namespace DiscordBridge
         return gatewayClient_.consumeReadyEvent();
     }
 
+    bool DiscordClient::consumeMessageCreateEvent(std::string& userId, std::string& channelId, std::string& message)
+    {
+        return gatewayClient_.consumeMessageCreateEvent(userId, channelId, message);
+    }
+
     const std::string& DiscordClient::getToken() const
     {
         return token_;

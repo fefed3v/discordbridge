@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <vector>
+#include <string>
 
 #include <amx/amx.h>
 
@@ -21,6 +22,8 @@ namespace DiscordBridge
 
         void clear();
         void dispatchReady();
+
+        void dispatchMessageCreate(const std::string& userId, const std::string& channelId, const std::string& message);
 
         std::size_t size() const;
     };

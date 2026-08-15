@@ -11,6 +11,7 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include <deque>
 
 namespace DiscordBridge
 {
@@ -38,6 +39,16 @@ namespace DiscordBridge
         std::atomic<std::int64_t> sequence_{-1};
         std::atomic<std::uint32_t> heartbeatInterval_{0};
 
+        struct MessageCreateEvent
+        {
+            std::string userId;
+            std::string channelId;
+            std::string message;
+        };
+
+        std::mutex eventMutex_;
+        std::deque<MessageCreateEvent> messageEvents_;
+
         std::string token_;
 
     public:
@@ -57,6 +68,8 @@ namespace DiscordBridge
         bool isReady() const;
 
         bool consumeReadyEvent();
+
+        bool consumeMessageCreateEvent(std::string& userId, std::string& channelId, std::string& message);
 
     private:
         void receiveLoop();

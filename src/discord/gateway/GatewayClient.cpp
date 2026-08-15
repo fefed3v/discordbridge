@@ -4,6 +4,7 @@
 #include <cctype>
 #include <string>
 #include <thread>
+#include <utility>
 #include <vector>
 
 namespace DiscordBridge
@@ -60,11 +61,130 @@ namespace DiscordBridge
 
         ++position;
 
-        const std::size_t end = json.find('"', position);
-        if (end == std::string::npos) return false;
+        std::string result;
+        result.reserve(64);
 
-        value = json.substr(position, end - position);
-        return true;
+        bool escaped = false;
+
+        while (position < json.size())
+        {
+            const char character = json[position++];
+
+            if (escaped)
+            {
+                switch (character)
+                {
+                    case '"': result.push_back('"'); break;
+                    case '\\': result.push_back('\\'); break;
+                    case '/': result.push_back('/'); break;
+                    case 'b': result.push_back('\b'); break;
+                    case 'f': result.push_back('\f'); break;
+                    case 'n': result.push_back('\n'); break;
+                    case 'r': result.push_back('\r'); break;
+                    case 't': result.push_back('\t'); break;
+
+                    default:
+                    {
+                        result.push_back('\\');
+                        result.push_back(character);
+                        break;
+                    }
+                }
+
+                escaped = false;
+                continue;
+            }
+
+            if (character == '\\')
+            {
+                escaped = true;
+                continue;
+            }
+
+            if (character == '"')
+            {
+                value = std::move(result);
+                return true;
+            }
+
+            result.push_back(character);
+        }
+
+        return false;
+    }
+
+    static bool FindObjectString(const std::string& json, const std::string& objectKey, const std::string& key, std::string& value)
+    {
+        const std::string objectSearch = "\"" + objectKey + "\"";
+
+        std::size_t objectPosition = json.find(objectSearch);
+        if (objectPosition == std::string::npos) return false;
+
+        objectPosition = json.find(':', objectPosition + objectSearch.size());
+        if (objectPosition == std::string::npos) return false;
+
+        const std::size_t objectStart = json.find('{', objectPosition + 1);
+        if (objectStart == std::string::npos) return false;
+
+        std::size_t position = objectStart + 1;
+        int depth = 1;
+        bool insideString = false;
+        bool escaped = false;
+
+        std::size_t objectEnd = std::string::npos;
+
+        while (position < json.size())
+        {
+            const char character = json[position];
+
+            if (insideString)
+            {
+                if (escaped)
+                {
+                    escaped = false;
+                }
+                else if (character == '\\')
+                {
+                    escaped = true;
+                }
+                else if (character == '"')
+                {
+                    insideString = false;
+                }
+            }
+            else
+            {
+                if (character == '"')
+                {
+                    insideString = true;
+                }
+                else if (character == '{')
+                {
+                    ++depth;
+                }
+                else if (character == '}')
+                {
+                    --depth;
+
+                    if (depth == 0)
+                    {
+                        objectEnd = position;
+                        break;
+                    }
+                }
+            }
+
+            ++position;
+        }
+
+        if (objectEnd == std::string::npos) return false;
+
+        const std::string objectJson = json.substr(
+            objectStart,
+            objectEnd - objectStart + 1
+        );
+
+        return FindString(objectJson, key, value);
     }
 
     GatewayClient::~GatewayClient()
@@ -80,14 +200,19 @@ namespace DiscordBridge
 
         token_ = token;
 
-        initialized_ = true;
-        connected_ = true;
-        running_ = true;
+        initialized_ = false;
+        connected_ = false;
+        running_ = false;
         ready_ = false;
         readyEventPending_ = false;
         heartbeatAck_ = true;
         heartbeatInterval_ = 0;
         sequence_ = -1;
+
+        {
+            std::lock_guard<std::mutex> lock(eventMutex_);
+            messageEvents_.clear();
+        }
 
         const std::wstring host = L"gateway.discord.gg";
         const std::wstring path = L"/?v=10&encoding=json";
@@ -212,6 +337,7 @@ namespace DiscordBridge
         connected_ = true;
         running_ = true;
         ready_ = false;
+        readyEventPending_ = false;
         heartbeatAck_ = true;
         heartbeatInterval_ = 0;
         sequence_ = -1;
@@ -239,9 +365,9 @@ namespace DiscordBridge
     {
         running_ = false;
         ready_ = false;
-        readyEventPending_ = false;
         connected_ = false;
         initialized_ = false;
+        readyEventPending_ = false;
 
         heartbeatCondition_.notify_all();
 
@@ -272,6 +398,11 @@ namespace DiscordBridge
 
         closeHandles();
 
+        {
+            std::lock_guard<std::mutex> lock(eventMutex_);
+            messageEvents_.clear();
+        }
+
         token_.clear();
 
         heartbeatInterval_ = 0;
@@ -299,17 +430,29 @@ namespace DiscordBridge
         return readyEventPending_.exchange(false);
     }
 
+    bool GatewayClient::consumeMessageCreateEvent(std::string& userId, std::string& channelId, std::string& message)
+    {
+        std::lock_guard<std::mutex> lock(eventMutex_);
+
+        if (messageEvents_.empty()) return false;
+
+        MessageCreateEvent event = std::move(messageEvents_.front());
+        messageEvents_.pop_front();
+
+        userId = std::move(event.userId);
+        channelId = std::move(event.channelId);
+        message = std::move(event.message);
+
+        return true;
+    }
+
     void GatewayClient::receiveLoop()
     {
         std::string payload;
 
         while (running_)
         {
-            if (!receivePayload(payload))
-            {
-                break;
-            }
-
+            if (!receivePayload(payload)) break;
             if (!running_) break;
 
             handlePayload(payload);
@@ -411,7 +554,11 @@ namespace DiscordBridge
 
             if (result != NO_ERROR) return false;
             if (!running_) return false;
-            if (bufferType == WINHTTP_WEB_SOCKET_CLOSE_BUFFER_TYPE) return false;
+
+            if (bufferType == WINHTTP_WEB_SOCKET_CLOSE_BUFFER_TYPE)
+            {
+                return false;
+            }
 
             if (bytesRead > 0)
             {
@@ -517,6 +664,9 @@ namespace DiscordBridge
             return;
         }
 
+        /*
+         * OP 10 - HELLO
+         */
         if (opcode == 10)
         {
             std::int64_t interval = 0;
@@ -559,6 +709,9 @@ namespace DiscordBridge
             return;
         }
 
+        /*
+         * OP 1 - HEARTBEAT REQUEST
+         */
         if (opcode == 1)
         {
             if (!sendHeartbeat())
@@ -573,12 +726,18 @@ namespace DiscordBridge
             return;
         }
 
+        /*
+         * OP 11 - HEARTBEAT ACK
+         */
         if (opcode == 11)
         {
             heartbeatAck_ = true;
             return;
         }
 
+        /*
+         * OP 0 - DISPATCH
+         */
         if (opcode != 0) return;
 
         std::string eventName;
@@ -588,11 +747,63 @@ namespace DiscordBridge
             return;
         }
 
+        /*
+         * READY
+         */
         if (eventName == "READY")
         {
             ready_ = true;
             connected_ = true;
+
+            /*
+             * O ProcessTick do SA-MP consumirá essa flag e
+             * executará DBridge_OnReady na thread principal.
+             */
             readyEventPending_ = true;
+
+            return;
+        }
+
+        /*
+         * MESSAGE_CREATE
+         */
+        if (eventName == "MESSAGE_CREATE")
+        {
+            std::string userId;
+            std::string channelId;
+            std::string message;
+
+            if (!FindObjectString(payload, "author", "id", userId))
+            {
+                return;
+            }
+
+            if (!FindString(payload, "channel_id", channelId))
+            {
+                return;
+            }
+
+            /*
+             * O content pode ser vazio, mas a propriedade precisa
+             * existir no payload.
+             */
+            if (!FindString(payload, "content", message))
+            {
+                return;
+            }
+
+            {
+                std::lock_guard<std::mutex> lock(eventMutex_);
+
+                messageEvents_.push_back(
+                    MessageCreateEvent{
+                        std::move(userId),
+                        std::move(channelId),
+                        std::move(message)
+                    }
+                );
+            }
+
             return;
         }
     }

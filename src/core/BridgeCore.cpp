@@ -32,6 +32,15 @@ namespace DiscordBridge
         {
             pawnRuntime_.dispatchReady();
         }
+
+        std::string userId;
+        std::string channelId;
+        std::string message;
+
+        while (discordClient_.consumeMessageCreateEvent(userId, channelId, message))
+        {
+            pawnRuntime_.dispatchMessageCreate(userId, channelId, message);
+        }
     }
     
     bool BridgeCore::isInitialized() const
