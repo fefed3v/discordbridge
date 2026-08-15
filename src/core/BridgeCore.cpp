@@ -25,6 +25,8 @@ namespace DiscordBridge
     void BridgeCore::process()
     {
         if (!initialized_) return;
+
+        discordClient_.process();
     }
 
     bool BridgeCore::isInitialized() const

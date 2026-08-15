@@ -7,61 +7,26 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(NOT WIN32)
-    message(FATAL_ERROR "DiscordBridge currently targets Windows.")
+    message(FATAL_ERROR "DiscordBridge atualmente suporta apenas Windows.")
 endif()
 
 if(NOT MSVC)
-    message(FATAL_ERROR "DiscordBridge currently requires MSVC.")
+    message(FATAL_ERROR "DiscordBridge atualmente requer MSVC.")
 endif()
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    message(FATAL_ERROR "DiscordBridge must be built as Win32/x86. Use -A Win32.")
+    message(FATAL_ERROR "DiscordBridge deve ser compilado em Win32/x86. Use -A Win32.")
 endif()
 
 # =========================================================
 # PATHS
 # =========================================================
 
-set(DPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/dpp")
 set(SAMP_SDK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/samp-plugin-sdk")
-
-if(NOT EXISTS "${DPP_DIR}/CMakeLists.txt")
-    message(FATAL_ERROR "DPP not found.")
-endif()
 
 if(NOT EXISTS "${SAMP_SDK_DIR}/plugincommon.h")
-    message(FATAL_ERROR "SA-MP Plugin SDK not found.")
+    message(FATAL_ERROR "SA-MP Plugin SDK nao encontrado em external/samp-plugin-sdk.")
 endif()
-
-# =========================================================
-# DPP
-# =========================================================
-
-set(DPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/dpp")
-set(SAMP_SDK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/samp-plugin-sdk")
-
-set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries" FORCE)
-set(BUILD_VOICE_SUPPORT OFF CACHE BOOL "Disable DPP voice support" FORCE)
-set(DPP_BUILD_TEST OFF CACHE BOOL "Disable DPP tests" FORCE)
-set(DPP_INSTALL OFF CACHE BOOL "Disable DPP install target" FORCE)
-set(DPP_NO_CORO ON CACHE BOOL "Disable DPP coroutines" FORCE)
-set(DPP_NO_VCPKG ON CACHE BOOL "Disable VCPKG" FORCE)
-set(WINDOWS_32_BIT ON CACHE BOOL "Build DPP for 32-bit Windows" FORCE)
-
-add_subdirectory("${DPP_DIR}" "${CMAKE_BINARY_DIR}/external/dpp" EXCLUDE_FROM_ALL)
-
-target_include_directories(dpp PRIVATE
-    "${DPP_DIR}/win32/include"
-)
-
-target_compile_definitions(dpp PRIVATE
-    OPENSSL_SYS_WIN32
-    _WINSOCK_DEPRECATED_NO_WARNINGS
-    _CRT_SECURE_NO_WARNINGS
-    _CRT_NONSTDC_NO_DEPRECATE
-    WIN32_LEAN_AND_MEAN
-    NOMINMAX
-)
 
 # =========================================================
 # DISCORD BRIDGE
@@ -69,52 +34,66 @@ target_compile_definitions(dpp PRIVATE
 
 add_library(DiscordBridge SHARED
     src/core/BridgeCore.cpp
+
     src/discord/DiscordClient.cpp
+    src/discord/http/HttpClient.cpp
+    src/discord/gateway/GatewayInfo.cpp
+    src/discord/gateway/GatewayClient.cpp
+    src/discord/events/DiscordEvents.cpp
 
     src/pawn/PawnRuntime.cpp
-    src/pawn/natives/VersionNatives.cpp
     src/pawn/natives/BasicNatives.cpp
+    src/pawn/natives/VersionNatives.cpp
 
     src/plugin/Plugin.cpp
     src/plugin/AmxExports.cpp
     src/plugin/DiscordBridge.def
 
-    "${SAMP_SDK_DIR}/amxplugin.cpp"
+    external/samp-plugin-sdk/amxplugin.cpp
 )
 
+# =========================================================
+# INCLUDES
+# =========================================================
+
 target_include_directories(DiscordBridge PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/src"
-    "${SAMP_SDK_DIR}"
-    "${SAMP_SDK_DIR}/amx"
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${SAMP_SDK_DIR}
+    ${SAMP_SDK_DIR}/amx
 )
+
+# =========================================================
+# DEFINITIONS
+# =========================================================
 
 target_compile_definitions(DiscordBridge PRIVATE
     HAVE_STDINT_H
     WIN32_LEAN_AND_MEAN
     NOMINMAX
+    _WINSOCK_DEPRECATED_NO_WARNINGS
+    _CRT_SECURE_NO_WARNINGS
 )
 
+# =========================================================
+# WINDOWS LIBRARIES
+# =========================================================
+
 target_link_libraries(DiscordBridge PRIVATE
-    dpp
+    ws2_32
+    winhttp
+    crypt32
 )
+
+# =========================================================
+# OUTPUT
+# =========================================================
 
 set_target_properties(DiscordBridge PROPERTIES
     OUTPUT_NAME "DiscordBridge"
+
     RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/DiscordBridge/Debug"
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/DiscordBridge/Release"
+
     ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/DiscordBridge/Debug"
-    ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release"
-)
-
-# =========================================================
-# TEMPORARY RUNTIME DEPENDENCIES
-# =========================================================
-
-set(DPP_RUNTIME_DIR "${DPP_DIR}/win32/32/bin")
-
-add_custom_command(TARGET DiscordBridge POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:dpp>" "$<TARGET_FILE_DIR:DiscordBridge>"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DPP_RUNTIME_DIR}/libssl-1_1.dll" "$<TARGET_FILE_DIR:DiscordBridge>"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DPP_RUNTIME_DIR}/libcrypto-1_1.dll" "$<TARGET_FILE_DIR:DiscordBridge>"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DPP_RUNTIME_DIR}/zlib1.dll" "$<TARGET_FILE_DIR:DiscordBridge>"
+    ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/DiscordBridge/Release"
 )

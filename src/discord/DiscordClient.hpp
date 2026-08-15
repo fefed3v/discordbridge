@@ -1,25 +1,27 @@
 #pragma once
 
-#include <atomic>
-#include <memory>
-#include <string>
+#include "http/HttpClient.hpp"
+#include "gateway/GatewayInfo.hpp"
+#include "gateway/GatewayClient.hpp"
 
-namespace dpp
-{
-    class cluster;
-}
+#include <atomic>
+#include <string>
 
 namespace DiscordBridge
 {
     class DiscordClient final
     {
     private:
-        std::unique_ptr<dpp::cluster> cluster_;
+        std::string token_;
+        HttpClient httpClient_;
+        GatewayInfo gatewayInfo_;
+        GatewayClient gatewayClient_;
+
         std::atomic_bool initialized_{false};
         std::atomic_bool connected_{false};
 
     public:
-        DiscordClient();
+        DiscordClient() = default;
         ~DiscordClient();
 
         DiscordClient(const DiscordClient&) = delete;
@@ -29,8 +31,12 @@ namespace DiscordBridge
 
         bool initialize(const std::string& token);
         void shutdown();
+        void process();
 
         bool isInitialized() const;
         bool isConnected() const;
+
+        const std::string& getToken() const;
+        const GatewayInfo& getGatewayInfo() const;
     };
 }
