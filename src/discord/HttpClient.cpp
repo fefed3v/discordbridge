@@ -6,7 +6,7 @@ namespace DiscordBridge
 {
     namespace
     {
-        constexpr wchar_t USER_AGENT[] = L"DiscordBridge/0.0.1";
+        constexpr wchar_t USER_AGENT[] = L"DiscordBridge/0.0.4";
 
         void CloseHandle(HINTERNET& handle)
         {
@@ -36,6 +36,11 @@ namespace DiscordBridge
     HttpResponse HttpClient::post(const std::wstring& host, const std::wstring& path, const std::wstring& headers, const std::string& body)
     {
         return request(L"POST", host, path, headers, body);
+    }
+
+    HttpResponse HttpClient::put(const std::wstring& host, const std::wstring& path, const std::wstring& headers, const std::string& body)
+    {
+        return request(L"PUT", host, path, headers, body);
     }
 
     HttpResponse HttpClient::patch(const std::wstring& host, const std::wstring& path, const std::wstring& headers, const std::string& body)

@@ -7,36 +7,47 @@
 #include <vector>
 #include <utility>
 
+using namespace std;
+
 namespace DiscordBridge
 {
     class PawnRuntime
     {
     public:
-        bool addAMX(AMX* amx);
-        bool removeAMX(AMX* amx);
+        bool addAMX(AMX *amx);
+        bool removeAMX(AMX *amx);
 
         void clear();
 
         void dispatchReady();
-        void dispatchMessageCreate(const std::string& userId, const std::string& channelId, const std::string& message);
-        void dispatchGuildMemberAdd(const std::string& guildId, const std::string& userId);
-        void dispatchGuildMemberRemove(const std::string& guildId, const std::string& userId);
+        void dispatchMessageCreate(const string &userId, const string &channelId, const string &message);
+        void dispatchGuildMemberAdd(const string &guildId, const string &userId);
+        void dispatchGuildMemberRemove(const string &guildId, const string &userId);
 
-        void dispatchMessageSent(bool success, const std::string& channelId, const std::string& messageId);
-        void dispatchMessageEdited(bool success, const std::string& channelId, const std::string& messageId);
-        void dispatchMessageDeleted(bool success, const std::string& channelId, const std::string& messageId);
-        void dispatchEmbedSent(bool success, const std::string& channelId, const std::string& messageId);
-        void dispatchComponentsSent(bool success, const std::string& channelId, const std::string& messageId);
+        void dispatchMessageSent(bool success, const string &channelId, const string &messageId);
+        void dispatchMessageEdited(bool success, const string &channelId, const string &messageId);
+        void dispatchMessageDeleted(bool success, const string &channelId, const string &messageId);
+        void dispatchEmbedSent(bool success, const string &channelId, const string &messageId);
+        void dispatchComponentsSent(bool success, const string &channelId, const string &messageId);
+        void dispatchChannelCreated(bool success, const string &guildId, const string &channelId);
+        void dispatchChannelDeleted(bool success, const string &guildId, const string &channelId);
+        void dispatchRoleCreated(bool success, const string &guildId, const string &roleId);
+        void dispatchRoleDeleted(bool success, const string &guildId, const string &roleId);
+        void dispatchMemberRoleAdded(bool success, const string &guildId, const string &userId);
+        void dispatchMemberRoleRemoved(bool success, const string &guildId, const string &userId);
+        void dispatchMemberKicked(bool success, const string &guildId, const string &userId);
+        void dispatchMemberBanned(bool success, const string &guildId, const string &userId);
+        void dispatchMemberUnbanned(bool success, const string &guildId, const string &userId);
 
-        void dispatchButtonClick(const std::string& userId, const std::string& channelId, const std::string& customId, const std::string& interactionId, const std::string& interactionToken);
-        void dispatchSelectMenu(const std::string& userId, const std::string& channelId, const std::string& customId, const std::string& value, const std::string& interactionId, const std::string& interactionToken);
-        void dispatchModalSubmit(const std::string& userId, const std::string& channelId, const std::string& customId, const std::vector<std::pair<std::string, std::string>>& values, const std::string& interactionId, const std::string& interactionToken);
-        bool getModalValue(const std::string& customId, std::string& value) const;
+        void dispatchButtonClick(const string &userId, const string &channelId, const string &customId, const string &interactionId, const string &interactionToken);
+        void dispatchSelectMenu(const string &userId, const string &channelId, const string &customId, const string &value, const string &interactionId, const string &interactionToken);
+        void dispatchModalSubmit(const string &userId, const string &channelId, const string &customId, const vector<pair<string, string>> &values, const string &interactionId, const string &interactionToken);
+        bool getModalValue(const string &customId, string &value) const;
 
-        std::size_t size() const;
+        size_t size() const;
 
     private:
-        std::vector<AMX*> scripts_;
-        const std::vector<std::pair<std::string, std::string>>* activeModalValues_{nullptr};
+        vector<AMX *> scripts_;
+        const vector<pair<string, string>> *activeModalValues_{nullptr};
     };
 }

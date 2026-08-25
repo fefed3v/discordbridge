@@ -12,7 +12,7 @@ namespace DiscordBridge
     {
         constexpr wchar_t GATEWAY_HOST[] = L"gateway.discord.gg";
         constexpr wchar_t GATEWAY_PATH[] = L"/?v=10&encoding=json";
-        constexpr wchar_t USER_AGENT[] = L"DiscordBridge/0.0.1";
+        constexpr wchar_t USER_AGENT[] = L"DiscordBridge/0.0.4";
 
         constexpr std::uint32_t GATEWAY_INTENTS = (1u << 0) | (1u << 1) | (1u << 9) | (1u << 15);
 

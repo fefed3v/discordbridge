@@ -9,6 +9,8 @@
 
 #include <memory>
 
+using namespace std;
+
 namespace DiscordBridge
 {
     using LogprintfFunction = void (*)(const char* format, ...);
@@ -16,7 +18,7 @@ namespace DiscordBridge
     namespace
     {
         LogprintfFunction logprintf = nullptr;
-        std::unique_ptr<BridgeCore> bridgeCore;
+        unique_ptr<BridgeCore> bridgeCore;
 
         void Log(const char* message)
         {
@@ -50,7 +52,7 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void** ppData)
         return false;
     }
 
-    DiscordBridge::bridgeCore = std::make_unique<DiscordBridge::BridgeCore>();
+    DiscordBridge::bridgeCore = make_unique<DiscordBridge::BridgeCore>();
 
     if (!DiscordBridge::bridgeCore->initialize())
     {

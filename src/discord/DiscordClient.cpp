@@ -8,6 +8,9 @@
 #include <cstdio>
 #include <utility>
 
+#include <chrono>
+#include <iostream>
+#include <thread>
 namespace DiscordBridge
 {
     namespace
@@ -294,7 +297,7 @@ namespace DiscordBridge
         const std::wstring headers =
             L"Authorization: Bot " + tokenWide +
             L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.1"
+            L"\r\nUser-Agent: DiscordBridge/0.0.4"
             L"\r\n";
 
         const HttpResponse response = httpClient_.get(
@@ -704,6 +707,89 @@ namespace DiscordBridge
         );
     }
 
+    bool DiscordClient::createChannel(const std::string& guildId, const std::string& name, int type)
+    {
+        if (!initialized_ || !restRunning_ || guildId.empty() || name.empty() || name.size() > 100 || type < 0) return false;
+        const std::string body = "{\"name\":\"" + EscapeJson(AnsiToUtf8(name)) + "\",\"type\":" + std::to_string(type) + "}";
+        return enqueueMessageOperation({MessageOperationType::CreateChannel, guildId, {}, body});
+    }
+
+    bool DiscordClient::deleteChannel(const std::string& channelId)
+    {
+        if (!initialized_ || !restRunning_ || channelId.empty()) return false;
+        return enqueueMessageOperation({MessageOperationType::DeleteChannel, {}, channelId, {}});
+    }
+
+    bool DiscordClient::createRole(const std::string& guildId, const std::string& name, int color, bool hoist, bool mentionable)
+    {
+        if (!initialized_ || !restRunning_ || guildId.empty() || name.empty() || name.size() > 100 || color < 0 || color > 0xFFFFFF) return false;
+        const std::string body = "{\"name\":\"" + EscapeJson(AnsiToUtf8(name)) + "\",\"color\":" + std::to_string(color) +
+            ",\"hoist\":" + (hoist ? "true" : "false") + ",\"mentionable\":" + (mentionable ? "true" : "false") + "}";
+        return enqueueMessageOperation({MessageOperationType::CreateRole, guildId, {}, body});
+    }
+
+    bool DiscordClient::deleteRole(const std::string& guildId, const std::string& roleId)
+    {
+        if (!initialized_ || !restRunning_ || guildId.empty() || roleId.empty()) return false;
+        return enqueueMessageOperation({MessageOperationType::DeleteRole, guildId, roleId, {}});
+    }
+
+    bool DiscordClient::addMemberRole(const std::string& guildId, const std::string& userId, const std::string& roleId)
+    {
+        if (!initialized_ || !restRunning_ || guildId.empty() || userId.empty() || roleId.empty()) return false;
+        return enqueueMessageOperation({MessageOperationType::AddMemberRole, guildId, userId, roleId});
+    }
+
+    bool DiscordClient::removeMemberRole(const std::string& guildId, const std::string& userId, const std::string& roleId)
+    {
+        if (!initialized_ || !restRunning_ || guildId.empty() || userId.empty() || roleId.empty()) return false;
+        return enqueueMessageOperation({MessageOperationType::RemoveMemberRole, guildId, userId, roleId});
+    }
+
+    bool DiscordClient::kickMember(const std::string& guildId, const std::string& userId)
+    {
+        if (!initialized_ || !restRunning_ || guildId.empty() || userId.empty()) return false;
+        return enqueueMessageOperation({MessageOperationType::KickMember, guildId, userId, {}});
+    }
+
+    bool DiscordClient::banMember(const std::string& guildId, const std::string& userId, int deleteMessageSeconds)
+    {
+        if (!initialized_ || !restRunning_ || guildId.empty() || userId.empty() || deleteMessageSeconds < 0 || deleteMessageSeconds > 604800) return false;
+        const std::string body = "{\"delete_message_seconds\":" + std::to_string(deleteMessageSeconds) + "}";
+        return enqueueMessageOperation({MessageOperationType::BanMember, guildId, userId, body});
+    }
+
+    bool DiscordClient::unbanMember(const std::string& guildId, const std::string& userId)
+    {
+        if (!initialized_ || !restRunning_ || guildId.empty() || userId.empty()) return false;
+        return enqueueMessageOperation({MessageOperationType::UnbanMember, guildId, userId, {}});
+    }
+
+    bool DiscordClient::consumeGuildOperationResultInternal(MessageOperationType type, bool& success, std::string& guildId, std::string& targetId)
+    {
+        std::lock_guard<std::mutex> lock(resultMutex_);
+        for (auto it = guildOperationResults_.begin(); it != guildOperationResults_.end(); ++it)
+        {
+            if (it->type != type) continue;
+            success = it->success;
+            guildId = std::move(it->guildId);
+            targetId = std::move(it->targetId);
+            guildOperationResults_.erase(it);
+            return true;
+        }
+        return false;
+    }
+
+    bool DiscordClient::consumeChannelCreatedEvent(bool& s, std::string& g, std::string& id) { return consumeGuildOperationResultInternal(MessageOperationType::CreateChannel, s, g, id); }
+    bool DiscordClient::consumeChannelDeletedEvent(bool& s, std::string& g, std::string& id) { return consumeGuildOperationResultInternal(MessageOperationType::DeleteChannel, s, g, id); }
+    bool DiscordClient::consumeRoleCreatedEvent(bool& s, std::string& g, std::string& id) { return consumeGuildOperationResultInternal(MessageOperationType::CreateRole, s, g, id); }
+    bool DiscordClient::consumeRoleDeletedEvent(bool& s, std::string& g, std::string& id) { return consumeGuildOperationResultInternal(MessageOperationType::DeleteRole, s, g, id); }
+    bool DiscordClient::consumeMemberRoleAddedEvent(bool& s, std::string& g, std::string& id) { return consumeGuildOperationResultInternal(MessageOperationType::AddMemberRole, s, g, id); }
+    bool DiscordClient::consumeMemberRoleRemovedEvent(bool& s, std::string& g, std::string& id) { return consumeGuildOperationResultInternal(MessageOperationType::RemoveMemberRole, s, g, id); }
+    bool DiscordClient::consumeMemberKickedEvent(bool& s, std::string& g, std::string& id) { return consumeGuildOperationResultInternal(MessageOperationType::KickMember, s, g, id); }
+    bool DiscordClient::consumeMemberBannedEvent(bool& s, std::string& g, std::string& id) { return consumeGuildOperationResultInternal(MessageOperationType::BanMember, s, g, id); }
+    bool DiscordClient::consumeMemberUnbannedEvent(bool& s, std::string& g, std::string& id) { return consumeGuildOperationResultInternal(MessageOperationType::UnbanMember, s, g, id); }
+
     bool DiscordClient::enqueueMessageOperation(MessageOperation operation, bool prioritize)
     {
         constexpr std::size_t MAX_PENDING_OPERATIONS = 1024;
@@ -751,7 +837,7 @@ namespace DiscordBridge
         const std::wstring tokenWide = Utf8ToWide(interactionToken);
         if (interactionWide.empty() || tokenWide.empty()) return false;
 
-        const std::wstring headers = L"Content-Type: application/json\r\nAccept: application/json\r\nUser-Agent: DiscordBridge/0.0.2\r\n";
+        const std::wstring headers = L"Content-Type: application/json\r\nAccept: application/json\r\nUser-Agent: DiscordBridge/0.0.4\r\n";
         const std::wstring path = L"/api/v10/interactions/" + interactionWide + L"/" + tokenWide + L"/callback";
         const HttpResponse response = interactionHttpClient_.post(L"discord.com", path, headers, body);
         if (!response.success)
@@ -845,6 +931,85 @@ namespace DiscordBridge
                     );
                     break;
 
+                case MessageOperationType::CreateChannel:
+                case MessageOperationType::DeleteChannel:
+                case MessageOperationType::CreateRole:
+                case MessageOperationType::DeleteRole:
+                case MessageOperationType::AddMemberRole:
+                case MessageOperationType::RemoveMemberRole:
+                case MessageOperationType::KickMember:
+                case MessageOperationType::BanMember:
+                case MessageOperationType::UnbanMember:
+                {
+                    const std::wstring tokenWide = Utf8ToWide(token_);
+                    const std::wstring guildWide = Utf8ToWide(operation.channelId);
+                    const std::wstring targetWide = Utf8ToWide(operation.messageId);
+                    const std::wstring extraWide = Utf8ToWide(operation.content);
+                    const std::wstring headers = L"Authorization: Bot " + tokenWide + L"\r\nAccept: application/json\r\nUser-Agent: DiscordBridge/0.0.4\r\n";
+                    const std::wstring jsonHeaders = headers + L"Content-Type: application/json\r\n";
+                    HttpResponse response;
+                    std::string resultId = operation.messageId;
+
+                    if (operation.type == MessageOperationType::CreateChannel)
+                    {
+                        response = httpClient_.post(L"discord.com", L"/api/v10/guilds/" + guildWide + L"/channels", jsonHeaders, operation.content);
+                        if (response.success) FindRootString(response.body, "id", resultId);
+                    }
+                    else if (operation.type == MessageOperationType::DeleteChannel)
+                    {
+                        response = httpClient_.del(L"discord.com", L"/api/v10/channels/" + targetWide, headers);
+                    }
+                    else if (operation.type == MessageOperationType::CreateRole)
+                    {
+                        response = httpClient_.post(L"discord.com", L"/api/v10/guilds/" + guildWide + L"/roles", jsonHeaders, operation.content);
+                        if (response.success) FindRootString(response.body, "id", resultId);
+                    }
+                    else if (operation.type == MessageOperationType::DeleteRole)
+                        response = httpClient_.del(L"discord.com", L"/api/v10/guilds/" + guildWide + L"/roles/" + targetWide, headers);
+                    else if (operation.type == MessageOperationType::AddMemberRole)
+                        response = httpClient_.put(L"discord.com", L"/api/v10/guilds/" + guildWide + L"/members/" + targetWide + L"/roles/" + extraWide, headers);
+                    else if (operation.type == MessageOperationType::RemoveMemberRole)
+                        response = httpClient_.del(L"discord.com", L"/api/v10/guilds/" + guildWide + L"/members/" + targetWide + L"/roles/" + extraWide, headers);
+                    else if (operation.type == MessageOperationType::KickMember)
+                        response = httpClient_.del(L"discord.com", L"/api/v10/guilds/" + guildWide + L"/members/" + targetWide, headers);
+                    else if (operation.type == MessageOperationType::BanMember)
+                        response = httpClient_.put(L"discord.com", L"/api/v10/guilds/" + guildWide + L"/bans/" + targetWide, jsonHeaders, operation.content);
+                    else if (operation.type == MessageOperationType::UnbanMember)
+                    {
+                        const std::wstring path = L"/api/v10/guilds/" + guildWide + L"/bans/" + targetWide;
+                        response = httpClient_.del(L"discord.com", path, headers);
+
+                        // A API pode retornar 404 por um curto periodo logo apos um ban
+                        // recem-criado. Fazemos poucas tentativas curtas apenas nesse caso.
+                        for (int attempt = 0; !response.success && response.statusCode == 404 && attempt < 2; ++attempt)
+                        {
+                            std::this_thread::sleep_for(std::chrono::milliseconds(250 * (attempt + 1)));
+                            response = httpClient_.del(L"discord.com", path, headers);
+                        }
+                    }
+
+                    success = response.success;
+
+                    if (!success)
+                    {
+                        std::cout << "[DiscordBridge]: Guild REST falhou | Operacao: "
+                                  << static_cast<int>(operation.type)
+                                  << " | Status: " << response.statusCode
+                                  << " | Guild: " << operation.channelId
+                                  << " | Alvo: " << operation.messageId;
+
+                        if (!response.body.empty())
+                            std::cout << " | Body: " << response.body;
+
+                        std::cout << std::endl;
+                    }
+                    {
+                        std::lock_guard<std::mutex> lock(resultMutex_);
+                        guildOperationResults_.push_back({operation.type, success, operation.channelId, std::move(resultId)});
+                    }
+                    continue;
+                }
+
                 case MessageOperationType::AcknowledgeInteraction:
                     sendInteractionCallback(operation.channelId, operation.messageId, "{\"type\":6}");
                     continue;
@@ -880,7 +1045,7 @@ namespace DiscordBridge
             L"Authorization: Bot " + tokenWide +
             L"\r\nContent-Type: application/json"
             L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.1"
+            L"\r\nUser-Agent: DiscordBridge/0.0.4"
             L"\r\n";
 
         const std::string body =
@@ -921,7 +1086,7 @@ namespace DiscordBridge
             L"Authorization: Bot " + tokenWide +
             L"\r\nContent-Type: application/json"
             L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.1"
+            L"\r\nUser-Agent: DiscordBridge/0.0.4"
             L"\r\n";
 
         const std::string body =
@@ -956,7 +1121,7 @@ namespace DiscordBridge
         const std::wstring headers =
             L"Authorization: Bot " + tokenWide +
             L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.1"
+            L"\r\nUser-Agent: DiscordBridge/0.0.4"
             L"\r\n";
 
         const std::wstring path =
@@ -987,7 +1152,7 @@ namespace DiscordBridge
             L"Authorization: Bot " + tokenWide +
             L"\r\nContent-Type: application/json"
             L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.1"
+            L"\r\nUser-Agent: DiscordBridge/0.0.4"
             L"\r\n";
 
         const std::string body =
@@ -1029,7 +1194,7 @@ namespace DiscordBridge
             L"Authorization: Bot " + tokenWide +
             L"\r\nContent-Type: application/json"
             L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.1"
+            L"\r\nUser-Agent: DiscordBridge/0.0.4"
             L"\r\n";
 
         const std::string body = "{\"components\":[" + componentsJson + "]}";

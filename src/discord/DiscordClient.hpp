@@ -25,7 +25,16 @@ namespace DiscordBridge
             Delete,
             SendEmbed,
             SendComponents,
-            AcknowledgeInteraction
+            AcknowledgeInteraction,
+            CreateChannel,
+            DeleteChannel,
+            CreateRole,
+            DeleteRole,
+            AddMemberRole,
+            RemoveMemberRole,
+            KickMember,
+            BanMember,
+            UnbanMember
         };
 
         struct MessageOperation
@@ -42,6 +51,14 @@ namespace DiscordBridge
             bool success;
             std::string channelId;
             std::string messageId;
+        };
+
+        struct GuildOperationResult
+        {
+            MessageOperationType type;
+            bool success;
+            std::string guildId;
+            std::string targetId;
         };
 
         struct InteractionOperation
@@ -96,6 +113,25 @@ namespace DiscordBridge
         bool sendEmbed(const std::string& channelId, const std::string& embedJson);
         bool sendComponents(const std::string& channelId, const std::string& componentsJson);
 
+        bool createChannel(const std::string& guildId, const std::string& name, int type = 0);
+        bool deleteChannel(const std::string& channelId);
+        bool createRole(const std::string& guildId, const std::string& name, int color = 0, bool hoist = false, bool mentionable = false);
+        bool deleteRole(const std::string& guildId, const std::string& roleId);
+        bool addMemberRole(const std::string& guildId, const std::string& userId, const std::string& roleId);
+        bool removeMemberRole(const std::string& guildId, const std::string& userId, const std::string& roleId);
+        bool kickMember(const std::string& guildId, const std::string& userId);
+        bool banMember(const std::string& guildId, const std::string& userId, int deleteMessageSeconds = 0);
+        bool unbanMember(const std::string& guildId, const std::string& userId);
+        bool consumeChannelCreatedEvent(bool& success, std::string& guildId, std::string& channelId);
+        bool consumeChannelDeletedEvent(bool& success, std::string& guildId, std::string& channelId);
+        bool consumeRoleCreatedEvent(bool& success, std::string& guildId, std::string& roleId);
+        bool consumeRoleDeletedEvent(bool& success, std::string& guildId, std::string& roleId);
+        bool consumeMemberRoleAddedEvent(bool& success, std::string& guildId, std::string& userId);
+        bool consumeMemberRoleRemovedEvent(bool& success, std::string& guildId, std::string& userId);
+        bool consumeMemberKickedEvent(bool& success, std::string& guildId, std::string& userId);
+        bool consumeMemberBannedEvent(bool& success, std::string& guildId, std::string& userId);
+        bool consumeMemberUnbannedEvent(bool& success, std::string& guildId, std::string& userId);
+
         const std::string& getToken() const;
         const GatewayInfo& getGatewayInfo() const;
 
@@ -107,6 +143,7 @@ namespace DiscordBridge
         bool enqueueMessageOperation(MessageOperation operation, bool prioritize = false);
 
         bool consumeMessageOperationResult(MessageOperationType type, bool& success, std::string& channelId, std::string& messageId);
+        bool consumeGuildOperationResultInternal(MessageOperationType type, bool& success, std::string& guildId, std::string& targetId);
 
         bool sendMessageRequest(const std::string& channelId, const std::string& message, std::string& messageId);
         bool editMessageRequest(const std::string& channelId, const std::string& messageId, const std::string& content);
@@ -132,6 +169,7 @@ namespace DiscordBridge
 
         std::deque<MessageOperation> messageOperations_;
         std::deque<MessageOperationResult> messageOperationResults_;
+        std::deque<GuildOperationResult> guildOperationResults_;
         std::deque<InteractionOperation> interactionOperations_;
         std::unordered_set<std::string> interactionResponses_;
 

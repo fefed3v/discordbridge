@@ -21,22 +21,22 @@ namespace DiscordBridge
 
         bool isInitialized() const;
 
-        PawnRuntime& getPawnRuntime();
-        const PawnRuntime& getPawnRuntime() const;
+        PawnRuntime &getPawnRuntime();
+        const PawnRuntime &getPawnRuntime() const;
 
-        DiscordClient& getDiscordClient();
-        const DiscordClient& getDiscordClient() const;
+        DiscordClient &getDiscordClient();
+        const DiscordClient &getDiscordClient() const;
 
-        EmbedManager& getEmbedManager();
-        const EmbedManager& getEmbedManager() const;
+        EmbedManager &getEmbedManager();
+        const EmbedManager &getEmbedManager() const;
 
-        ButtonManager& getButtonManager();
-        const ButtonManager& getButtonManager() const;
+        ButtonManager &getButtonManager();
+        const ButtonManager &getButtonManager() const;
 
-        ActionRowManager& getActionRowManager();
-        const ActionRowManager& getActionRowManager() const;
-        SelectMenuManager& getSelectMenuManager();
-        ModalManager& getModalManager();
+        ActionRowManager &getActionRowManager();
+        const ActionRowManager &getActionRowManager() const;
+        SelectMenuManager &getSelectMenuManager();
+        ModalManager &getModalManager();
 
     private:
         bool initialized_{false};
