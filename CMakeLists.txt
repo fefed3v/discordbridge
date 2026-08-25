@@ -54,9 +54,9 @@ set(DISCORD_BRIDGE_SOURCES
 # =========================================================
 
 if(WIN32)
-    if(NOT MSVC)
-        message(FATAL_ERROR "No Windows, use MSVC ou ClangCL.")
-    endif()
+    # if(NOT MSVC)
+    #     message(FATAL_ERROR "No Windows, use MSVC ou ClangCL.")
+    # endif()
 
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         message(FATAL_ERROR "SA-MP Windows requer Win32/x86. Configure com -A Win32.")
