@@ -3,6 +3,8 @@
 #include "../discord/Button.hpp"
 #include "../discord/DiscordClient.hpp"
 #include "../discord/Embed.hpp"
+#include "../discord/SelectMenu.hpp"
+#include "../discord/Modal.hpp"
 #include "../pawn/PawnRuntime.hpp"
 
 namespace DiscordBridge
@@ -33,6 +35,8 @@ namespace DiscordBridge
 
         ActionRowManager& getActionRowManager();
         const ActionRowManager& getActionRowManager() const;
+        SelectMenuManager& getSelectMenuManager();
+        ModalManager& getModalManager();
 
     private:
         bool initialized_{false};
@@ -42,5 +46,7 @@ namespace DiscordBridge
         EmbedManager embedManager_;
         ButtonManager buttonManager_;
         ActionRowManager actionRowManager_;
+        SelectMenuManager selectMenuManager_;
+        ModalManager modalManager_;
     };
 }

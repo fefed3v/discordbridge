@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <string>
 #include <vector>
+#include <utility>
 
 namespace DiscordBridge
 {
@@ -27,11 +28,15 @@ namespace DiscordBridge
         void dispatchEmbedSent(bool success, const std::string& channelId, const std::string& messageId);
         void dispatchComponentsSent(bool success, const std::string& channelId, const std::string& messageId);
 
-        void dispatchButtonClick(const std::string& userId, const std::string& channelId, const std::string& customId);
+        void dispatchButtonClick(const std::string& userId, const std::string& channelId, const std::string& customId, const std::string& interactionId, const std::string& interactionToken);
+        void dispatchSelectMenu(const std::string& userId, const std::string& channelId, const std::string& customId, const std::string& value, const std::string& interactionId, const std::string& interactionToken);
+        void dispatchModalSubmit(const std::string& userId, const std::string& channelId, const std::string& customId, const std::vector<std::pair<std::string, std::string>>& values, const std::string& interactionId, const std::string& interactionToken);
+        bool getModalValue(const std::string& customId, std::string& value) const;
 
         std::size_t size() const;
 
     private:
         std::vector<AMX*> scripts_;
+        const std::vector<std::pair<std::string, std::string>>* activeModalValues_{nullptr};
     };
 }

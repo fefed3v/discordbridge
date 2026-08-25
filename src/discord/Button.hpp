@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "SelectMenu.hpp"
 
 namespace DiscordBridge
 {
@@ -76,6 +77,8 @@ namespace DiscordBridge
     {
     public:
         bool addButton(ButtonHandle handle);
+        bool setSelectMenu(SelectMenuHandle handle);
+        void clearSelectMenu();
         bool removeButton(ButtonHandle handle);
         bool hasButton(ButtonHandle handle) const;
 
@@ -86,10 +89,11 @@ namespace DiscordBridge
 
         const std::vector<ButtonHandle>& getButtons() const;
 
-        std::string toJson(const ButtonManager& buttonManager) const;
+        std::string toJson(const ButtonManager& buttonManager, const SelectMenuManager* selectManager = nullptr) const;
 
     private:
         std::vector<ButtonHandle> buttons_;
+        SelectMenuHandle selectMenu_{0};
     };
 
     class ActionRowManager

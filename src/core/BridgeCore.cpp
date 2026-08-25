@@ -1,5 +1,8 @@
 #include "BridgeCore.hpp"
 
+#include <utility>
+#include <vector>
+
 namespace DiscordBridge
 {
     BridgeCore::~BridgeCore()
@@ -21,6 +24,8 @@ namespace DiscordBridge
 
         discordClient_.shutdown();
 
+        modalManager_.clear();
+        selectMenuManager_.clear();
         actionRowManager_.clear();
         buttonManager_.clear();
         embedManager_.clear();
@@ -52,7 +57,17 @@ namespace DiscordBridge
         std::string interactionToken;
         std::string customId;
 
-        while (discordClient_.consumeButtonClickEvent(interactionId, interactionToken, userId, channelId, customId)) pawnRuntime_.dispatchButtonClick(userId, channelId, customId);
+        while (discordClient_.consumeButtonClickEvent(interactionId, interactionToken, userId, channelId, customId)) { pawnRuntime_.dispatchButtonClick(userId, channelId, customId, interactionId, interactionToken); discordClient_.acknowledgeInteractionAsync(interactionId, interactionToken); }
+
+        std::string value;
+        while (discordClient_.consumeSelectMenuEvent(interactionId, interactionToken, userId, channelId, customId, value)) { pawnRuntime_.dispatchSelectMenu(userId, channelId, customId, value, interactionId, interactionToken); discordClient_.acknowledgeInteractionAsync(interactionId, interactionToken); }
+
+        std::vector<std::pair<std::string, std::string>> modalValues;
+        while (discordClient_.consumeModalEvent(interactionId, interactionToken, userId, channelId, customId, modalValues))
+        {
+            pawnRuntime_.dispatchModalSubmit(userId, channelId, customId, modalValues, interactionId, interactionToken);
+            discordClient_.deferInteractionAsync(interactionId, interactionToken, true);
+        }
 
         bool success = false;
         std::string messageId;
@@ -118,4 +133,7 @@ namespace DiscordBridge
     {
         return actionRowManager_;
     }
+    SelectMenuManager& BridgeCore::getSelectMenuManager() { return selectMenuManager_; }
+    ModalManager& BridgeCore::getModalManager() { return modalManager_; }
+
 }

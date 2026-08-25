@@ -195,11 +195,19 @@ namespace DiscordBridge
 
     bool ActionRow::addButton(ButtonHandle handle)
     {
-        if (handle == 0 || buttons_.size() >= 5 || hasButton(handle)) return false;
+        if (handle == 0 || selectMenu_ != 0 || buttons_.size() >= 5 || hasButton(handle)) return false;
 
         buttons_.push_back(handle);
         return true;
     }
+
+    bool ActionRow::setSelectMenu(SelectMenuHandle handle)
+    {
+        if (handle == 0 || !buttons_.empty()) return false;
+        selectMenu_ = handle; return true;
+    }
+
+    void ActionRow::clearSelectMenu() { selectMenu_ = 0; }
 
     bool ActionRow::removeButton(ButtonHandle handle)
     {
@@ -219,11 +227,12 @@ namespace DiscordBridge
     void ActionRow::clear()
     {
         buttons_.clear();
+        selectMenu_ = 0;
     }
 
     bool ActionRow::empty() const
     {
-        return buttons_.empty();
+        return buttons_.empty() && selectMenu_ == 0;
     }
 
     std::size_t ActionRow::size() const
@@ -236,8 +245,14 @@ namespace DiscordBridge
         return buttons_;
     }
 
-    std::string ActionRow::toJson(const ButtonManager& buttonManager) const
+    std::string ActionRow::toJson(const ButtonManager& buttonManager, const SelectMenuManager* selectManager) const
     {
+        if (selectMenu_ != 0) {
+            if (!selectManager) return {};
+            const SelectMenu* menu = selectManager->get(selectMenu_);
+            if (!menu || !menu->isValid()) return {};
+            return "{\"type\":1,\"components\":[" + menu->toJson() + "]}";
+        }
         if (buttons_.empty()) return {};
 
         std::string json = "{\"type\":1,\"components\":[";

@@ -9,6 +9,9 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 namespace DiscordBridge
 {
@@ -21,7 +24,8 @@ namespace DiscordBridge
             Edit,
             Delete,
             SendEmbed,
-            SendComponents
+            SendComponents,
+            AcknowledgeInteraction
         };
 
         struct MessageOperation
@@ -38,6 +42,13 @@ namespace DiscordBridge
             bool success;
             std::string channelId;
             std::string messageId;
+        };
+
+        struct InteractionOperation
+        {
+            std::string interactionId;
+            std::string interactionToken;
+            std::string body;
         };
 
     public:
@@ -61,6 +72,12 @@ namespace DiscordBridge
         bool consumeGuildMemberAddEvent(std::string& guildId, std::string& userId);
         bool consumeGuildMemberRemoveEvent(std::string& guildId, std::string& userId);
         bool consumeButtonClickEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId);
+        bool consumeSelectMenuEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId, std::string& value);
+        bool consumeModalEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId, std::vector<std::pair<std::string, std::string>>& values);
+        bool acknowledgeInteractionAsync(const std::string& interactionId, const std::string& interactionToken);
+        bool deferInteractionAsync(const std::string& interactionId, const std::string& interactionToken, bool ephemeral = true);
+        bool respondInteraction(const std::string& interactionId, const std::string& interactionToken, const std::string& content, bool ephemeral = true);
+        bool showModal(const std::string& interactionId, const std::string& interactionToken, const std::string& modalJson);
 
         bool consumeMessageSentEvent(bool& success, std::string& channelId, std::string& messageId);
         bool consumeMessageEditedEvent(bool& success, std::string& channelId, std::string& messageId);
@@ -84,6 +101,10 @@ namespace DiscordBridge
 
     private:
         void restLoop();
+        void interactionLoop();
+        bool enqueueInteractionOperation(InteractionOperation operation, bool prioritize = false);
+        bool sendInteractionCallback(const std::string& interactionId, const std::string& interactionToken, const std::string& body);
+        bool enqueueMessageOperation(MessageOperation operation, bool prioritize = false);
 
         bool consumeMessageOperationResult(MessageOperationType type, bool& success, std::string& channelId, std::string& messageId);
 
@@ -95,21 +116,29 @@ namespace DiscordBridge
         bool acknowledgeInteraction(const std::string& interactionId, const std::string& interactionToken);
 
         HttpClient httpClient_;
+        HttpClient interactionHttpClient_{true};
         Gateway gateway_;
         GatewayInfo gatewayInfo_;
 
         std::thread restThread_;
+        std::thread interactionThread_;
 
         std::mutex outgoingMutex_;
         std::mutex resultMutex_;
+        std::mutex interactionMutex_;
+        std::mutex interactionResponseMutex_;
         std::condition_variable outgoingCondition_;
+        std::condition_variable interactionCondition_;
 
         std::deque<MessageOperation> messageOperations_;
         std::deque<MessageOperationResult> messageOperationResults_;
+        std::deque<InteractionOperation> interactionOperations_;
+        std::unordered_set<std::string> interactionResponses_;
 
         std::atomic_bool initialized_{false};
         std::atomic_bool connected_{false};
         std::atomic_bool restRunning_{false};
+        std::atomic_bool interactionRunning_{false};
 
         std::string token_;
     };

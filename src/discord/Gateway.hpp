@@ -1,7 +1,9 @@
 #pragma once
 
+#ifdef _WIN32
 #include <windows.h>
 #include <winhttp.h>
+#endif
 
 #include <atomic>
 #include <condition_variable>
@@ -10,6 +12,8 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include <utility>
+#include <vector>
 
 namespace DiscordBridge
 {
@@ -43,19 +47,25 @@ namespace DiscordBridge
             std::string userId;
         };
 
-        struct ButtonClickEvent
+        struct ComponentEvent
         {
             std::string interactionId;
             std::string interactionToken;
             std::string userId;
             std::string channelId;
             std::string customId;
+            std::string value;
+            std::vector<std::pair<std::string, std::string>> modalValues;
         };
 
+#ifdef _WIN32
         HINTERNET session_{nullptr};
         HINTERNET connection_{nullptr};
         HINTERNET request_{nullptr};
         HINTERNET webSocket_{nullptr};
+#else
+        void* webSocket_{nullptr};
+#endif
 
         std::thread receiveThread_;
         std::thread heartbeatThread_;
@@ -63,11 +73,15 @@ namespace DiscordBridge
         std::mutex heartbeatMutex_;
         std::condition_variable heartbeatCondition_;
 
+        std::mutex sendMutex_;
+        std::mutex presenceMutex_;
         std::mutex eventMutex_;
         std::deque<MessageCreateEvent> messageEvents_;
         std::deque<GuildMemberEvent> guildMemberAddEvents_;
         std::deque<GuildMemberEvent> guildMemberRemoveEvents_;
-        std::deque<ButtonClickEvent> buttonClickEvents_;
+        std::deque<ComponentEvent> buttonClickEvents_;
+        std::deque<ComponentEvent> selectMenuEvents_;
+        std::deque<ComponentEvent> modalEvents_;
 
         std::atomic_bool initialized_{false};
         std::atomic_bool connected_{false};
@@ -109,6 +123,8 @@ namespace DiscordBridge
         bool consumeGuildMemberAddEvent(std::string& guildId, std::string& userId);
         bool consumeGuildMemberRemoveEvent(std::string& guildId, std::string& userId);
         bool consumeButtonClickEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId);
+        bool consumeSelectMenuEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId, std::string& value);
+        bool consumeModalEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId, std::vector<std::pair<std::string, std::string>>& values);
 
         bool setStatus(int status);
         bool setActivity(int type, const std::string& name, const std::string& state = "", const std::string& url = "");

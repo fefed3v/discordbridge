@@ -3,7 +3,9 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#ifdef _WIN32
 #include <windows.h>
+#endif
 
 namespace DiscordBridge
 {
@@ -11,23 +13,20 @@ namespace DiscordBridge
     {
         std::string Utf8ToAnsi(const std::string& value)
         {
+#ifdef _WIN32
             if (value.empty()) return {};
-
             const int wideSize = MultiByteToWideChar(CP_UTF8, 0, value.data(), static_cast<int>(value.size()), nullptr, 0);
             if (wideSize <= 0) return value;
-
             std::wstring wide(static_cast<std::size_t>(wideSize), L'\0');
-
             if (MultiByteToWideChar(CP_UTF8, 0, value.data(), static_cast<int>(value.size()), wide.data(), wideSize) <= 0) return value;
-
             const int ansiSize = WideCharToMultiByte(CP_ACP, 0, wide.data(), wideSize, nullptr, 0, nullptr, nullptr);
             if (ansiSize <= 0) return value;
-
             std::string result(static_cast<std::size_t>(ansiSize), '\0');
-
             if (WideCharToMultiByte(CP_ACP, 0, wide.data(), wideSize, result.data(), ansiSize, nullptr, nullptr) <= 0) return value;
-
             return result;
+#else
+            return value;
+#endif
         }
 
         bool PushPawnString(AMX* amx, const std::string& value, cell& address)
@@ -116,6 +115,40 @@ namespace DiscordBridge
                 amx_Release(amx, thirdAddress);
                 amx_Release(amx, secondAddress);
                 amx_Release(amx, firstAddress);
+            }
+        }
+
+        void DispatchStrings(const std::vector<AMX*>& scripts, const char* callback, const std::vector<std::string>& values)
+        {
+            for (AMX* amx : scripts)
+            {
+                int index = -1;
+                if (!FindPublic(amx, callback, index)) continue;
+
+                std::vector<cell> addresses;
+                addresses.reserve(values.size());
+                bool ok = true;
+
+                for (const auto& value : values)
+                {
+                    cell address = 0;
+                    if (!PushPawnString(amx, value, address))
+                    {
+                        ok = false;
+                        break;
+                    }
+                    addresses.push_back(address);
+                }
+
+                if (ok)
+                {
+                    for (auto it = addresses.rbegin(); it != addresses.rend(); ++it) amx_Push(amx, *it);
+                    cell returnValue = 0;
+                    amx_Exec(amx, &returnValue, index);
+                }
+
+                // AMX heap allocations are stack-like. They MUST be released in reverse order.
+                for (auto it = addresses.rbegin(); it != addresses.rend(); ++it) amx_Release(amx, *it);
             }
         }
 
@@ -229,9 +262,29 @@ namespace DiscordBridge
         DispatchResult(scripts_, "DBridge_OnComponentsSent", success, channelId, messageId);
     }
 
-    void PawnRuntime::dispatchButtonClick(const std::string& userId, const std::string& channelId, const std::string& customId)
+    void PawnRuntime::dispatchButtonClick(const std::string& userId,const std::string& channelId,const std::string& customId,const std::string& interactionId,const std::string& interactionToken)
+    { DispatchThreeStrings(scripts_,"DBridge_OnButtonClick",userId,channelId,customId); DispatchStrings(scripts_,"DBridge_OnButtonInteraction",{userId,channelId,customId,interactionId,interactionToken}); }
+
+    void PawnRuntime::dispatchSelectMenu(const std::string& userId,const std::string& channelId,const std::string& customId,const std::string& value,const std::string& interactionId,const std::string& interactionToken)
+    { DispatchStrings(scripts_,"DBridge_OnSelectMenu",{userId,channelId,customId,value,interactionId,interactionToken}); }
+
+    void PawnRuntime::dispatchModalSubmit(const std::string& userId, const std::string& channelId, const std::string& customId, const std::vector<std::pair<std::string, std::string>>& values, const std::string& interactionId, const std::string& interactionToken)
     {
-        DispatchThreeStrings(scripts_, "DBridge_OnButtonClick", userId, channelId, customId);
+        activeModalValues_ = &values;
+        DispatchStrings(scripts_, "DBridge_OnModalSubmit", {userId, channelId, customId, interactionId, interactionToken});
+        activeModalValues_ = nullptr;
+    }
+
+    bool PawnRuntime::getModalValue(const std::string& customId, std::string& value) const
+    {
+        if (!activeModalValues_ || customId.empty()) return false;
+        for (const auto& entry : *activeModalValues_)
+        {
+            if (entry.first != customId) continue;
+            value = entry.second;
+            return true;
+        }
+        return false;
     }
 
     std::size_t PawnRuntime::size() const

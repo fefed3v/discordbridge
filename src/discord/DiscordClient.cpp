@@ -1,8 +1,11 @@
 #include "DiscordClient.hpp"
 
+#ifdef _WIN32
 #include <windows.h>
+#endif
 
 #include <cctype>
+#include <cstdio>
 #include <utility>
 
 namespace DiscordBridge
@@ -11,95 +14,34 @@ namespace DiscordBridge
     {
         std::wstring Utf8ToWide(const std::string& value)
         {
+#ifdef _WIN32
             if (value.empty()) return {};
-
-            const int size = MultiByteToWideChar(
-                CP_UTF8,
-                0,
-                value.data(),
-                static_cast<int>(value.size()),
-                nullptr,
-                0
-            );
-
+            const int size = MultiByteToWideChar(CP_UTF8, 0, value.data(), static_cast<int>(value.size()), nullptr, 0);
             if (size <= 0) return {};
-
             std::wstring result(static_cast<std::size_t>(size), L'\0');
-
-            if (MultiByteToWideChar(
-                CP_UTF8,
-                0,
-                value.data(),
-                static_cast<int>(value.size()),
-                result.data(),
-                size
-            ) <= 0)
-            {
-                return {};
-            }
-
+            if (MultiByteToWideChar(CP_UTF8, 0, value.data(), static_cast<int>(value.size()), result.data(), size) <= 0) return {};
             return result;
+#else
+            return std::wstring(value.begin(), value.end());
+#endif
         }
 
         std::string AnsiToUtf8(const std::string& value)
         {
+#ifdef _WIN32
             if (value.empty()) return {};
-
-            const int wideSize = MultiByteToWideChar(
-                CP_ACP,
-                0,
-                value.data(),
-                static_cast<int>(value.size()),
-                nullptr,
-                0
-            );
-
+            const int wideSize = MultiByteToWideChar(CP_ACP, 0, value.data(), static_cast<int>(value.size()), nullptr, 0);
             if (wideSize <= 0) return value;
-
             std::wstring wide(static_cast<std::size_t>(wideSize), L'\0');
-
-            if (MultiByteToWideChar(
-                CP_ACP,
-                0,
-                value.data(),
-                static_cast<int>(value.size()),
-                wide.data(),
-                wideSize
-            ) <= 0)
-            {
-                return value;
-            }
-
-            const int utf8Size = WideCharToMultiByte(
-                CP_UTF8,
-                0,
-                wide.data(),
-                wideSize,
-                nullptr,
-                0,
-                nullptr,
-                nullptr
-            );
-
+            if (MultiByteToWideChar(CP_ACP, 0, value.data(), static_cast<int>(value.size()), wide.data(), wideSize) <= 0) return value;
+            const int utf8Size = WideCharToMultiByte(CP_UTF8, 0, wide.data(), wideSize, nullptr, 0, nullptr, nullptr);
             if (utf8Size <= 0) return value;
-
             std::string result(static_cast<std::size_t>(utf8Size), '\0');
-
-            if (WideCharToMultiByte(
-                CP_UTF8,
-                0,
-                wide.data(),
-                wideSize,
-                result.data(),
-                utf8Size,
-                nullptr,
-                nullptr
-            ) <= 0)
-            {
-                return value;
-            }
-
+            if (WideCharToMultiByte(CP_UTF8, 0, wide.data(), wideSize, result.data(), utf8Size, nullptr, nullptr) <= 0) return value;
             return result;
+#else
+            return value;
+#endif
         }
 
         std::string EscapeJson(const std::string& value)
@@ -377,6 +319,13 @@ namespace DiscordBridge
 
         gatewayInfo_ = std::move(gatewayInfo);
 
+        if (!interactionHttpClient_.open())
+        {
+            gatewayInfo_ = GatewayInfo{};
+            token_.clear();
+            return false;
+        }
+
         if (!gateway_.connect(gatewayInfo_, token_))
         {
             gatewayInfo_ = GatewayInfo{};
@@ -386,14 +335,22 @@ namespace DiscordBridge
         }
 
         restRunning_ = true;
+        interactionRunning_ = true;
 
         try
         {
             restThread_ = std::thread(&DiscordClient::restLoop, this);
+            interactionThread_ = std::thread(&DiscordClient::interactionLoop, this);
         }
         catch (...)
         {
             restRunning_ = false;
+            interactionRunning_ = false;
+            outgoingCondition_.notify_all();
+            interactionCondition_.notify_all();
+
+            if (restThread_.joinable()) restThread_.join();
+            if (interactionThread_.joinable()) interactionThread_.join();
 
             gateway_.disconnect();
 
@@ -415,9 +372,12 @@ namespace DiscordBridge
         connected_ = false;
 
         restRunning_ = false;
+        interactionRunning_ = false;
         outgoingCondition_.notify_all();
+        interactionCondition_.notify_all();
 
         if (restThread_.joinable() && restThread_.get_id() != std::this_thread::get_id()) restThread_.join();
+        if (interactionThread_.joinable() && interactionThread_.get_id() != std::this_thread::get_id()) interactionThread_.join();
 
         {
             std::lock_guard<std::mutex> lock(outgoingMutex_);
@@ -427,6 +387,16 @@ namespace DiscordBridge
         {
             std::lock_guard<std::mutex> lock(resultMutex_);
             messageOperationResults_.clear();
+        }
+
+        {
+            std::lock_guard<std::mutex> lock(interactionMutex_);
+            interactionOperations_.clear();
+        }
+
+        {
+            std::lock_guard<std::mutex> lock(interactionResponseMutex_);
+            interactionResponses_.clear();
         }
 
         gateway_.disconnect();
@@ -473,14 +443,91 @@ namespace DiscordBridge
     }
 
     bool DiscordClient::consumeButtonClickEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId)
+    { return gateway_.consumeButtonClickEvent(interactionId, interactionToken, userId, channelId, customId); }
+
+    bool DiscordClient::consumeSelectMenuEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId, std::string& value)
+    { return gateway_.consumeSelectMenuEvent(interactionId, interactionToken, userId, channelId, customId, value); }
+
+    bool DiscordClient::consumeModalEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId, std::vector<std::pair<std::string, std::string>>& values)
+    { return gateway_.consumeModalEvent(interactionId, interactionToken, userId, channelId, customId, values); }
+
+    bool DiscordClient::acknowledgeInteractionAsync(const std::string& id, const std::string& token)
     {
-        return gateway_.consumeButtonClickEvent(
-            interactionId,
-            interactionToken,
-            userId,
-            channelId,
-            customId
-        );
+        if (!initialized_ || id.empty() || token.empty()) return false;
+
+        {
+            std::lock_guard<std::mutex> lock(interactionResponseMutex_);
+            const auto it = interactionResponses_.find(id);
+            if (it != interactionResponses_.end())
+            {
+                interactionResponses_.erase(it);
+                return true;
+            }
+        }
+
+        return enqueueInteractionOperation({id, token, "{\"type\":6}"});
+    }
+
+    bool DiscordClient::deferInteractionAsync(const std::string& id, const std::string& token, bool ephemeral)
+    {
+        if (!initialized_ || id.empty() || token.empty()) return false;
+
+        {
+            std::lock_guard<std::mutex> lock(interactionResponseMutex_);
+            const auto it = interactionResponses_.find(id);
+            if (it != interactionResponses_.end())
+            {
+                interactionResponses_.erase(it);
+                return true;
+            }
+        }
+
+        std::string body = "{\"type\":5,\"data\":{";
+        if (ephemeral) body += "\"flags\":64";
+        body += "}}";
+        return enqueueInteractionOperation({id, token, std::move(body)});
+    }
+
+    bool DiscordClient::respondInteraction(const std::string& id, const std::string& token, const std::string& content, bool ephemeral)
+    {
+        if (!initialized_ || id.empty() || token.empty() || content.empty() || content.size() > 2000) return false;
+
+        {
+            std::lock_guard<std::mutex> lock(interactionResponseMutex_);
+            interactionResponses_.insert(id);
+        }
+
+        std::string body = "{\"type\":4,\"data\":{\"content\":\"" + EscapeJson(AnsiToUtf8(content)) + "\"";
+        if (ephemeral) body += ",\"flags\":64";
+        body += "}}";
+
+        if (!enqueueInteractionOperation({id, token, std::move(body)}, true))
+        {
+            std::lock_guard<std::mutex> lock(interactionResponseMutex_);
+            interactionResponses_.erase(id);
+            return false;
+        }
+
+        return true;
+    }
+
+    bool DiscordClient::showModal(const std::string& id, const std::string& token, const std::string& modalJson)
+    {
+        if (!initialized_ || id.empty() || token.empty() || modalJson.empty()) return false;
+
+        {
+            std::lock_guard<std::mutex> lock(interactionResponseMutex_);
+            interactionResponses_.insert(id);
+        }
+
+        if (!enqueueInteractionOperation({id, token, "{\"type\":9,\"data\":" + modalJson + "}"}, true))
+        {
+            std::lock_guard<std::mutex> lock(interactionResponseMutex_);
+            interactionResponses_.erase(id);
+            return false;
+        }
+
+        return true;
     }
 
     bool DiscordClient::consumeMessageSentEvent(bool& success, std::string& channelId, std::string& messageId)
@@ -586,22 +633,14 @@ namespace DiscordBridge
         if (channelId.empty() || message.empty()) return false;
         if (message.size() > 2000) return false;
 
-        {
-            std::lock_guard<std::mutex> lock(outgoingMutex_);
-
-            messageOperations_.push_back(
-                MessageOperation{
-                    MessageOperationType::Send,
-                    channelId,
-                    "",
-                    message
-                }
-            );
-        }
-
-        outgoingCondition_.notify_one();
-
-        return true;
+        return enqueueMessageOperation(
+            MessageOperation{
+                MessageOperationType::Send,
+                channelId,
+                {},
+                message
+            }
+        );
     }
 
     bool DiscordClient::editMessage(const std::string& channelId, const std::string& messageId, const std::string& content)
@@ -610,22 +649,14 @@ namespace DiscordBridge
         if (channelId.empty() || messageId.empty() || content.empty()) return false;
         if (content.size() > 2000) return false;
 
-        {
-            std::lock_guard<std::mutex> lock(outgoingMutex_);
-
-            messageOperations_.push_back(
-                MessageOperation{
-                    MessageOperationType::Edit,
-                    channelId,
-                    messageId,
-                    content
-                }
-            );
-        }
-
-        outgoingCondition_.notify_one();
-
-        return true;
+        return enqueueMessageOperation(
+            MessageOperation{
+                MessageOperationType::Edit,
+                channelId,
+                messageId,
+                content
+            }
+        );
     }
 
     bool DiscordClient::deleteMessage(const std::string& channelId, const std::string& messageId)
@@ -633,22 +664,14 @@ namespace DiscordBridge
         if (!initialized_ || !restRunning_) return false;
         if (channelId.empty() || messageId.empty()) return false;
 
-        {
-            std::lock_guard<std::mutex> lock(outgoingMutex_);
-
-            messageOperations_.push_back(
-                MessageOperation{
-                    MessageOperationType::Delete,
-                    channelId,
-                    messageId,
-                    ""
-                }
-            );
-        }
-
-        outgoingCondition_.notify_one();
-
-        return true;
+        return enqueueMessageOperation(
+            MessageOperation{
+                MessageOperationType::Delete,
+                channelId,
+                messageId,
+                {}
+            }
+        );
     }
 
     bool DiscordClient::sendEmbed(const std::string& channelId, const std::string& embedJson)
@@ -656,22 +679,14 @@ namespace DiscordBridge
         if (!initialized_ || !restRunning_) return false;
         if (channelId.empty() || embedJson.empty()) return false;
 
-        {
-            std::lock_guard<std::mutex> lock(outgoingMutex_);
-
-            messageOperations_.push_back(
-                MessageOperation{
-                    MessageOperationType::SendEmbed,
-                    channelId,
-                    "",
-                    embedJson
-                }
-            );
-        }
-
-        outgoingCondition_.notify_one();
-
-        return true;
+        return enqueueMessageOperation(
+            MessageOperation{
+                MessageOperationType::SendEmbed,
+                channelId,
+                {},
+                embedJson
+            }
+        );
     }
 
     bool DiscordClient::sendComponents(const std::string& channelId, const std::string& componentsJson)
@@ -679,57 +694,89 @@ namespace DiscordBridge
         if (!initialized_ || !restRunning_) return false;
         if (channelId.empty() || componentsJson.empty()) return false;
 
+        return enqueueMessageOperation(
+            MessageOperation{
+                MessageOperationType::SendComponents,
+                channelId,
+                {},
+                componentsJson
+            }
+        );
+    }
+
+    bool DiscordClient::enqueueMessageOperation(MessageOperation operation, bool prioritize)
+    {
+        constexpr std::size_t MAX_PENDING_OPERATIONS = 1024;
+
+        if (!restRunning_) return false;
+
         {
             std::lock_guard<std::mutex> lock(outgoingMutex_);
 
-            messageOperations_.push_back(
-                MessageOperation{
-                    MessageOperationType::SendComponents,
-                    channelId,
-                    "",
-                    componentsJson
-                }
-            );
+            if (messageOperations_.size() >= MAX_PENDING_OPERATIONS) return false;
+
+            if (prioritize) messageOperations_.push_front(std::move(operation));
+            else messageOperations_.push_back(std::move(operation));
         }
 
         outgoingCondition_.notify_one();
-
         return true;
     }
 
     bool DiscordClient::acknowledgeInteraction(const std::string& interactionId, const std::string& interactionToken)
     {
-        if (!initialized_) return false;
-        if (interactionId.empty() || interactionToken.empty()) return false;
+        return sendInteractionCallback(interactionId, interactionToken, "{\"type\":6}");
+    }
+
+    bool DiscordClient::enqueueInteractionOperation(InteractionOperation operation, bool prioritize)
+    {
+        if (!interactionRunning_ || operation.interactionId.empty() || operation.interactionToken.empty() || operation.body.empty()) return false;
+
+        {
+            std::lock_guard<std::mutex> lock(interactionMutex_);
+            if (interactionOperations_.size() >= 256) return false;
+            if (prioritize) interactionOperations_.push_front(std::move(operation));
+            else interactionOperations_.push_back(std::move(operation));
+        }
+
+        interactionCondition_.notify_one();
+        return true;
+    }
+
+    bool DiscordClient::sendInteractionCallback(const std::string& interactionId, const std::string& interactionToken, const std::string& body)
+    {
+        if (interactionId.empty() || interactionToken.empty() || body.empty()) return false;
 
         const std::wstring interactionWide = Utf8ToWide(interactionId);
         const std::wstring tokenWide = Utf8ToWide(interactionToken);
-
         if (interactionWide.empty() || tokenWide.empty()) return false;
 
-        const std::wstring headers =
-            L"Content-Type: application/json"
-            L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.1"
-            L"\r\n";
-
-        const std::wstring path =
-            L"/api/v10/interactions/" +
-            interactionWide +
-            L"/" +
-            tokenWide +
-            L"/callback";
-
-        const std::string body = "{\"type\":6}";
-
-        const HttpResponse response = httpClient_.post(
-            L"discord.com",
-            path,
-            headers,
-            body
-        );
-
+        const std::wstring headers = L"Content-Type: application/json\r\nAccept: application/json\r\nUser-Agent: DiscordBridge/0.0.2\r\n";
+        const std::wstring path = L"/api/v10/interactions/" + interactionWide + L"/" + tokenWide + L"/callback";
+        const HttpResponse response = interactionHttpClient_.post(L"discord.com", path, headers, body);
+        if (!response.success)
+        {
+            std::printf("[DiscordBridge]: Interaction HTTP falhou | Status: %lu | Body: %s\n", response.statusCode, response.body.empty() ? "<vazio>" : response.body.c_str());
+        }
         return response.success;
+    }
+
+    void DiscordClient::interactionLoop()
+    {
+        while (interactionRunning_)
+        {
+            InteractionOperation operation;
+
+            {
+                std::unique_lock<std::mutex> lock(interactionMutex_);
+                interactionCondition_.wait(lock, [this] { return !interactionRunning_ || !interactionOperations_.empty(); });
+                if (!interactionRunning_ && interactionOperations_.empty()) break;
+                operation = std::move(interactionOperations_.front());
+                interactionOperations_.pop_front();
+            }
+
+            sendInteractionCallback(operation.interactionId, operation.interactionToken, operation.body);
+        }
     }
 
     void DiscordClient::restLoop()
@@ -797,6 +844,10 @@ namespace DiscordBridge
                         messageId
                     );
                     break;
+
+                case MessageOperationType::AcknowledgeInteraction:
+                    sendInteractionCallback(operation.channelId, operation.messageId, "{\"type\":6}");
+                    continue;
             }
 
             {
