@@ -2,6 +2,7 @@
 
 #include "Gateway.hpp"
 #include "HttpClient.hpp"
+#include "DiscordData.hpp"
 
 #include <atomic>
 #include <condition_variable>
@@ -35,7 +36,14 @@ namespace DiscordBridge
             KickMember,
             BanMember,
             UnbanMember,
-            DeployCommands
+            DeployCommands,
+            SendV2,
+            EditV2,
+            FetchGuild,
+            FetchChannel,
+            FetchRole,
+            FetchMember,
+            FetchUser
         };
 
         struct MessageOperation
@@ -103,6 +111,8 @@ namespace DiscordBridge
         bool consumeMessageDeletedEvent(bool& success, std::string& channelId, std::string& messageId);
         bool consumeEmbedSentEvent(bool& success, std::string& channelId, std::string& messageId);
         bool consumeComponentsSentEvent(bool& success, std::string& channelId, std::string& messageId);
+        bool consumeV2SentEvent(bool& success, std::string& channelId, std::string& messageId);
+        bool consumeV2EditedEvent(bool& success, std::string& channelId, std::string& messageId);
 
         bool setStatus(int status);
         bool setActivity(int type, const std::string& name, const std::string& state = "", const std::string& url = "");
@@ -114,6 +124,22 @@ namespace DiscordBridge
         bool deleteMessage(const std::string& channelId, const std::string& messageId);
         bool sendEmbed(const std::string& channelId, const std::string& embedJson);
         bool sendComponents(const std::string& channelId, const std::string& componentsJson);
+        bool sendV2(const std::string& channelId, const std::string& messageJson);
+        bool editV2(const std::string& channelId, const std::string& messageId, const std::string& messageJson);
+        bool respondV2(const std::string& interactionId, const std::string& interactionToken, const std::string& componentsJson, bool ephemeral = true);
+
+        bool fetchGuild(const std::string& guildId);
+        bool fetchChannel(const std::string& channelId);
+        bool fetchRole(const std::string& guildId, const std::string& roleId);
+        bool fetchMember(const std::string& guildId, const std::string& userId);
+        bool fetchUser(const std::string& userId);
+        bool consumeGuildFetchedEvent(bool& success, std::string& guildId);
+        bool consumeChannelFetchedEvent(bool& success, std::string& channelId);
+        bool consumeRoleFetchedEvent(bool& success, std::string& guildId, std::string& roleId);
+        bool consumeMemberFetchedEvent(bool& success, std::string& guildId, std::string& userId);
+        bool consumeUserFetchedEvent(bool& success, std::string& userId);
+        DiscordDataStore& getDataStore();
+        const DiscordDataStore& getDataStore() const;
 
         bool createChannel(const std::string& guildId, const std::string& name, int type = 0);
         bool deleteChannel(const std::string& channelId);
@@ -154,12 +180,15 @@ namespace DiscordBridge
         bool deleteMessageRequest(const std::string& channelId, const std::string& messageId);
         bool sendEmbedRequest(const std::string& channelId, const std::string& embedJson, std::string& messageId);
         bool sendComponentsRequest(const std::string& channelId, const std::string& componentsJson, std::string& messageId);
+        bool sendV2Request(const std::string& channelId, const std::string& messageJson, std::string& messageId);
+        bool editV2Request(const std::string& channelId, const std::string& messageId, const std::string& messageJson);
         bool acknowledgeInteraction(const std::string& interactionId, const std::string& interactionToken);
 
         HttpClient httpClient_;
         HttpClient interactionHttpClient_{true};
         Gateway gateway_;
         GatewayInfo gatewayInfo_;
+        DiscordDataStore dataStore_;
 
         std::thread restThread_;
         std::thread interactionThread_;

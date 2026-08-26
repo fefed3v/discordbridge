@@ -4,7 +4,7 @@ namespace DiscordBridge
 {
     inline constexpr int VERSION_MAJOR = 0;
     inline constexpr int VERSION_MINOR = 0;
-    inline constexpr int VERSION_PATCH = 5;
+    inline constexpr int VERSION_PATCH = 7;
 
-    inline constexpr const char* VERSION_STRING = "0.0.5";
+    inline constexpr const char* VERSION_STRING = "0.0.7";
 }

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 
 project(
     DiscordBridge
-    VERSION 0.0.5
+    VERSION 0.0.7
     LANGUAGES CXX
 )
 
@@ -70,11 +70,15 @@ set(DISCORD_BRIDGE_SOURCES
     ${SRC_DIR}/discord/DiscordClient.cpp
     ${SRC_DIR}/discord/Gateway.cpp
     ${SRC_DIR}/discord/HttpClient.cpp
+
     ${SRC_DIR}/discord/Embed.cpp
     ${SRC_DIR}/discord/Button.cpp
     ${SRC_DIR}/discord/SelectMenu.cpp
     ${SRC_DIR}/discord/Modal.cpp
     ${SRC_DIR}/discord/Command.cpp
+
+    ${SRC_DIR}/discord/DiscordData.cpp
+    ${SRC_DIR}/discord/ComponentsV2.cpp
 
     ${SRC_DIR}/pawn/PawnRuntime.cpp
     ${SRC_DIR}/pawn/Natives.cpp
@@ -160,24 +164,50 @@ set_target_properties(
         PREFIX ""
         SUFFIX ".dll"
 
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/DiscordBridge"
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/DiscordBridge"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/DiscordBridge"
+        RUNTIME_OUTPUT_DIRECTORY
+            "${CMAKE_BINARY_DIR}/DiscordBridge"
 
-        RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/DiscordBridge/Debug"
-        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/DiscordBridge/Release"
-        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/DiscordBridge/RelWithDebInfo"
-        RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_BINARY_DIR}/DiscordBridge/MinSizeRel"
+        ARCHIVE_OUTPUT_DIRECTORY
+            "${CMAKE_BINARY_DIR}/DiscordBridge"
 
-        ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/DiscordBridge/Debug"
-        ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/DiscordBridge/Release"
-        ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/DiscordBridge/RelWithDebInfo"
-        ARCHIVE_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_BINARY_DIR}/DiscordBridge/MinSizeRel"
+        LIBRARY_OUTPUT_DIRECTORY
+            "${CMAKE_BINARY_DIR}/DiscordBridge"
 
-        LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/DiscordBridge/Debug"
-        LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/DiscordBridge/Release"
-        LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/DiscordBridge/RelWithDebInfo"
-        LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_BINARY_DIR}/DiscordBridge/MinSizeRel"
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG
+            "${CMAKE_BINARY_DIR}/DiscordBridge/Debug"
+
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE
+            "${CMAKE_BINARY_DIR}/DiscordBridge/Release"
+
+        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO
+            "${CMAKE_BINARY_DIR}/DiscordBridge/RelWithDebInfo"
+
+        RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL
+            "${CMAKE_BINARY_DIR}/DiscordBridge/MinSizeRel"
+
+        ARCHIVE_OUTPUT_DIRECTORY_DEBUG
+            "${CMAKE_BINARY_DIR}/DiscordBridge/Debug"
+
+        ARCHIVE_OUTPUT_DIRECTORY_RELEASE
+            "${CMAKE_BINARY_DIR}/DiscordBridge/Release"
+
+        ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO
+            "${CMAKE_BINARY_DIR}/DiscordBridge/RelWithDebInfo"
+
+        ARCHIVE_OUTPUT_DIRECTORY_MINSIZEREL
+            "${CMAKE_BINARY_DIR}/DiscordBridge/MinSizeRel"
+
+        LIBRARY_OUTPUT_DIRECTORY_DEBUG
+            "${CMAKE_BINARY_DIR}/DiscordBridge/Debug"
+
+        LIBRARY_OUTPUT_DIRECTORY_RELEASE
+            "${CMAKE_BINARY_DIR}/DiscordBridge/Release"
+
+        LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO
+            "${CMAKE_BINARY_DIR}/DiscordBridge/RelWithDebInfo"
+
+        LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL
+            "${CMAKE_BINARY_DIR}/DiscordBridge/MinSizeRel"
 )
 
 # =========================================================

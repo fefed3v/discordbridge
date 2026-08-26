@@ -201,6 +201,42 @@ namespace DiscordBridge
                 amx_Release(amx, channelAddress);
             }
         }
+
+        void DispatchFetchOne(const vector<AMX *> &scripts, const char *callback, bool success, const string &id)
+        {
+            for (AMX *amx : scripts)
+            {
+                int index = -1;
+                if (!FindPublic(amx, callback, index)) continue;
+                cell address = 0;
+                if (!PushPawnString(amx, id, address)) continue;
+                amx_Push(amx, address);
+                amx_Push(amx, success ? 1 : 0);
+                cell returnValue = 0;
+                amx_Exec(amx, &returnValue, index);
+                amx_Release(amx, address);
+            }
+        }
+
+        void DispatchFetchTwo(const vector<AMX *> &scripts, const char *callback, bool success, const string &first, const string &second)
+        {
+            for (AMX *amx : scripts)
+            {
+                int index = -1;
+                if (!FindPublic(amx, callback, index)) continue;
+                cell firstAddress = 0, secondAddress = 0;
+                if (!PushPawnString(amx, first, firstAddress)) continue;
+                if (!PushPawnString(amx, second, secondAddress)) { amx_Release(amx, firstAddress); continue; }
+                amx_Push(amx, secondAddress);
+                amx_Push(amx, firstAddress);
+                amx_Push(amx, success ? 1 : 0);
+                cell returnValue = 0;
+                amx_Exec(amx, &returnValue, index);
+                amx_Release(amx, secondAddress);
+                amx_Release(amx, firstAddress);
+            }
+        }
+
         void DispatchDeployResult(const vector<AMX *> &scripts, bool success, const string &guildId)
         {
             for (AMX *amx : scripts)
@@ -300,6 +336,16 @@ namespace DiscordBridge
         DispatchResult(scripts_, "DBridge_OnComponentsSent", success, channelId, messageId);
     }
 
+    void PawnRuntime::dispatchV2Sent(bool success, const string &channelId, const string &messageId)
+    {
+        DispatchResult(scripts_, "DBridge_OnV2Sent", success, channelId, messageId);
+    }
+
+    void PawnRuntime::dispatchV2Edited(bool success, const string &channelId, const string &messageId)
+    {
+        DispatchResult(scripts_, "DBridge_OnV2Edited", success, channelId, messageId);
+    }
+
     void PawnRuntime::dispatchChannelCreated(bool s, const string& g, const string& id) { DispatchResult(scripts_, "DBridge_OnChannelCreated", s, g, id); }
     void PawnRuntime::dispatchChannelDeleted(bool s, const string& g, const string& id) { DispatchResult(scripts_, "DBridge_OnChannelDeleted", s, g, id); }
     void PawnRuntime::dispatchRoleCreated(bool s, const string& g, const string& id) { DispatchResult(scripts_, "DBridge_OnRoleCreated", s, g, id); }
@@ -310,6 +356,11 @@ namespace DiscordBridge
     void PawnRuntime::dispatchMemberBanned(bool s, const string& g, const string& id) { DispatchResult(scripts_, "DBridge_OnMemberBanned", s, g, id); }
     void PawnRuntime::dispatchMemberUnbanned(bool s, const string& g, const string& id) { DispatchResult(scripts_, "DBridge_OnMemberUnbanned", s, g, id); }
     void PawnRuntime::dispatchCommandsDeployed(bool s, const string& g) { DispatchDeployResult(scripts_, s, g); }
+    void PawnRuntime::dispatchGuildFetched(bool s, const string& g) { DispatchFetchOne(scripts_, "DBridge_OnGuildFetched", s, g); }
+    void PawnRuntime::dispatchChannelFetched(bool s, const string& c) { DispatchFetchOne(scripts_, "DBridge_OnChannelFetched", s, c); }
+    void PawnRuntime::dispatchRoleFetched(bool s, const string& g, const string& r) { DispatchFetchTwo(scripts_, "DBridge_OnRoleFetched", s, g, r); }
+    void PawnRuntime::dispatchMemberFetched(bool s, const string& g, const string& u) { DispatchFetchTwo(scripts_, "DBridge_OnMemberFetched", s, g, u); }
+    void PawnRuntime::dispatchUserFetched(bool s, const string& u) { DispatchFetchOne(scripts_, "DBridge_OnUserFetched", s, u); }
 
     void PawnRuntime::dispatchButtonClick(const string &userId, const string &channelId, const string &customId, const string &interactionId, const string &interactionToken)
     {

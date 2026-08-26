@@ -6,12 +6,12 @@
 using namespace DiscordBridge;
 using namespace std;
 
-DiscordBridge::BridgeCore::~BridgeCore()
+BridgeCore::~BridgeCore()
 {
     shutdown();
 }
 
-bool DiscordBridge::BridgeCore::initialize()
+bool BridgeCore::initialize()
 {
     if (initialized_)
         return false;
@@ -20,7 +20,7 @@ bool DiscordBridge::BridgeCore::initialize()
     return true;
 }
 
-void DiscordBridge::BridgeCore::shutdown()
+void BridgeCore::shutdown()
 {
     if (!initialized_)
         return;
@@ -28,6 +28,7 @@ void DiscordBridge::BridgeCore::shutdown()
     discordClient_.shutdown();
 
     commandManager_.clear();
+    v2Manager_.clear();
     modalManager_.clear();
     selectMenuManager_.clear();
     actionRowManager_.clear();
@@ -38,7 +39,7 @@ void DiscordBridge::BridgeCore::shutdown()
     initialized_ = false;
 }
 
-void DiscordBridge::BridgeCore::process()
+void BridgeCore::process()
 {
     if (!initialized_)
         return;
@@ -113,6 +114,11 @@ void DiscordBridge::BridgeCore::process()
         pawnRuntime_.dispatchEmbedSent(success, channelId, messageId);
     while (discordClient_.consumeComponentsSentEvent(success, channelId, messageId))
         pawnRuntime_.dispatchComponentsSent(success, channelId, messageId);
+    while (discordClient_.consumeV2SentEvent(success, channelId, messageId))
+        pawnRuntime_.dispatchV2Sent(success, channelId, messageId);
+
+    while (discordClient_.consumeV2EditedEvent(success, channelId, messageId))
+        pawnRuntime_.dispatchV2Edited(success, channelId, messageId);
 
     string targetId;
     while (discordClient_.consumeChannelCreatedEvent(success, guildId, targetId)) pawnRuntime_.dispatchChannelCreated(success, guildId, targetId);
@@ -125,14 +131,20 @@ void DiscordBridge::BridgeCore::process()
     while (discordClient_.consumeMemberBannedEvent(success, guildId, targetId)) pawnRuntime_.dispatchMemberBanned(success, guildId, targetId);
     while (discordClient_.consumeMemberUnbannedEvent(success, guildId, targetId)) pawnRuntime_.dispatchMemberUnbanned(success, guildId, targetId);
     while (discordClient_.consumeCommandsDeployedEvent(success, guildId)) pawnRuntime_.dispatchCommandsDeployed(success, guildId);
+
+    while (discordClient_.consumeGuildFetchedEvent(success, guildId)) pawnRuntime_.dispatchGuildFetched(success, guildId);
+    while (discordClient_.consumeChannelFetchedEvent(success, channelId)) pawnRuntime_.dispatchChannelFetched(success, channelId);
+    while (discordClient_.consumeRoleFetchedEvent(success, guildId, targetId)) pawnRuntime_.dispatchRoleFetched(success, guildId, targetId);
+    while (discordClient_.consumeMemberFetchedEvent(success, guildId, targetId)) pawnRuntime_.dispatchMemberFetched(success, guildId, targetId);
+    while (discordClient_.consumeUserFetchedEvent(success, targetId)) pawnRuntime_.dispatchUserFetched(success, targetId);
 }
 
-bool DiscordBridge::BridgeCore::isInitialized() const
+bool BridgeCore::isInitialized() const
 {
     return initialized_;
 }
 
-DiscordBridge::PawnRuntime &BridgeCore::getPawnRuntime()
+PawnRuntime &BridgeCore::getPawnRuntime()
 {
     return pawnRuntime_;
 }
@@ -142,7 +154,7 @@ const PawnRuntime &BridgeCore::getPawnRuntime() const
     return pawnRuntime_;
 }
 
-DiscordBridge::DiscordClient &BridgeCore::getDiscordClient()
+DiscordClient &BridgeCore::getDiscordClient()
 {
     return discordClient_;
 }
@@ -152,7 +164,7 @@ const DiscordClient &BridgeCore::getDiscordClient() const
     return discordClient_;
 }
 
-DiscordBridge::EmbedManager &BridgeCore::getEmbedManager()
+EmbedManager &BridgeCore::getEmbedManager()
 {
     return embedManager_;
 }
@@ -162,7 +174,7 @@ const EmbedManager &BridgeCore::getEmbedManager() const
     return embedManager_;
 }
 
-DiscordBridge::ButtonManager &BridgeCore::getButtonManager()
+ButtonManager &BridgeCore::getButtonManager()
 {
     return buttonManager_;
 }
@@ -172,7 +184,7 @@ const ButtonManager &BridgeCore::getButtonManager() const
     return buttonManager_;
 }
 
-DiscordBridge::ActionRowManager &BridgeCore::getActionRowManager()
+ActionRowManager &BridgeCore::getActionRowManager()
 {
     return actionRowManager_;
 }
@@ -182,6 +194,8 @@ const ActionRowManager &BridgeCore::getActionRowManager() const
     return actionRowManager_;
 }
 
-DiscordBridge::SelectMenuManager &BridgeCore::getSelectMenuManager() { return selectMenuManager_; }
-DiscordBridge::ModalManager &BridgeCore::getModalManager() { return modalManager_; }
-DiscordBridge::CommandManager &BridgeCore::getCommandManager() { return commandManager_; }
+SelectMenuManager &BridgeCore::getSelectMenuManager() { return selectMenuManager_; }
+ModalManager &BridgeCore::getModalManager() { return modalManager_; }
+CommandManager &BridgeCore::getCommandManager() { return commandManager_; }
+
+ComponentsV2Manager &BridgeCore::getV2Manager() { return v2Manager_; }

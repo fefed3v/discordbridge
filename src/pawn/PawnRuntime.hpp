@@ -29,6 +29,8 @@ namespace DiscordBridge
         void dispatchMessageDeleted(bool success, const string &channelId, const string &messageId);
         void dispatchEmbedSent(bool success, const string &channelId, const string &messageId);
         void dispatchComponentsSent(bool success, const string &channelId, const string &messageId);
+        void dispatchV2Sent(bool success, const string &channelId, const string &messageId);
+        void dispatchV2Edited(bool success, const string &channelId, const string &messageId);
         void dispatchChannelCreated(bool success, const string &guildId, const string &channelId);
         void dispatchChannelDeleted(bool success, const string &guildId, const string &channelId);
         void dispatchRoleCreated(bool success, const string &guildId, const string &roleId);
@@ -39,6 +41,11 @@ namespace DiscordBridge
         void dispatchMemberBanned(bool success, const string &guildId, const string &userId);
         void dispatchMemberUnbanned(bool success, const string &guildId, const string &userId);
         void dispatchCommandsDeployed(bool success, const string &guildId);
+        void dispatchGuildFetched(bool success, const string &guildId);
+        void dispatchChannelFetched(bool success, const string &channelId);
+        void dispatchRoleFetched(bool success, const string &guildId, const string &roleId);
+        void dispatchMemberFetched(bool success, const string &guildId, const string &userId);
+        void dispatchUserFetched(bool success, const string &userId);
 
         void dispatchButtonClick(const string &userId, const string &channelId, const string &customId, const string &interactionId, const string &interactionToken);
         void dispatchSelectMenu(const string &userId, const string &channelId, const string &customId, const string &value, const string &interactionId, const string &interactionToken);

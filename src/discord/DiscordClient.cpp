@@ -297,7 +297,7 @@ namespace DiscordBridge
         const std::wstring headers =
             L"Authorization: Bot " + tokenWide +
             L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.5"
+            L"\r\nUser-Agent: DiscordBridge/0.0.7"
             L"\r\n";
 
         const HttpResponse response = httpClient_.get(
@@ -390,6 +390,7 @@ namespace DiscordBridge
         {
             std::lock_guard<std::mutex> lock(resultMutex_);
             messageOperationResults_.clear();
+            guildOperationResults_.clear();
         }
 
         {
@@ -405,6 +406,7 @@ namespace DiscordBridge
         gateway_.disconnect();
 
         gatewayInfo_ = GatewayInfo{};
+        dataStore_.clear();
         token_.clear();
     }
 
@@ -586,6 +588,16 @@ namespace DiscordBridge
         );
     }
 
+    bool DiscordClient::consumeV2SentEvent(bool& success, std::string& channelId, std::string& messageId)
+    {
+        return consumeMessageOperationResult(MessageOperationType::SendV2, success, channelId, messageId);
+    }
+
+    bool DiscordClient::consumeV2EditedEvent(bool& success, std::string& channelId, std::string& messageId)
+    {
+        return consumeMessageOperationResult(MessageOperationType::EditV2, success, channelId, messageId);
+    }
+
     bool DiscordClient::consumeMessageOperationResult(MessageOperationType type, bool& success, std::string& channelId, std::string& messageId)
     {
         std::lock_guard<std::mutex> lock(resultMutex_);
@@ -710,6 +722,64 @@ namespace DiscordBridge
         );
     }
 
+    bool DiscordClient::sendV2(const std::string& channelId, const std::string& messageJson)
+    {
+        if (!initialized_ || !restRunning_ || channelId.empty() || messageJson.empty()) return false;
+        return enqueueMessageOperation({MessageOperationType::SendV2, channelId, {}, messageJson});
+    }
+
+    bool DiscordClient::editV2(const std::string& channelId, const std::string& messageId, const std::string& messageJson)
+    {
+        if (!initialized_ || !restRunning_ || channelId.empty() || messageId.empty() || messageJson.empty()) return false;
+        return enqueueMessageOperation({MessageOperationType::EditV2, channelId, messageId, messageJson});
+    }
+
+    bool DiscordClient::respondV2(const std::string& interactionId, const std::string& interactionToken, const std::string& componentsJson, bool ephemeral)
+    {
+        if (!initialized_ || interactionId.empty() || interactionToken.empty() || componentsJson.empty()) return false;
+        {
+            std::lock_guard<std::mutex> lock(interactionResponseMutex_);
+            interactionResponses_.insert(interactionId);
+        }
+        const int flags = 32768 | (ephemeral ? 64 : 0);
+        const std::string body = "{\"type\":4,\"data\":{\"flags\":" + std::to_string(flags) + ",\"components\":" + componentsJson + "}}";
+        if (!enqueueInteractionOperation({interactionId, interactionToken, body}, true))
+        {
+            std::lock_guard<std::mutex> lock(interactionResponseMutex_);
+            interactionResponses_.erase(interactionId);
+            return false;
+        }
+        return true;
+    }
+
+    bool DiscordClient::fetchGuild(const std::string& guildId)
+    {
+        return initialized_ && restRunning_ && !guildId.empty() && enqueueMessageOperation({MessageOperationType::FetchGuild, guildId, {}, {}});
+    }
+
+    bool DiscordClient::fetchChannel(const std::string& channelId)
+    {
+        return initialized_ && restRunning_ && !channelId.empty() && enqueueMessageOperation({MessageOperationType::FetchChannel, {}, channelId, {}});
+    }
+
+    bool DiscordClient::fetchRole(const std::string& guildId, const std::string& roleId)
+    {
+        return initialized_ && restRunning_ && !guildId.empty() && !roleId.empty() && enqueueMessageOperation({MessageOperationType::FetchRole, guildId, roleId, {}});
+    }
+
+    bool DiscordClient::fetchMember(const std::string& guildId, const std::string& userId)
+    {
+        return initialized_ && restRunning_ && !guildId.empty() && !userId.empty() && enqueueMessageOperation({MessageOperationType::FetchMember, guildId, userId, {}});
+    }
+
+    bool DiscordClient::fetchUser(const std::string& userId)
+    {
+        return initialized_ && restRunning_ && !userId.empty() && enqueueMessageOperation({MessageOperationType::FetchUser, {}, userId, {}});
+    }
+
+    DiscordDataStore& DiscordClient::getDataStore() { return dataStore_; }
+    const DiscordDataStore& DiscordClient::getDataStore() const { return dataStore_; }
+
     bool DiscordClient::createChannel(const std::string& guildId, const std::string& name, int type)
     {
         if (!initialized_ || !restRunning_ || guildId.empty() || name.empty() || name.size() > 100 || type < 0) return false;
@@ -800,6 +870,11 @@ namespace DiscordBridge
     bool DiscordClient::consumeMemberBannedEvent(bool& s, std::string& g, std::string& id) { return consumeGuildOperationResultInternal(MessageOperationType::BanMember, s, g, id); }
     bool DiscordClient::consumeMemberUnbannedEvent(bool& s, std::string& g, std::string& id) { return consumeGuildOperationResultInternal(MessageOperationType::UnbanMember, s, g, id); }
     bool DiscordClient::consumeCommandsDeployedEvent(bool& s, std::string& g) { std::string id; return consumeGuildOperationResultInternal(MessageOperationType::DeployCommands, s, g, id); }
+    bool DiscordClient::consumeGuildFetchedEvent(bool& s, std::string& g) { std::string id; return consumeGuildOperationResultInternal(MessageOperationType::FetchGuild, s, g, id); }
+    bool DiscordClient::consumeChannelFetchedEvent(bool& s, std::string& c) { std::string g; return consumeGuildOperationResultInternal(MessageOperationType::FetchChannel, s, g, c); }
+    bool DiscordClient::consumeRoleFetchedEvent(bool& s, std::string& g, std::string& r) { return consumeGuildOperationResultInternal(MessageOperationType::FetchRole, s, g, r); }
+    bool DiscordClient::consumeMemberFetchedEvent(bool& s, std::string& g, std::string& u) { return consumeGuildOperationResultInternal(MessageOperationType::FetchMember, s, g, u); }
+    bool DiscordClient::consumeUserFetchedEvent(bool& s, std::string& u) { std::string g; return consumeGuildOperationResultInternal(MessageOperationType::FetchUser, s, g, u); }
 
     bool DiscordClient::enqueueMessageOperation(MessageOperation operation, bool prioritize)
     {
@@ -848,7 +923,7 @@ namespace DiscordBridge
         const std::wstring tokenWide = Utf8ToWide(interactionToken);
         if (interactionWide.empty() || tokenWide.empty()) return false;
 
-        const std::wstring headers = L"Content-Type: application/json\r\nAccept: application/json\r\nUser-Agent: DiscordBridge/0.0.5\r\n";
+        const std::wstring headers = L"Content-Type: application/json\r\nAccept: application/json\r\nUser-Agent: DiscordBridge/0.0.7\r\n";
         const std::wstring path = L"/api/v10/interactions/" + interactionWide + L"/" + tokenWide + L"/callback";
         const HttpResponse response = interactionHttpClient_.post(L"discord.com", path, headers, body);
         if (!response.success)
@@ -942,6 +1017,14 @@ namespace DiscordBridge
                     );
                     break;
 
+                case MessageOperationType::SendV2:
+                    success = sendV2Request(operation.channelId, operation.content, messageId);
+                    break;
+
+                case MessageOperationType::EditV2:
+                    success = editV2Request(operation.channelId, operation.messageId, operation.content);
+                    break;
+
                 case MessageOperationType::CreateChannel:
                 case MessageOperationType::DeleteChannel:
                 case MessageOperationType::CreateRole:
@@ -952,12 +1035,17 @@ namespace DiscordBridge
                 case MessageOperationType::BanMember:
                 case MessageOperationType::UnbanMember:
                 case MessageOperationType::DeployCommands:
+                case MessageOperationType::FetchGuild:
+                case MessageOperationType::FetchChannel:
+                case MessageOperationType::FetchRole:
+                case MessageOperationType::FetchMember:
+                case MessageOperationType::FetchUser:
                 {
                     const std::wstring tokenWide = Utf8ToWide(token_);
                     const std::wstring guildWide = Utf8ToWide(operation.channelId);
                     const std::wstring targetWide = Utf8ToWide(operation.messageId);
                     const std::wstring extraWide = Utf8ToWide(operation.content);
-                    const std::wstring headers = L"Authorization: Bot " + tokenWide + L"\r\nAccept: application/json\r\nUser-Agent: DiscordBridge/0.0.5\r\n";
+                    const std::wstring headers = L"Authorization: Bot " + tokenWide + L"\r\nAccept: application/json\r\nUser-Agent: DiscordBridge/0.0.7\r\n";
                     const std::wstring jsonHeaders = headers + L"Content-Type: application/json\r\n";
                     HttpResponse response;
                     std::string resultId = operation.messageId;
@@ -966,6 +1054,46 @@ namespace DiscordBridge
                     {
                         response = httpClient_.put(L"discord.com", L"/api/v10/applications/" + targetWide + L"/guilds/" + guildWide + L"/commands", jsonHeaders, operation.content);
                         resultId = operation.messageId;
+                    }
+                    else if (operation.type == MessageOperationType::FetchGuild)
+                    {
+                        response = httpClient_.get(L"discord.com", L"/api/v10/guilds/" + guildWide + L"?with_counts=true", headers);
+                        resultId = operation.channelId;
+                        if (response.success) dataStore_.storeGuild(operation.channelId, response.body);
+                    }
+                    else if (operation.type == MessageOperationType::FetchChannel)
+                    {
+                        response = httpClient_.get(L"discord.com", L"/api/v10/channels/" + targetWide, headers);
+                        resultId = operation.messageId;
+                        if (response.success) dataStore_.storeChannel(operation.messageId, response.body);
+                    }
+                    else if (operation.type == MessageOperationType::FetchRole)
+                    {
+                        response = httpClient_.get(L"discord.com", L"/api/v10/guilds/" + guildWide + L"/roles", headers);
+                        resultId = operation.messageId;
+                        std::string roleJson;
+                        if (response.success && DiscordDataStore::findObjectById(response.body, operation.messageId, roleJson))
+                            dataStore_.storeRole(operation.channelId, operation.messageId, roleJson);
+                        else if (response.success)
+                            response.success = false;
+                    }
+                    else if (operation.type == MessageOperationType::FetchMember)
+                    {
+                        response = httpClient_.get(L"discord.com", L"/api/v10/guilds/" + guildWide + L"/members/" + targetWide, headers);
+                        resultId = operation.messageId;
+                        if (response.success)
+                        {
+                            dataStore_.storeMember(operation.channelId, operation.messageId, response.body);
+                            std::string userJson, embeddedId;
+                            if (DiscordDataStore::extractEmbeddedUser(response.body, userJson) && FindRootString(userJson, "id", embeddedId) && !embeddedId.empty())
+                                dataStore_.storeUser(embeddedId, userJson);
+                        }
+                    }
+                    else if (operation.type == MessageOperationType::FetchUser)
+                    {
+                        response = httpClient_.get(L"discord.com", L"/api/v10/users/" + targetWide, headers);
+                        resultId = operation.messageId;
+                        if (response.success) dataStore_.storeUser(operation.messageId, response.body);
                     }
                     else if (operation.type == MessageOperationType::CreateChannel)
                     {
@@ -1062,7 +1190,7 @@ namespace DiscordBridge
             L"Authorization: Bot " + tokenWide +
             L"\r\nContent-Type: application/json"
             L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.5"
+            L"\r\nUser-Agent: DiscordBridge/0.0.7"
             L"\r\n";
 
         const std::string body =
@@ -1103,7 +1231,7 @@ namespace DiscordBridge
             L"Authorization: Bot " + tokenWide +
             L"\r\nContent-Type: application/json"
             L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.5"
+            L"\r\nUser-Agent: DiscordBridge/0.0.7"
             L"\r\n";
 
         const std::string body =
@@ -1138,7 +1266,7 @@ namespace DiscordBridge
         const std::wstring headers =
             L"Authorization: Bot " + tokenWide +
             L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.5"
+            L"\r\nUser-Agent: DiscordBridge/0.0.7"
             L"\r\n";
 
         const std::wstring path =
@@ -1169,7 +1297,7 @@ namespace DiscordBridge
             L"Authorization: Bot " + tokenWide +
             L"\r\nContent-Type: application/json"
             L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.5"
+            L"\r\nUser-Agent: DiscordBridge/0.0.7"
             L"\r\n";
 
         const std::string body =
@@ -1211,7 +1339,7 @@ namespace DiscordBridge
             L"Authorization: Bot " + tokenWide +
             L"\r\nContent-Type: application/json"
             L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.5"
+            L"\r\nUser-Agent: DiscordBridge/0.0.7"
             L"\r\n";
 
         const std::string body = "{\"components\":[" + componentsJson + "]}";
@@ -1233,6 +1361,55 @@ namespace DiscordBridge
         if (!FindRootString(response.body, "id", messageId)) return false;
 
         return !messageId.empty();
+    }
+
+
+    bool DiscordClient::sendV2Request(const std::string& channelId, const std::string& messageJson, std::string& messageId)
+    {
+        messageId.clear();
+        if (token_.empty() || channelId.empty() || messageJson.empty()) return false;
+        const std::wstring tokenWide = Utf8ToWide(token_);
+        const std::wstring channelWide = Utf8ToWide(channelId);
+        if (tokenWide.empty() || channelWide.empty()) return false;
+        const std::wstring headers =
+            L"Authorization: Bot " + tokenWide +
+            L"\r\nContent-Type: application/json"
+            L"\r\nAccept: application/json"
+            L"\r\nUser-Agent: DiscordBridge/0.0.7"
+            L"\r\n";
+        const HttpResponse response = httpClient_.post(L"discord.com", L"/api/v10/channels/" + channelWide + L"/messages", headers, messageJson);
+        if (!response.success)
+        {
+            std::cout << "[DiscordBridge]: Components V2 falhou | Status: " << response.statusCode;
+            if (!response.body.empty()) std::cout << " | Body: " << response.body;
+            std::cout << std::endl;
+            return false;
+        }
+        return FindRootString(response.body, "id", messageId) && !messageId.empty();
+    }
+
+    bool DiscordClient::editV2Request(const std::string& channelId, const std::string& messageId, const std::string& messageJson)
+    {
+        if (token_.empty() || channelId.empty() || messageId.empty() || messageJson.empty()) return false;
+        const std::wstring tokenWide = Utf8ToWide(token_);
+        const std::wstring channelWide = Utf8ToWide(channelId);
+        const std::wstring messageWide = Utf8ToWide(messageId);
+        if (tokenWide.empty() || channelWide.empty() || messageWide.empty()) return false;
+        const std::wstring headers =
+            L"Authorization: Bot " + tokenWide +
+            L"\r\nContent-Type: application/json"
+            L"\r\nAccept: application/json"
+            L"\r\nUser-Agent: DiscordBridge/0.0.7"
+            L"\r\n";
+        const std::wstring path = L"/api/v10/channels/" + channelWide + L"/messages/" + messageWide;
+        const HttpResponse response = httpClient_.patch(L"discord.com", path, headers, messageJson);
+        if (!response.success)
+        {
+            std::cout << "[DiscordBridge]: Edit Components V2 falhou | Status: " << response.statusCode;
+            if (!response.body.empty()) std::cout << " | Body: " << response.body;
+            std::cout << std::endl;
+        }
+        return response.success;
     }
 
     const std::string& DiscordClient::getToken() const

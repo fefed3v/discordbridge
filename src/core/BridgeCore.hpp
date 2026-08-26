@@ -6,6 +6,7 @@
 #include "../discord/SelectMenu.hpp"
 #include "../discord/Modal.hpp"
 #include "../discord/Command.hpp"
+#include "../discord/ComponentsV2.hpp"
 #include "../pawn/PawnRuntime.hpp"
 
 namespace DiscordBridge
@@ -39,6 +40,7 @@ namespace DiscordBridge
         SelectMenuManager &getSelectMenuManager();
         ModalManager &getModalManager();
         CommandManager &getCommandManager();
+        ComponentsV2Manager &getV2Manager();
 
     private:
         bool initialized_{false};
@@ -51,5 +53,6 @@ namespace DiscordBridge
         SelectMenuManager selectMenuManager_;
         ModalManager modalManager_;
         CommandManager commandManager_;
+        ComponentsV2Manager v2Manager_;
     };
 }
