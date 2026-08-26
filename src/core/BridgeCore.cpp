@@ -27,6 +27,7 @@ void DiscordBridge::BridgeCore::shutdown()
 
     discordClient_.shutdown();
 
+    commandManager_.clear();
     modalManager_.clear();
     selectMenuManager_.clear();
     actionRowManager_.clear();
@@ -43,6 +44,11 @@ void DiscordBridge::BridgeCore::process()
         return;
 
     discordClient_.process();
+
+    if (commandManager_.autoDeploy() && commandManager_.dirty() && discordClient_.isConnected() && !commandManager_.guildId().empty())
+    {
+        if (discordClient_.deployCommands(commandManager_.guildId(), commandManager_.toJson())) commandManager_.markDeployed();
+    }
 
     if (discordClient_.consumeReadyEvent())
         pawnRuntime_.dispatchReady();
@@ -72,6 +78,15 @@ void DiscordBridge::BridgeCore::process()
     }
 
     string value;
+    vector<pair<string, string>> commandOptions;
+    string commandName;
+
+    while (discordClient_.consumeSlashCommandEvent(interactionId, interactionToken, userId, guildId, channelId, commandName, commandOptions))
+    {
+        pawnRuntime_.dispatchSlashCommand(commandName, userId, guildId, channelId, commandOptions, interactionId, interactionToken);
+        discordClient_.deferInteractionAsync(interactionId, interactionToken, true);
+    }
+
     while (discordClient_.consumeSelectMenuEvent(interactionId, interactionToken, userId, channelId, customId, value))
     {
         pawnRuntime_.dispatchSelectMenu(userId, channelId, customId, value, interactionId, interactionToken);
@@ -109,6 +124,7 @@ void DiscordBridge::BridgeCore::process()
     while (discordClient_.consumeMemberKickedEvent(success, guildId, targetId)) pawnRuntime_.dispatchMemberKicked(success, guildId, targetId);
     while (discordClient_.consumeMemberBannedEvent(success, guildId, targetId)) pawnRuntime_.dispatchMemberBanned(success, guildId, targetId);
     while (discordClient_.consumeMemberUnbannedEvent(success, guildId, targetId)) pawnRuntime_.dispatchMemberUnbanned(success, guildId, targetId);
+    while (discordClient_.consumeCommandsDeployedEvent(success, guildId)) pawnRuntime_.dispatchCommandsDeployed(success, guildId);
 }
 
 bool DiscordBridge::BridgeCore::isInitialized() const
@@ -168,3 +184,4 @@ const ActionRowManager &BridgeCore::getActionRowManager() const
 
 DiscordBridge::SelectMenuManager &BridgeCore::getSelectMenuManager() { return selectMenuManager_; }
 DiscordBridge::ModalManager &BridgeCore::getModalManager() { return modalManager_; }
+DiscordBridge::CommandManager &BridgeCore::getCommandManager() { return commandManager_; }

@@ -47,6 +47,17 @@ namespace DiscordBridge
             std::string userId;
         };
 
+        struct SlashCommandEvent
+        {
+            std::string interactionId;
+            std::string interactionToken;
+            std::string userId;
+            std::string guildId;
+            std::string channelId;
+            std::string commandName;
+            std::vector<std::pair<std::string, std::string>> options;
+        };
+
         struct ComponentEvent
         {
             std::string interactionId;
@@ -76,12 +87,14 @@ namespace DiscordBridge
         std::mutex sendMutex_;
         std::mutex presenceMutex_;
         std::mutex eventMutex_;
+        mutable std::mutex applicationMutex_;
         std::deque<MessageCreateEvent> messageEvents_;
         std::deque<GuildMemberEvent> guildMemberAddEvents_;
         std::deque<GuildMemberEvent> guildMemberRemoveEvents_;
         std::deque<ComponentEvent> buttonClickEvents_;
         std::deque<ComponentEvent> selectMenuEvents_;
         std::deque<ComponentEvent> modalEvents_;
+        std::deque<SlashCommandEvent> slashCommandEvents_;
 
         std::atomic_bool initialized_{false};
         std::atomic_bool connected_{false};
@@ -101,6 +114,7 @@ namespace DiscordBridge
         std::string currentActivityState_;
         std::string currentActivityUrl_;
         std::string token_;
+        std::string applicationId_;
 
     public:
         Gateway() = default;
@@ -125,6 +139,8 @@ namespace DiscordBridge
         bool consumeButtonClickEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId);
         bool consumeSelectMenuEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId, std::string& value);
         bool consumeModalEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId, std::vector<std::pair<std::string, std::string>>& values);
+        bool consumeSlashCommandEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& guildId, std::string& channelId, std::string& commandName, std::vector<std::pair<std::string, std::string>>& options);
+        std::string getApplicationId() const;
 
         bool setStatus(int status);
         bool setActivity(int type, const std::string& name, const std::string& state = "", const std::string& url = "");

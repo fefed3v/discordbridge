@@ -38,16 +38,20 @@ namespace DiscordBridge
         void dispatchMemberKicked(bool success, const string &guildId, const string &userId);
         void dispatchMemberBanned(bool success, const string &guildId, const string &userId);
         void dispatchMemberUnbanned(bool success, const string &guildId, const string &userId);
+        void dispatchCommandsDeployed(bool success, const string &guildId);
 
         void dispatchButtonClick(const string &userId, const string &channelId, const string &customId, const string &interactionId, const string &interactionToken);
         void dispatchSelectMenu(const string &userId, const string &channelId, const string &customId, const string &value, const string &interactionId, const string &interactionToken);
         void dispatchModalSubmit(const string &userId, const string &channelId, const string &customId, const vector<pair<string, string>> &values, const string &interactionId, const string &interactionToken);
         bool getModalValue(const string &customId, string &value) const;
+        void dispatchSlashCommand(const string &commandName, const string &userId, const string &guildId, const string &channelId, const vector<pair<string, string>> &options, const string &interactionId, const string &interactionToken);
+        bool getCommandValue(const string &name, string &value) const;
 
         size_t size() const;
 
     private:
         vector<AMX *> scripts_;
         const vector<pair<string, string>> *activeModalValues_{nullptr};
+        const vector<pair<string, string>> *activeCommandValues_{nullptr};
     };
 }

@@ -6,7 +6,7 @@ namespace DiscordBridge
 {
     namespace
     {
-        constexpr wchar_t USER_AGENT[] = L"DiscordBridge/0.0.4";
+        constexpr wchar_t USER_AGENT[] = L"DiscordBridge/0.0.5";
 
         void CloseHandle(HINTERNET& handle)
         {

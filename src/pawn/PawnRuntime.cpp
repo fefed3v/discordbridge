@@ -201,6 +201,21 @@ namespace DiscordBridge
                 amx_Release(amx, channelAddress);
             }
         }
+        void DispatchDeployResult(const vector<AMX *> &scripts, bool success, const string &guildId)
+        {
+            for (AMX *amx : scripts)
+            {
+                int index = -1;
+                if (!FindPublic(amx, "DBridge_OnCommandsDeployed", index)) continue;
+                cell guildAddress = 0;
+                if (!PushPawnString(amx, guildId, guildAddress)) continue;
+                amx_Push(amx, guildAddress);
+                amx_Push(amx, success ? 1 : 0);
+                cell returnValue = 0;
+                amx_Exec(amx, &returnValue, index);
+                amx_Release(amx, guildAddress);
+            }
+        }
     }
 
     bool PawnRuntime::addAMX(AMX *amx)
@@ -294,6 +309,7 @@ namespace DiscordBridge
     void PawnRuntime::dispatchMemberKicked(bool s, const string& g, const string& id) { DispatchResult(scripts_, "DBridge_OnMemberKicked", s, g, id); }
     void PawnRuntime::dispatchMemberBanned(bool s, const string& g, const string& id) { DispatchResult(scripts_, "DBridge_OnMemberBanned", s, g, id); }
     void PawnRuntime::dispatchMemberUnbanned(bool s, const string& g, const string& id) { DispatchResult(scripts_, "DBridge_OnMemberUnbanned", s, g, id); }
+    void PawnRuntime::dispatchCommandsDeployed(bool s, const string& g) { DispatchDeployResult(scripts_, s, g); }
 
     void PawnRuntime::dispatchButtonClick(const string &userId, const string &channelId, const string &customId, const string &interactionId, const string &interactionToken)
     {
@@ -321,6 +337,26 @@ namespace DiscordBridge
         {
             if (entry.first != customId)
                 continue;
+            value = entry.second;
+            return true;
+        }
+        return false;
+    }
+
+
+    void PawnRuntime::dispatchSlashCommand(const string &commandName, const string &userId, const string &guildId, const string &channelId, const vector<pair<string, string>> &options, const string &interactionId, const string &interactionToken)
+    {
+        activeCommandValues_ = &options;
+        DispatchStrings(scripts_, "DBridge_OnSlashCommand", {commandName, userId, guildId, channelId, interactionId, interactionToken});
+        activeCommandValues_ = nullptr;
+    }
+
+    bool PawnRuntime::getCommandValue(const string &name, string &value) const
+    {
+        if (!activeCommandValues_ || name.empty()) return false;
+        for (const auto &entry : *activeCommandValues_)
+        {
+            if (entry.first != name) continue;
             value = entry.second;
             return true;
         }

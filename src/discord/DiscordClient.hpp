@@ -34,7 +34,8 @@ namespace DiscordBridge
             RemoveMemberRole,
             KickMember,
             BanMember,
-            UnbanMember
+            UnbanMember,
+            DeployCommands
         };
 
         struct MessageOperation
@@ -91,6 +92,7 @@ namespace DiscordBridge
         bool consumeButtonClickEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId);
         bool consumeSelectMenuEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId, std::string& value);
         bool consumeModalEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId, std::vector<std::pair<std::string, std::string>>& values);
+        bool consumeSlashCommandEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& guildId, std::string& channelId, std::string& commandName, std::vector<std::pair<std::string, std::string>>& options);
         bool acknowledgeInteractionAsync(const std::string& interactionId, const std::string& interactionToken);
         bool deferInteractionAsync(const std::string& interactionId, const std::string& interactionToken, bool ephemeral = true);
         bool respondInteraction(const std::string& interactionId, const std::string& interactionToken, const std::string& content, bool ephemeral = true);
@@ -122,6 +124,8 @@ namespace DiscordBridge
         bool kickMember(const std::string& guildId, const std::string& userId);
         bool banMember(const std::string& guildId, const std::string& userId, int deleteMessageSeconds = 0);
         bool unbanMember(const std::string& guildId, const std::string& userId);
+        bool deployCommands(const std::string& guildId, const std::string& commandsJson);
+        bool consumeCommandsDeployedEvent(bool& success, std::string& guildId);
         bool consumeChannelCreatedEvent(bool& success, std::string& guildId, std::string& channelId);
         bool consumeChannelDeletedEvent(bool& success, std::string& guildId, std::string& channelId);
         bool consumeRoleCreatedEvent(bool& success, std::string& guildId, std::string& roleId);

@@ -12,7 +12,7 @@ namespace DiscordBridge
     {
         constexpr wchar_t GATEWAY_HOST[] = L"gateway.discord.gg";
         constexpr wchar_t GATEWAY_PATH[] = L"/?v=10&encoding=json";
-        constexpr wchar_t USER_AGENT[] = L"DiscordBridge/0.0.4";
+        constexpr wchar_t USER_AGENT[] = L"DiscordBridge/0.0.5";
 
         constexpr std::uint32_t GATEWAY_INTENTS = (1u << 0) | (1u << 1) | (1u << 9) | (1u << 15);
 
@@ -352,6 +352,54 @@ namespace DiscordBridge
         }
 
 
+        bool FindDirectPrimitiveString(const std::string& json, const std::string& key, std::string& value)
+        {
+            std::size_t position = 0;
+            if (!FindDirectValue(json, key, position)) return false;
+            if (position >= json.size()) return false;
+            if (json[position] == '"')
+            {
+                std::size_t end = position;
+                return ParseJsonStringAt(json, position, value, end);
+            }
+            const std::size_t start = position;
+            while (position < json.size() && json[position] != ',' && json[position] != '}' && json[position] != ']') ++position;
+            std::size_t end = position;
+            while (end > start && std::isspace(static_cast<unsigned char>(json[end - 1]))) --end;
+            if (end <= start) return false;
+            value = json.substr(start, end - start);
+            return true;
+        }
+
+        void ExtractCommandOptions(const std::string& json, std::vector<std::pair<std::string, std::string>>& values)
+        {
+            values.clear();
+            std::vector<std::size_t> objectStarts;
+            bool insideString = false;
+            bool escaped = false;
+            for (std::size_t position = 0; position < json.size(); ++position)
+            {
+                const char character = json[position];
+                if (insideString)
+                {
+                    if (escaped) escaped = false;
+                    else if (character == '\\') escaped = true;
+                    else if (character == '"') insideString = false;
+                    continue;
+                }
+                if (character == '"') { insideString = true; continue; }
+                if (character == '{') { objectStarts.push_back(position); continue; }
+                if (character != '}' || objectStarts.empty()) continue;
+                const std::size_t start = objectStarts.back();
+                objectStarts.pop_back();
+                const std::string objectJson = json.substr(start, position - start + 1);
+                std::string name;
+                std::string value;
+                if (!FindDirectString(objectJson, "name", name) || !FindDirectPrimitiveString(objectJson, "value", value) || name.empty()) continue;
+                values.emplace_back(std::move(name), std::move(value));
+            }
+        }
+
         void ExtractModalValues(const std::string& json, std::vector<std::pair<std::string, std::string>>& values)
         {
             values.clear();
@@ -635,6 +683,24 @@ namespace DiscordBridge
         values = std::move(event.modalValues);
         return true;
     }
+
+    bool Gateway::consumeSlashCommandEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& guildId, std::string& channelId, std::string& commandName, std::vector<std::pair<std::string, std::string>>& options)
+    {
+        std::lock_guard<std::mutex> lock(eventMutex_);
+        if (slashCommandEvents_.empty()) return false;
+        SlashCommandEvent event = std::move(slashCommandEvents_.front());
+        slashCommandEvents_.pop_front();
+        interactionId = std::move(event.interactionId);
+        interactionToken = std::move(event.interactionToken);
+        userId = std::move(event.userId);
+        guildId = std::move(event.guildId);
+        channelId = std::move(event.channelId);
+        commandName = std::move(event.commandName);
+        options = std::move(event.options);
+        return true;
+    }
+
+    std::string Gateway::getApplicationId() const { std::lock_guard<std::mutex> lock(applicationMutex_); return applicationId_; }
 
     bool Gateway::setStatus(int status)
     {
@@ -921,12 +987,22 @@ namespace DiscordBridge
 
         if (eventName == "READY")
         {
+            std::string readyJson;
+            std::string applicationJson;
+            if (FindDirectObject(payload, "d", readyJson) && FindDirectObject(readyJson, "application", applicationJson))
+            {
+                std::string applicationId;
+                if (FindDirectString(applicationJson, "id", applicationId))
+                {
+                    std::lock_guard<std::mutex> lock(applicationMutex_);
+                    applicationId_ = std::move(applicationId);
+                }
+            }
+
             ready_ = true;
             connected_ = true;
             readyEventPending_ = true;
-
             sendPresence();
-
             return;
         }
 
@@ -955,8 +1031,23 @@ namespace DiscordBridge
 
             std::string dataJson;
             if (!FindDirectObject(interactionJson, "data", dataJson)) return;
-            if (!FindDirectString(dataJson, "custom_id", event.customId)) return;
 
+            if (interactionType == 2)
+            {
+                SlashCommandEvent commandEvent;
+                commandEvent.interactionId = std::move(event.interactionId);
+                commandEvent.interactionToken = std::move(event.interactionToken);
+                commandEvent.userId = std::move(event.userId);
+                commandEvent.channelId = std::move(event.channelId);
+                FindDirectString(interactionJson, "guild_id", commandEvent.guildId);
+                if (!FindDirectString(dataJson, "name", commandEvent.commandName)) return;
+                ExtractCommandOptions(dataJson, commandEvent.options);
+                std::lock_guard<std::mutex> lock(eventMutex_);
+                slashCommandEvents_.push_back(std::move(commandEvent));
+                return;
+            }
+
+            if (!FindDirectString(dataJson, "custom_id", event.customId)) return;
             std::lock_guard<std::mutex> lock(eventMutex_);
 
             if (interactionType == 3)
@@ -1099,5 +1190,7 @@ namespace DiscordBridge
         buttonClickEvents_.clear();
         selectMenuEvents_.clear();
         modalEvents_.clear();
+        slashCommandEvents_.clear();
+        { std::lock_guard<std::mutex> appLock(applicationMutex_); applicationId_.clear(); }
     }
 }

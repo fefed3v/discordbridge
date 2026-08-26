@@ -297,7 +297,7 @@ namespace DiscordBridge
         const std::wstring headers =
             L"Authorization: Bot " + tokenWide +
             L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.4"
+            L"\r\nUser-Agent: DiscordBridge/0.0.5"
             L"\r\n";
 
         const HttpResponse response = httpClient_.get(
@@ -453,6 +453,9 @@ namespace DiscordBridge
 
     bool DiscordClient::consumeModalEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId, std::vector<std::pair<std::string, std::string>>& values)
     { return gateway_.consumeModalEvent(interactionId, interactionToken, userId, channelId, customId, values); }
+
+    bool DiscordClient::consumeSlashCommandEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& guildId, std::string& channelId, std::string& commandName, std::vector<std::pair<std::string, std::string>>& options)
+    { return gateway_.consumeSlashCommandEvent(interactionId, interactionToken, userId, guildId, channelId, commandName, options); }
 
     bool DiscordClient::acknowledgeInteractionAsync(const std::string& id, const std::string& token)
     {
@@ -765,6 +768,13 @@ namespace DiscordBridge
         return enqueueMessageOperation({MessageOperationType::UnbanMember, guildId, userId, {}});
     }
 
+    bool DiscordClient::deployCommands(const std::string& guildId, const std::string& commandsJson)
+    {
+        const std::string applicationId = gateway_.getApplicationId();
+        if (!initialized_ || !restRunning_ || guildId.empty() || commandsJson.empty() || applicationId.empty()) return false;
+        return enqueueMessageOperation({MessageOperationType::DeployCommands, guildId, applicationId, commandsJson}, true);
+    }
+
     bool DiscordClient::consumeGuildOperationResultInternal(MessageOperationType type, bool& success, std::string& guildId, std::string& targetId)
     {
         std::lock_guard<std::mutex> lock(resultMutex_);
@@ -789,6 +799,7 @@ namespace DiscordBridge
     bool DiscordClient::consumeMemberKickedEvent(bool& s, std::string& g, std::string& id) { return consumeGuildOperationResultInternal(MessageOperationType::KickMember, s, g, id); }
     bool DiscordClient::consumeMemberBannedEvent(bool& s, std::string& g, std::string& id) { return consumeGuildOperationResultInternal(MessageOperationType::BanMember, s, g, id); }
     bool DiscordClient::consumeMemberUnbannedEvent(bool& s, std::string& g, std::string& id) { return consumeGuildOperationResultInternal(MessageOperationType::UnbanMember, s, g, id); }
+    bool DiscordClient::consumeCommandsDeployedEvent(bool& s, std::string& g) { std::string id; return consumeGuildOperationResultInternal(MessageOperationType::DeployCommands, s, g, id); }
 
     bool DiscordClient::enqueueMessageOperation(MessageOperation operation, bool prioritize)
     {
@@ -837,7 +848,7 @@ namespace DiscordBridge
         const std::wstring tokenWide = Utf8ToWide(interactionToken);
         if (interactionWide.empty() || tokenWide.empty()) return false;
 
-        const std::wstring headers = L"Content-Type: application/json\r\nAccept: application/json\r\nUser-Agent: DiscordBridge/0.0.4\r\n";
+        const std::wstring headers = L"Content-Type: application/json\r\nAccept: application/json\r\nUser-Agent: DiscordBridge/0.0.5\r\n";
         const std::wstring path = L"/api/v10/interactions/" + interactionWide + L"/" + tokenWide + L"/callback";
         const HttpResponse response = interactionHttpClient_.post(L"discord.com", path, headers, body);
         if (!response.success)
@@ -940,17 +951,23 @@ namespace DiscordBridge
                 case MessageOperationType::KickMember:
                 case MessageOperationType::BanMember:
                 case MessageOperationType::UnbanMember:
+                case MessageOperationType::DeployCommands:
                 {
                     const std::wstring tokenWide = Utf8ToWide(token_);
                     const std::wstring guildWide = Utf8ToWide(operation.channelId);
                     const std::wstring targetWide = Utf8ToWide(operation.messageId);
                     const std::wstring extraWide = Utf8ToWide(operation.content);
-                    const std::wstring headers = L"Authorization: Bot " + tokenWide + L"\r\nAccept: application/json\r\nUser-Agent: DiscordBridge/0.0.4\r\n";
+                    const std::wstring headers = L"Authorization: Bot " + tokenWide + L"\r\nAccept: application/json\r\nUser-Agent: DiscordBridge/0.0.5\r\n";
                     const std::wstring jsonHeaders = headers + L"Content-Type: application/json\r\n";
                     HttpResponse response;
                     std::string resultId = operation.messageId;
 
-                    if (operation.type == MessageOperationType::CreateChannel)
+                    if (operation.type == MessageOperationType::DeployCommands)
+                    {
+                        response = httpClient_.put(L"discord.com", L"/api/v10/applications/" + targetWide + L"/guilds/" + guildWide + L"/commands", jsonHeaders, operation.content);
+                        resultId = operation.messageId;
+                    }
+                    else if (operation.type == MessageOperationType::CreateChannel)
                     {
                         response = httpClient_.post(L"discord.com", L"/api/v10/guilds/" + guildWide + L"/channels", jsonHeaders, operation.content);
                         if (response.success) FindRootString(response.body, "id", resultId);
@@ -1045,7 +1062,7 @@ namespace DiscordBridge
             L"Authorization: Bot " + tokenWide +
             L"\r\nContent-Type: application/json"
             L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.4"
+            L"\r\nUser-Agent: DiscordBridge/0.0.5"
             L"\r\n";
 
         const std::string body =
@@ -1086,7 +1103,7 @@ namespace DiscordBridge
             L"Authorization: Bot " + tokenWide +
             L"\r\nContent-Type: application/json"
             L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.4"
+            L"\r\nUser-Agent: DiscordBridge/0.0.5"
             L"\r\n";
 
         const std::string body =
@@ -1121,7 +1138,7 @@ namespace DiscordBridge
         const std::wstring headers =
             L"Authorization: Bot " + tokenWide +
             L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.4"
+            L"\r\nUser-Agent: DiscordBridge/0.0.5"
             L"\r\n";
 
         const std::wstring path =
@@ -1152,7 +1169,7 @@ namespace DiscordBridge
             L"Authorization: Bot " + tokenWide +
             L"\r\nContent-Type: application/json"
             L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.4"
+            L"\r\nUser-Agent: DiscordBridge/0.0.5"
             L"\r\n";
 
         const std::string body =
@@ -1194,7 +1211,7 @@ namespace DiscordBridge
             L"Authorization: Bot " + tokenWide +
             L"\r\nContent-Type: application/json"
             L"\r\nAccept: application/json"
-            L"\r\nUser-Agent: DiscordBridge/0.0.4"
+            L"\r\nUser-Agent: DiscordBridge/0.0.5"
             L"\r\n";
 
         const std::string body = "{\"components\":[" + componentsJson + "]}";
