@@ -8,7 +8,6 @@
 #endif
 
 using namespace std;
-using namespace DiscordBridge;
 
 namespace DiscordBridge
 {
