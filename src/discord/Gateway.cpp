@@ -5,14 +5,22 @@
 #include <limits>
 #include <utility>
 #include <vector>
+#ifndef _WIN32
+#include <curl/curl.h>
+#include <cstring>
+#endif
 
 namespace DiscordBridge
 {
     namespace
     {
+#ifdef _WIN32
         constexpr wchar_t GATEWAY_HOST[] = L"gateway.discord.gg";
         constexpr wchar_t GATEWAY_PATH[] = L"/?v=10&encoding=json";
         constexpr wchar_t USER_AGENT[] = L"DiscordBridge/0.0.7";
+#else
+        constexpr char GATEWAY_URL[] = "wss://gateway.discord.gg/?v=10&encoding=json";
+#endif
 
         constexpr std::uint32_t GATEWAY_INTENTS = (1u << 0) | (1u << 1) | (1u << 9) | (1u << 15);
 
@@ -522,6 +530,7 @@ namespace DiscordBridge
         token_ = token;
         resetState();
 
+#ifdef _WIN32
         session_ = WinHttpOpen(USER_AGENT, WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
         if (!session_) return failConnection();
 
@@ -545,6 +554,17 @@ namespace DiscordBridge
 
         WinHttpCloseHandle(request_);
         request_ = nullptr;
+#else
+        if (curl_global_init(CURL_GLOBAL_DEFAULT) != CURLE_OK) return failConnection();
+        CURL* socket = curl_easy_init();
+        if (!socket) return failConnection();
+        curl_easy_setopt(socket, CURLOPT_URL, GATEWAY_URL);
+        curl_easy_setopt(socket, CURLOPT_USERAGENT, "DiscordBridge/0.0.7");
+        curl_easy_setopt(socket, CURLOPT_CONNECT_ONLY, 2L);
+        curl_easy_setopt(socket, CURLOPT_CONNECTTIMEOUT_MS, 10000L);
+        if (curl_easy_perform(socket) != CURLE_OK) { curl_easy_cleanup(socket); return failConnection(); }
+        webSocket_ = socket;
+#endif
 
         initialized_ = true;
         connected_ = true;
@@ -574,11 +594,14 @@ namespace DiscordBridge
 
         if (webSocket_)
         {
-            HINTERNET socket = webSocket_;
-            webSocket_ = nullptr;
-
+#ifdef _WIN32
+            HINTERNET socket = webSocket_; webSocket_ = nullptr;
             WinHttpWebSocketShutdown(socket, WINHTTP_WEB_SOCKET_SUCCESS_CLOSE_STATUS, nullptr, 0);
             WinHttpCloseHandle(socket);
+#else
+            CURL* socket = static_cast<CURL*>(webSocket_); webSocket_ = nullptr;
+            curl_easy_cleanup(socket);
+#endif
         }
 
         if (heartbeatThread_.joinable() && heartbeatThread_.get_id() != std::this_thread::get_id()) heartbeatThread_.join();
@@ -812,46 +835,50 @@ namespace DiscordBridge
     bool Gateway::receivePayload(std::string& payload)
     {
         payload.clear();
-
+#ifdef _WIN32
         HINTERNET socket = webSocket_;
-
         if (!running_ || !socket) return false;
-
         std::vector<char> buffer(8192);
-
         while (running_)
         {
-            DWORD bytesRead = 0;
-            WINHTTP_WEB_SOCKET_BUFFER_TYPE bufferType{};
-
+            DWORD bytesRead = 0; WINHTTP_WEB_SOCKET_BUFFER_TYPE bufferType{};
             const DWORD result = WinHttpWebSocketReceive(socket, buffer.data(), static_cast<DWORD>(buffer.size()), &bytesRead, &bufferType);
-
             if (result != NO_ERROR || !running_ || bufferType == WINHTTP_WEB_SOCKET_CLOSE_BUFFER_TYPE) return false;
-
             if (bytesRead > 0) payload.append(buffer.data(), bytesRead);
-
             if (bufferType == WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE) return true;
             if (bufferType != WINHTTP_WEB_SOCKET_UTF8_FRAGMENT_BUFFER_TYPE) return false;
         }
-
+#else
+        CURL* socket = static_cast<CURL*>(webSocket_);
+        if (!running_ || !socket) return false;
+        char buffer[8192];
+        while (running_)
+        {
+            size_t received = 0; const curl_ws_frame* meta = nullptr;
+            CURLcode result = curl_ws_recv(socket, buffer, sizeof(buffer), &received, &meta);
+            if (result == CURLE_AGAIN) { std::this_thread::sleep_for(std::chrono::milliseconds(5)); continue; }
+            if (result != CURLE_OK || !meta || (meta->flags & CURLWS_CLOSE)) return false;
+            if (received) payload.append(buffer, received);
+            if (meta->bytesleft == 0 && !(meta->flags & CURLWS_CONT)) return true;
+        }
+#endif
         return false;
     }
 
     bool Gateway::sendText(const std::string& payload)
     {
         if (payload.empty()) return false;
-
         std::lock_guard<std::mutex> lock(sendMutex_);
-
+#ifdef _WIN32
         HINTERNET socket = webSocket_;
         if (!running_ || !socket) return false;
-
-        return WinHttpWebSocketSend(
-            socket,
-            WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE,
-            const_cast<char*>(payload.data()),
-            static_cast<DWORD>(payload.size())
-        ) == NO_ERROR;
+        return WinHttpWebSocketSend(socket, WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE, const_cast<char*>(payload.data()), static_cast<DWORD>(payload.size())) == NO_ERROR;
+#else
+        CURL* socket = static_cast<CURL*>(webSocket_);
+        if (!running_ || !socket) return false;
+        size_t sent = 0;
+        return curl_ws_send(socket, payload.data(), payload.size(), &sent, 0, CURLWS_TEXT) == CURLE_OK && sent == payload.size();
+#endif
     }
 
     bool Gateway::sendHeartbeat()
@@ -1149,29 +1176,14 @@ namespace DiscordBridge
 
     void Gateway::closeHandles()
     {
-        if (webSocket_)
-        {
-            WinHttpCloseHandle(webSocket_);
-            webSocket_ = nullptr;
-        }
-
-        if (request_)
-        {
-            WinHttpCloseHandle(request_);
-            request_ = nullptr;
-        }
-
-        if (connection_)
-        {
-            WinHttpCloseHandle(connection_);
-            connection_ = nullptr;
-        }
-
-        if (session_)
-        {
-            WinHttpCloseHandle(session_);
-            session_ = nullptr;
-        }
+#ifdef _WIN32
+        if (webSocket_) { WinHttpCloseHandle(webSocket_); webSocket_ = nullptr; }
+        if (request_) { WinHttpCloseHandle(request_); request_ = nullptr; }
+        if (connection_) { WinHttpCloseHandle(connection_); connection_ = nullptr; }
+        if (session_) { WinHttpCloseHandle(session_); session_ = nullptr; }
+#else
+        if (webSocket_) { curl_easy_cleanup(static_cast<CURL*>(webSocket_)); webSocket_ = nullptr; }
+#endif
     }
 
     void Gateway::resetState()

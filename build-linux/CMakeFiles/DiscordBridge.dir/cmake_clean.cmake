@@ -1,0 +1,41 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/DiscordBridge.dir/external/samp-plugin-sdk/amxplugin.cpp.o"
+  "CMakeFiles/DiscordBridge.dir/external/samp-plugin-sdk/amxplugin.cpp.o.d"
+  "CMakeFiles/DiscordBridge.dir/src/core/BridgeCore.cpp.o"
+  "CMakeFiles/DiscordBridge.dir/src/core/BridgeCore.cpp.o.d"
+  "CMakeFiles/DiscordBridge.dir/src/discord/Button.cpp.o"
+  "CMakeFiles/DiscordBridge.dir/src/discord/Button.cpp.o.d"
+  "CMakeFiles/DiscordBridge.dir/src/discord/Command.cpp.o"
+  "CMakeFiles/DiscordBridge.dir/src/discord/Command.cpp.o.d"
+  "CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.o"
+  "CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.o.d"
+  "CMakeFiles/DiscordBridge.dir/src/discord/DiscordClient.cpp.o"
+  "CMakeFiles/DiscordBridge.dir/src/discord/DiscordClient.cpp.o.d"
+  "CMakeFiles/DiscordBridge.dir/src/discord/DiscordData.cpp.o"
+  "CMakeFiles/DiscordBridge.dir/src/discord/DiscordData.cpp.o.d"
+  "CMakeFiles/DiscordBridge.dir/src/discord/Embed.cpp.o"
+  "CMakeFiles/DiscordBridge.dir/src/discord/Embed.cpp.o.d"
+  "CMakeFiles/DiscordBridge.dir/src/discord/Gateway.cpp.o"
+  "CMakeFiles/DiscordBridge.dir/src/discord/Gateway.cpp.o.d"
+  "CMakeFiles/DiscordBridge.dir/src/discord/HttpClient.cpp.o"
+  "CMakeFiles/DiscordBridge.dir/src/discord/HttpClient.cpp.o.d"
+  "CMakeFiles/DiscordBridge.dir/src/discord/Modal.cpp.o"
+  "CMakeFiles/DiscordBridge.dir/src/discord/Modal.cpp.o.d"
+  "CMakeFiles/DiscordBridge.dir/src/discord/SelectMenu.cpp.o"
+  "CMakeFiles/DiscordBridge.dir/src/discord/SelectMenu.cpp.o.d"
+  "CMakeFiles/DiscordBridge.dir/src/pawn/Natives.cpp.o"
+  "CMakeFiles/DiscordBridge.dir/src/pawn/Natives.cpp.o.d"
+  "CMakeFiles/DiscordBridge.dir/src/pawn/PawnRuntime.cpp.o"
+  "CMakeFiles/DiscordBridge.dir/src/pawn/PawnRuntime.cpp.o.d"
+  "CMakeFiles/DiscordBridge.dir/src/plugin/AmxExports.cpp.o"
+  "CMakeFiles/DiscordBridge.dir/src/plugin/AmxExports.cpp.o.d"
+  "CMakeFiles/DiscordBridge.dir/src/plugin/Plugin.cpp.o"
+  "CMakeFiles/DiscordBridge.dir/src/plugin/Plugin.cpp.o.d"
+  "DiscordBridge/Release/DiscordBridge.pdb"
+  "DiscordBridge/Release/DiscordBridge.so"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CXX)
+  include(CMakeFiles/DiscordBridge.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()
