@@ -5,7 +5,7 @@ CMakeFiles/DiscordBridge.dir/src/plugin/Plugin.cpp.o: \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/AmxExports.hpp \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../Version.hpp \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/BridgeCore.hpp \
- /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/Button.hpp \
+ /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/components/legacy/Button.hpp \
  /usr/include/c++/13/cstdint \
  /usr/include/x86_64-linux-gnu/c++/13/32/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/32/bits/os_defines.h \
@@ -220,9 +220,9 @@ CMakeFiles/DiscordBridge.dir/src/plugin/Plugin.cpp.o: \
  /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \
  /usr/include/c++/13/bits/vector.tcc \
- /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/SelectMenu.hpp \
- /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/DiscordClient.hpp \
- /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/Gateway.hpp \
+ /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/components/legacy/SelectMenu.hpp \
+ /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/client/DiscordClient.hpp \
+ /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/client/../gateway/Gateway.hpp \
  /usr/include/c++/13/atomic /usr/include/c++/13/condition_variable \
  /usr/include/c++/13/bits/chrono.h /usr/include/c++/13/ratio \
  /usr/include/c++/13/limits /usr/include/c++/13/ctime \
@@ -237,7 +237,7 @@ CMakeFiles/DiscordBridge.dir/src/plugin/Plugin.cpp.o: \
  /usr/include/c++/13/bits/stl_deque.h /usr/include/c++/13/bits/deque.tcc \
  /usr/include/c++/13/mutex /usr/include/c++/13/thread \
  /usr/include/c++/13/utility /usr/include/c++/13/bits/stl_relops.h \
- /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/../security/AbuseGuard.hpp \
+ /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/client/../gateway/../../security/AbuseGuard.hpp \
  /usr/include/c++/13/chrono /usr/include/c++/13/sstream \
  /usr/include/c++/13/istream /usr/include/c++/13/bits/istream.tcc \
  /usr/include/c++/13/bits/sstream.tcc /usr/include/c++/13/bits/stl_algo.h \
@@ -256,15 +256,15 @@ CMakeFiles/DiscordBridge.dir/src/plugin/Plugin.cpp.o: \
  /usr/include/c++/13/array /usr/include/c++/13/charconv \
  /usr/include/c++/13/optional /usr/include/c++/13/span \
  /usr/include/c++/13/variant \
- /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/HttpClient.hpp \
- /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/DiscordData.hpp \
+ /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/client/../http/HttpClient.hpp \
+ /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/client/../data/DiscordData.hpp \
  /usr/include/c++/13/unordered_set \
  /usr/include/c++/13/bits/unordered_set.h \
- /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/Embed.hpp \
- /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/Modal.hpp \
- /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/Command.hpp \
- /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/components/ComponentsV2.hpp \
- /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/components/Component.hpp \
+ /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/embeds/Embed.hpp \
+ /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/components/legacy/Modal.hpp \
+ /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/commands/Command.hpp \
+ /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/components/v2/ComponentsV2.hpp \
+ /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/components/v2/Component.hpp \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../pawn/PawnRuntime.hpp \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/external/samp-plugin-sdk/amx/amx.h \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/external/samp-plugin-sdk/amx/sclinux.h \

@@ -177,269 +177,269 @@ src/core/BridgeCore.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/core/BridgeCore.cpp.s
 .PHONY : src/core/BridgeCore.cpp.s
 
-src/discord/Button.o: src/discord/Button.cpp.o
-.PHONY : src/discord/Button.o
+src/discord/client/DiscordClient.o: src/discord/client/DiscordClient.cpp.o
+.PHONY : src/discord/client/DiscordClient.o
 
 # target to build an object file
-src/discord/Button.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/Button.cpp.o
-.PHONY : src/discord/Button.cpp.o
+src/discord/client/DiscordClient.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/client/DiscordClient.cpp.o
+.PHONY : src/discord/client/DiscordClient.cpp.o
 
-src/discord/Button.i: src/discord/Button.cpp.i
-.PHONY : src/discord/Button.i
+src/discord/client/DiscordClient.i: src/discord/client/DiscordClient.cpp.i
+.PHONY : src/discord/client/DiscordClient.i
 
 # target to preprocess a source file
-src/discord/Button.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/Button.cpp.i
-.PHONY : src/discord/Button.cpp.i
+src/discord/client/DiscordClient.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/client/DiscordClient.cpp.i
+.PHONY : src/discord/client/DiscordClient.cpp.i
 
-src/discord/Button.s: src/discord/Button.cpp.s
-.PHONY : src/discord/Button.s
+src/discord/client/DiscordClient.s: src/discord/client/DiscordClient.cpp.s
+.PHONY : src/discord/client/DiscordClient.s
 
 # target to generate assembly for a file
-src/discord/Button.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/Button.cpp.s
-.PHONY : src/discord/Button.cpp.s
+src/discord/client/DiscordClient.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/client/DiscordClient.cpp.s
+.PHONY : src/discord/client/DiscordClient.cpp.s
 
-src/discord/Command.o: src/discord/Command.cpp.o
-.PHONY : src/discord/Command.o
+src/discord/commands/Command.o: src/discord/commands/Command.cpp.o
+.PHONY : src/discord/commands/Command.o
 
 # target to build an object file
-src/discord/Command.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/Command.cpp.o
-.PHONY : src/discord/Command.cpp.o
+src/discord/commands/Command.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/commands/Command.cpp.o
+.PHONY : src/discord/commands/Command.cpp.o
 
-src/discord/Command.i: src/discord/Command.cpp.i
-.PHONY : src/discord/Command.i
+src/discord/commands/Command.i: src/discord/commands/Command.cpp.i
+.PHONY : src/discord/commands/Command.i
 
 # target to preprocess a source file
-src/discord/Command.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/Command.cpp.i
-.PHONY : src/discord/Command.cpp.i
+src/discord/commands/Command.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/commands/Command.cpp.i
+.PHONY : src/discord/commands/Command.cpp.i
 
-src/discord/Command.s: src/discord/Command.cpp.s
-.PHONY : src/discord/Command.s
+src/discord/commands/Command.s: src/discord/commands/Command.cpp.s
+.PHONY : src/discord/commands/Command.s
 
 # target to generate assembly for a file
-src/discord/Command.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/Command.cpp.s
-.PHONY : src/discord/Command.cpp.s
+src/discord/commands/Command.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/commands/Command.cpp.s
+.PHONY : src/discord/commands/Command.cpp.s
 
-src/discord/DiscordClient.o: src/discord/DiscordClient.cpp.o
-.PHONY : src/discord/DiscordClient.o
+src/discord/components/legacy/Button.o: src/discord/components/legacy/Button.cpp.o
+.PHONY : src/discord/components/legacy/Button.o
 
 # target to build an object file
-src/discord/DiscordClient.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/DiscordClient.cpp.o
-.PHONY : src/discord/DiscordClient.cpp.o
+src/discord/components/legacy/Button.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/legacy/Button.cpp.o
+.PHONY : src/discord/components/legacy/Button.cpp.o
 
-src/discord/DiscordClient.i: src/discord/DiscordClient.cpp.i
-.PHONY : src/discord/DiscordClient.i
+src/discord/components/legacy/Button.i: src/discord/components/legacy/Button.cpp.i
+.PHONY : src/discord/components/legacy/Button.i
 
 # target to preprocess a source file
-src/discord/DiscordClient.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/DiscordClient.cpp.i
-.PHONY : src/discord/DiscordClient.cpp.i
+src/discord/components/legacy/Button.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/legacy/Button.cpp.i
+.PHONY : src/discord/components/legacy/Button.cpp.i
 
-src/discord/DiscordClient.s: src/discord/DiscordClient.cpp.s
-.PHONY : src/discord/DiscordClient.s
+src/discord/components/legacy/Button.s: src/discord/components/legacy/Button.cpp.s
+.PHONY : src/discord/components/legacy/Button.s
 
 # target to generate assembly for a file
-src/discord/DiscordClient.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/DiscordClient.cpp.s
-.PHONY : src/discord/DiscordClient.cpp.s
+src/discord/components/legacy/Button.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/legacy/Button.cpp.s
+.PHONY : src/discord/components/legacy/Button.cpp.s
 
-src/discord/DiscordData.o: src/discord/DiscordData.cpp.o
-.PHONY : src/discord/DiscordData.o
+src/discord/components/legacy/Modal.o: src/discord/components/legacy/Modal.cpp.o
+.PHONY : src/discord/components/legacy/Modal.o
 
 # target to build an object file
-src/discord/DiscordData.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/DiscordData.cpp.o
-.PHONY : src/discord/DiscordData.cpp.o
+src/discord/components/legacy/Modal.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/legacy/Modal.cpp.o
+.PHONY : src/discord/components/legacy/Modal.cpp.o
 
-src/discord/DiscordData.i: src/discord/DiscordData.cpp.i
-.PHONY : src/discord/DiscordData.i
+src/discord/components/legacy/Modal.i: src/discord/components/legacy/Modal.cpp.i
+.PHONY : src/discord/components/legacy/Modal.i
 
 # target to preprocess a source file
-src/discord/DiscordData.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/DiscordData.cpp.i
-.PHONY : src/discord/DiscordData.cpp.i
+src/discord/components/legacy/Modal.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/legacy/Modal.cpp.i
+.PHONY : src/discord/components/legacy/Modal.cpp.i
 
-src/discord/DiscordData.s: src/discord/DiscordData.cpp.s
-.PHONY : src/discord/DiscordData.s
+src/discord/components/legacy/Modal.s: src/discord/components/legacy/Modal.cpp.s
+.PHONY : src/discord/components/legacy/Modal.s
 
 # target to generate assembly for a file
-src/discord/DiscordData.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/DiscordData.cpp.s
-.PHONY : src/discord/DiscordData.cpp.s
+src/discord/components/legacy/Modal.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/legacy/Modal.cpp.s
+.PHONY : src/discord/components/legacy/Modal.cpp.s
 
-src/discord/Embed.o: src/discord/Embed.cpp.o
-.PHONY : src/discord/Embed.o
+src/discord/components/legacy/SelectMenu.o: src/discord/components/legacy/SelectMenu.cpp.o
+.PHONY : src/discord/components/legacy/SelectMenu.o
 
 # target to build an object file
-src/discord/Embed.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/Embed.cpp.o
-.PHONY : src/discord/Embed.cpp.o
+src/discord/components/legacy/SelectMenu.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/legacy/SelectMenu.cpp.o
+.PHONY : src/discord/components/legacy/SelectMenu.cpp.o
 
-src/discord/Embed.i: src/discord/Embed.cpp.i
-.PHONY : src/discord/Embed.i
+src/discord/components/legacy/SelectMenu.i: src/discord/components/legacy/SelectMenu.cpp.i
+.PHONY : src/discord/components/legacy/SelectMenu.i
 
 # target to preprocess a source file
-src/discord/Embed.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/Embed.cpp.i
-.PHONY : src/discord/Embed.cpp.i
+src/discord/components/legacy/SelectMenu.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/legacy/SelectMenu.cpp.i
+.PHONY : src/discord/components/legacy/SelectMenu.cpp.i
 
-src/discord/Embed.s: src/discord/Embed.cpp.s
-.PHONY : src/discord/Embed.s
+src/discord/components/legacy/SelectMenu.s: src/discord/components/legacy/SelectMenu.cpp.s
+.PHONY : src/discord/components/legacy/SelectMenu.s
 
 # target to generate assembly for a file
-src/discord/Embed.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/Embed.cpp.s
-.PHONY : src/discord/Embed.cpp.s
+src/discord/components/legacy/SelectMenu.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/legacy/SelectMenu.cpp.s
+.PHONY : src/discord/components/legacy/SelectMenu.cpp.s
 
-src/discord/Gateway.o: src/discord/Gateway.cpp.o
-.PHONY : src/discord/Gateway.o
+src/discord/components/v2/Component.o: src/discord/components/v2/Component.cpp.o
+.PHONY : src/discord/components/v2/Component.o
 
 # target to build an object file
-src/discord/Gateway.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/Gateway.cpp.o
-.PHONY : src/discord/Gateway.cpp.o
+src/discord/components/v2/Component.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/v2/Component.cpp.o
+.PHONY : src/discord/components/v2/Component.cpp.o
 
-src/discord/Gateway.i: src/discord/Gateway.cpp.i
-.PHONY : src/discord/Gateway.i
+src/discord/components/v2/Component.i: src/discord/components/v2/Component.cpp.i
+.PHONY : src/discord/components/v2/Component.i
 
 # target to preprocess a source file
-src/discord/Gateway.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/Gateway.cpp.i
-.PHONY : src/discord/Gateway.cpp.i
+src/discord/components/v2/Component.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/v2/Component.cpp.i
+.PHONY : src/discord/components/v2/Component.cpp.i
 
-src/discord/Gateway.s: src/discord/Gateway.cpp.s
-.PHONY : src/discord/Gateway.s
+src/discord/components/v2/Component.s: src/discord/components/v2/Component.cpp.s
+.PHONY : src/discord/components/v2/Component.s
 
 # target to generate assembly for a file
-src/discord/Gateway.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/Gateway.cpp.s
-.PHONY : src/discord/Gateway.cpp.s
+src/discord/components/v2/Component.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/v2/Component.cpp.s
+.PHONY : src/discord/components/v2/Component.cpp.s
 
-src/discord/HttpClient.o: src/discord/HttpClient.cpp.o
-.PHONY : src/discord/HttpClient.o
+src/discord/components/v2/ComponentsV2.o: src/discord/components/v2/ComponentsV2.cpp.o
+.PHONY : src/discord/components/v2/ComponentsV2.o
 
 # target to build an object file
-src/discord/HttpClient.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/HttpClient.cpp.o
-.PHONY : src/discord/HttpClient.cpp.o
+src/discord/components/v2/ComponentsV2.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/v2/ComponentsV2.cpp.o
+.PHONY : src/discord/components/v2/ComponentsV2.cpp.o
 
-src/discord/HttpClient.i: src/discord/HttpClient.cpp.i
-.PHONY : src/discord/HttpClient.i
+src/discord/components/v2/ComponentsV2.i: src/discord/components/v2/ComponentsV2.cpp.i
+.PHONY : src/discord/components/v2/ComponentsV2.i
 
 # target to preprocess a source file
-src/discord/HttpClient.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/HttpClient.cpp.i
-.PHONY : src/discord/HttpClient.cpp.i
+src/discord/components/v2/ComponentsV2.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/v2/ComponentsV2.cpp.i
+.PHONY : src/discord/components/v2/ComponentsV2.cpp.i
 
-src/discord/HttpClient.s: src/discord/HttpClient.cpp.s
-.PHONY : src/discord/HttpClient.s
+src/discord/components/v2/ComponentsV2.s: src/discord/components/v2/ComponentsV2.cpp.s
+.PHONY : src/discord/components/v2/ComponentsV2.s
 
 # target to generate assembly for a file
-src/discord/HttpClient.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/HttpClient.cpp.s
-.PHONY : src/discord/HttpClient.cpp.s
+src/discord/components/v2/ComponentsV2.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/v2/ComponentsV2.cpp.s
+.PHONY : src/discord/components/v2/ComponentsV2.cpp.s
 
-src/discord/Modal.o: src/discord/Modal.cpp.o
-.PHONY : src/discord/Modal.o
+src/discord/data/DiscordData.o: src/discord/data/DiscordData.cpp.o
+.PHONY : src/discord/data/DiscordData.o
 
 # target to build an object file
-src/discord/Modal.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/Modal.cpp.o
-.PHONY : src/discord/Modal.cpp.o
+src/discord/data/DiscordData.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/data/DiscordData.cpp.o
+.PHONY : src/discord/data/DiscordData.cpp.o
 
-src/discord/Modal.i: src/discord/Modal.cpp.i
-.PHONY : src/discord/Modal.i
+src/discord/data/DiscordData.i: src/discord/data/DiscordData.cpp.i
+.PHONY : src/discord/data/DiscordData.i
 
 # target to preprocess a source file
-src/discord/Modal.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/Modal.cpp.i
-.PHONY : src/discord/Modal.cpp.i
+src/discord/data/DiscordData.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/data/DiscordData.cpp.i
+.PHONY : src/discord/data/DiscordData.cpp.i
 
-src/discord/Modal.s: src/discord/Modal.cpp.s
-.PHONY : src/discord/Modal.s
+src/discord/data/DiscordData.s: src/discord/data/DiscordData.cpp.s
+.PHONY : src/discord/data/DiscordData.s
 
 # target to generate assembly for a file
-src/discord/Modal.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/Modal.cpp.s
-.PHONY : src/discord/Modal.cpp.s
+src/discord/data/DiscordData.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/data/DiscordData.cpp.s
+.PHONY : src/discord/data/DiscordData.cpp.s
 
-src/discord/SelectMenu.o: src/discord/SelectMenu.cpp.o
-.PHONY : src/discord/SelectMenu.o
+src/discord/embeds/Embed.o: src/discord/embeds/Embed.cpp.o
+.PHONY : src/discord/embeds/Embed.o
 
 # target to build an object file
-src/discord/SelectMenu.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/SelectMenu.cpp.o
-.PHONY : src/discord/SelectMenu.cpp.o
+src/discord/embeds/Embed.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/embeds/Embed.cpp.o
+.PHONY : src/discord/embeds/Embed.cpp.o
 
-src/discord/SelectMenu.i: src/discord/SelectMenu.cpp.i
-.PHONY : src/discord/SelectMenu.i
+src/discord/embeds/Embed.i: src/discord/embeds/Embed.cpp.i
+.PHONY : src/discord/embeds/Embed.i
 
 # target to preprocess a source file
-src/discord/SelectMenu.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/SelectMenu.cpp.i
-.PHONY : src/discord/SelectMenu.cpp.i
+src/discord/embeds/Embed.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/embeds/Embed.cpp.i
+.PHONY : src/discord/embeds/Embed.cpp.i
 
-src/discord/SelectMenu.s: src/discord/SelectMenu.cpp.s
-.PHONY : src/discord/SelectMenu.s
+src/discord/embeds/Embed.s: src/discord/embeds/Embed.cpp.s
+.PHONY : src/discord/embeds/Embed.s
 
 # target to generate assembly for a file
-src/discord/SelectMenu.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/SelectMenu.cpp.s
-.PHONY : src/discord/SelectMenu.cpp.s
+src/discord/embeds/Embed.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/embeds/Embed.cpp.s
+.PHONY : src/discord/embeds/Embed.cpp.s
 
-src/discord/components/Component.o: src/discord/components/Component.cpp.o
-.PHONY : src/discord/components/Component.o
+src/discord/gateway/Gateway.o: src/discord/gateway/Gateway.cpp.o
+.PHONY : src/discord/gateway/Gateway.o
 
 # target to build an object file
-src/discord/components/Component.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.o
-.PHONY : src/discord/components/Component.cpp.o
+src/discord/gateway/Gateway.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/gateway/Gateway.cpp.o
+.PHONY : src/discord/gateway/Gateway.cpp.o
 
-src/discord/components/Component.i: src/discord/components/Component.cpp.i
-.PHONY : src/discord/components/Component.i
+src/discord/gateway/Gateway.i: src/discord/gateway/Gateway.cpp.i
+.PHONY : src/discord/gateway/Gateway.i
 
 # target to preprocess a source file
-src/discord/components/Component.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.i
-.PHONY : src/discord/components/Component.cpp.i
+src/discord/gateway/Gateway.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/gateway/Gateway.cpp.i
+.PHONY : src/discord/gateway/Gateway.cpp.i
 
-src/discord/components/Component.s: src/discord/components/Component.cpp.s
-.PHONY : src/discord/components/Component.s
+src/discord/gateway/Gateway.s: src/discord/gateway/Gateway.cpp.s
+.PHONY : src/discord/gateway/Gateway.s
 
 # target to generate assembly for a file
-src/discord/components/Component.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.s
-.PHONY : src/discord/components/Component.cpp.s
+src/discord/gateway/Gateway.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/gateway/Gateway.cpp.s
+.PHONY : src/discord/gateway/Gateway.cpp.s
 
-src/discord/components/ComponentsV2.o: src/discord/components/ComponentsV2.cpp.o
-.PHONY : src/discord/components/ComponentsV2.o
+src/discord/http/HttpClient.o: src/discord/http/HttpClient.cpp.o
+.PHONY : src/discord/http/HttpClient.o
 
 # target to build an object file
-src/discord/components/ComponentsV2.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.o
-.PHONY : src/discord/components/ComponentsV2.cpp.o
+src/discord/http/HttpClient.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/http/HttpClient.cpp.o
+.PHONY : src/discord/http/HttpClient.cpp.o
 
-src/discord/components/ComponentsV2.i: src/discord/components/ComponentsV2.cpp.i
-.PHONY : src/discord/components/ComponentsV2.i
+src/discord/http/HttpClient.i: src/discord/http/HttpClient.cpp.i
+.PHONY : src/discord/http/HttpClient.i
 
 # target to preprocess a source file
-src/discord/components/ComponentsV2.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.i
-.PHONY : src/discord/components/ComponentsV2.cpp.i
+src/discord/http/HttpClient.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/http/HttpClient.cpp.i
+.PHONY : src/discord/http/HttpClient.cpp.i
 
-src/discord/components/ComponentsV2.s: src/discord/components/ComponentsV2.cpp.s
-.PHONY : src/discord/components/ComponentsV2.s
+src/discord/http/HttpClient.s: src/discord/http/HttpClient.cpp.s
+.PHONY : src/discord/http/HttpClient.s
 
 # target to generate assembly for a file
-src/discord/components/ComponentsV2.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.s
-.PHONY : src/discord/components/ComponentsV2.cpp.s
+src/discord/http/HttpClient.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/http/HttpClient.cpp.s
+.PHONY : src/discord/http/HttpClient.cpp.s
 
 src/pawn/Natives.o: src/pawn/Natives.cpp.o
 .PHONY : src/pawn/Natives.o
@@ -552,39 +552,39 @@ help:
 	@echo "... src/core/BridgeCore.o"
 	@echo "... src/core/BridgeCore.i"
 	@echo "... src/core/BridgeCore.s"
-	@echo "... src/discord/Button.o"
-	@echo "... src/discord/Button.i"
-	@echo "... src/discord/Button.s"
-	@echo "... src/discord/Command.o"
-	@echo "... src/discord/Command.i"
-	@echo "... src/discord/Command.s"
-	@echo "... src/discord/DiscordClient.o"
-	@echo "... src/discord/DiscordClient.i"
-	@echo "... src/discord/DiscordClient.s"
-	@echo "... src/discord/DiscordData.o"
-	@echo "... src/discord/DiscordData.i"
-	@echo "... src/discord/DiscordData.s"
-	@echo "... src/discord/Embed.o"
-	@echo "... src/discord/Embed.i"
-	@echo "... src/discord/Embed.s"
-	@echo "... src/discord/Gateway.o"
-	@echo "... src/discord/Gateway.i"
-	@echo "... src/discord/Gateway.s"
-	@echo "... src/discord/HttpClient.o"
-	@echo "... src/discord/HttpClient.i"
-	@echo "... src/discord/HttpClient.s"
-	@echo "... src/discord/Modal.o"
-	@echo "... src/discord/Modal.i"
-	@echo "... src/discord/Modal.s"
-	@echo "... src/discord/SelectMenu.o"
-	@echo "... src/discord/SelectMenu.i"
-	@echo "... src/discord/SelectMenu.s"
-	@echo "... src/discord/components/Component.o"
-	@echo "... src/discord/components/Component.i"
-	@echo "... src/discord/components/Component.s"
-	@echo "... src/discord/components/ComponentsV2.o"
-	@echo "... src/discord/components/ComponentsV2.i"
-	@echo "... src/discord/components/ComponentsV2.s"
+	@echo "... src/discord/client/DiscordClient.o"
+	@echo "... src/discord/client/DiscordClient.i"
+	@echo "... src/discord/client/DiscordClient.s"
+	@echo "... src/discord/commands/Command.o"
+	@echo "... src/discord/commands/Command.i"
+	@echo "... src/discord/commands/Command.s"
+	@echo "... src/discord/components/legacy/Button.o"
+	@echo "... src/discord/components/legacy/Button.i"
+	@echo "... src/discord/components/legacy/Button.s"
+	@echo "... src/discord/components/legacy/Modal.o"
+	@echo "... src/discord/components/legacy/Modal.i"
+	@echo "... src/discord/components/legacy/Modal.s"
+	@echo "... src/discord/components/legacy/SelectMenu.o"
+	@echo "... src/discord/components/legacy/SelectMenu.i"
+	@echo "... src/discord/components/legacy/SelectMenu.s"
+	@echo "... src/discord/components/v2/Component.o"
+	@echo "... src/discord/components/v2/Component.i"
+	@echo "... src/discord/components/v2/Component.s"
+	@echo "... src/discord/components/v2/ComponentsV2.o"
+	@echo "... src/discord/components/v2/ComponentsV2.i"
+	@echo "... src/discord/components/v2/ComponentsV2.s"
+	@echo "... src/discord/data/DiscordData.o"
+	@echo "... src/discord/data/DiscordData.i"
+	@echo "... src/discord/data/DiscordData.s"
+	@echo "... src/discord/embeds/Embed.o"
+	@echo "... src/discord/embeds/Embed.i"
+	@echo "... src/discord/embeds/Embed.s"
+	@echo "... src/discord/gateway/Gateway.o"
+	@echo "... src/discord/gateway/Gateway.i"
+	@echo "... src/discord/gateway/Gateway.s"
+	@echo "... src/discord/http/HttpClient.o"
+	@echo "... src/discord/http/HttpClient.i"
+	@echo "... src/discord/http/HttpClient.s"
 	@echo "... src/pawn/Natives.o"
 	@echo "... src/pawn/Natives.i"
 	@echo "... src/pawn/Natives.s"
