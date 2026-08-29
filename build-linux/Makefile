@@ -225,30 +225,6 @@ src/discord/Command.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/Command.cpp.s
 .PHONY : src/discord/Command.cpp.s
 
-src/discord/ComponentsV2.o: src/discord/ComponentsV2.cpp.o
-.PHONY : src/discord/ComponentsV2.o
-
-# target to build an object file
-src/discord/ComponentsV2.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.o
-.PHONY : src/discord/ComponentsV2.cpp.o
-
-src/discord/ComponentsV2.i: src/discord/ComponentsV2.cpp.i
-.PHONY : src/discord/ComponentsV2.i
-
-# target to preprocess a source file
-src/discord/ComponentsV2.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.i
-.PHONY : src/discord/ComponentsV2.cpp.i
-
-src/discord/ComponentsV2.s: src/discord/ComponentsV2.cpp.s
-.PHONY : src/discord/ComponentsV2.s
-
-# target to generate assembly for a file
-src/discord/ComponentsV2.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.s
-.PHONY : src/discord/ComponentsV2.cpp.s
-
 src/discord/DiscordClient.o: src/discord/DiscordClient.cpp.o
 .PHONY : src/discord/DiscordClient.o
 
@@ -417,6 +393,54 @@ src/discord/SelectMenu.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/SelectMenu.cpp.s
 .PHONY : src/discord/SelectMenu.cpp.s
 
+src/discord/components/Component.o: src/discord/components/Component.cpp.o
+.PHONY : src/discord/components/Component.o
+
+# target to build an object file
+src/discord/components/Component.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.o
+.PHONY : src/discord/components/Component.cpp.o
+
+src/discord/components/Component.i: src/discord/components/Component.cpp.i
+.PHONY : src/discord/components/Component.i
+
+# target to preprocess a source file
+src/discord/components/Component.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.i
+.PHONY : src/discord/components/Component.cpp.i
+
+src/discord/components/Component.s: src/discord/components/Component.cpp.s
+.PHONY : src/discord/components/Component.s
+
+# target to generate assembly for a file
+src/discord/components/Component.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.s
+.PHONY : src/discord/components/Component.cpp.s
+
+src/discord/components/ComponentsV2.o: src/discord/components/ComponentsV2.cpp.o
+.PHONY : src/discord/components/ComponentsV2.o
+
+# target to build an object file
+src/discord/components/ComponentsV2.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.o
+.PHONY : src/discord/components/ComponentsV2.cpp.o
+
+src/discord/components/ComponentsV2.i: src/discord/components/ComponentsV2.cpp.i
+.PHONY : src/discord/components/ComponentsV2.i
+
+# target to preprocess a source file
+src/discord/components/ComponentsV2.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.i
+.PHONY : src/discord/components/ComponentsV2.cpp.i
+
+src/discord/components/ComponentsV2.s: src/discord/components/ComponentsV2.cpp.s
+.PHONY : src/discord/components/ComponentsV2.s
+
+# target to generate assembly for a file
+src/discord/components/ComponentsV2.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/DiscordBridge.dir/build.make CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.s
+.PHONY : src/discord/components/ComponentsV2.cpp.s
+
 src/pawn/Natives.o: src/pawn/Natives.cpp.o
 .PHONY : src/pawn/Natives.o
 
@@ -534,9 +558,6 @@ help:
 	@echo "... src/discord/Command.o"
 	@echo "... src/discord/Command.i"
 	@echo "... src/discord/Command.s"
-	@echo "... src/discord/ComponentsV2.o"
-	@echo "... src/discord/ComponentsV2.i"
-	@echo "... src/discord/ComponentsV2.s"
 	@echo "... src/discord/DiscordClient.o"
 	@echo "... src/discord/DiscordClient.i"
 	@echo "... src/discord/DiscordClient.s"
@@ -558,6 +579,12 @@ help:
 	@echo "... src/discord/SelectMenu.o"
 	@echo "... src/discord/SelectMenu.i"
 	@echo "... src/discord/SelectMenu.s"
+	@echo "... src/discord/components/Component.o"
+	@echo "... src/discord/components/Component.i"
+	@echo "... src/discord/components/Component.s"
+	@echo "... src/discord/components/ComponentsV2.o"
+	@echo "... src/discord/components/ComponentsV2.i"
+	@echo "... src/discord/components/ComponentsV2.s"
 	@echo "... src/pawn/Natives.o"
 	@echo "... src/pawn/Natives.i"
 	@echo "... src/pawn/Natives.s"

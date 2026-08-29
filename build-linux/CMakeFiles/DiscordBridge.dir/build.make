@@ -209,24 +209,38 @@ CMakeFiles/DiscordBridge.dir/src/discord/DiscordData.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/DiscordBridge.dir/src/discord/DiscordData.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/DiscordData.cpp" -o CMakeFiles/DiscordBridge.dir/src/discord/DiscordData.cpp.s
 
-CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.o: CMakeFiles/DiscordBridge.dir/flags.make
-CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.o: /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/discord/ComponentsV2.cpp
-CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.o: CMakeFiles/DiscordBridge.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build-linux/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.o -MF CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.o.d -o CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.o -c "/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/ComponentsV2.cpp"
+CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.o: CMakeFiles/DiscordBridge.dir/flags.make
+CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.o: /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/discord/components/ComponentsV2.cpp
+CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.o: CMakeFiles/DiscordBridge.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build-linux/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.o -MF CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.o.d -o CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.o -c "/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/components/ComponentsV2.cpp"
 
-CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/ComponentsV2.cpp" > CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.i
+CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/components/ComponentsV2.cpp" > CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.i
 
-CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/ComponentsV2.cpp" -o CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.s
+CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/components/ComponentsV2.cpp" -o CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.s
+
+CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.o: CMakeFiles/DiscordBridge.dir/flags.make
+CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.o: /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/discord/components/Component.cpp
+CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.o: CMakeFiles/DiscordBridge.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build-linux/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.o -MF CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.o.d -o CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.o -c "/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/components/Component.cpp"
+
+CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/components/Component.cpp" > CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.i
+
+CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/components/Component.cpp" -o CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.s
 
 CMakeFiles/DiscordBridge.dir/src/pawn/PawnRuntime.cpp.o: CMakeFiles/DiscordBridge.dir/flags.make
 CMakeFiles/DiscordBridge.dir/src/pawn/PawnRuntime.cpp.o: /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/pawn/PawnRuntime.cpp
 CMakeFiles/DiscordBridge.dir/src/pawn/PawnRuntime.cpp.o: CMakeFiles/DiscordBridge.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build-linux/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/DiscordBridge.dir/src/pawn/PawnRuntime.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build-linux/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/DiscordBridge.dir/src/pawn/PawnRuntime.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/DiscordBridge.dir/src/pawn/PawnRuntime.cpp.o -MF CMakeFiles/DiscordBridge.dir/src/pawn/PawnRuntime.cpp.o.d -o CMakeFiles/DiscordBridge.dir/src/pawn/PawnRuntime.cpp.o -c "/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/pawn/PawnRuntime.cpp"
 
 CMakeFiles/DiscordBridge.dir/src/pawn/PawnRuntime.cpp.i: cmake_force
@@ -240,7 +254,7 @@ CMakeFiles/DiscordBridge.dir/src/pawn/PawnRuntime.cpp.s: cmake_force
 CMakeFiles/DiscordBridge.dir/src/pawn/Natives.cpp.o: CMakeFiles/DiscordBridge.dir/flags.make
 CMakeFiles/DiscordBridge.dir/src/pawn/Natives.cpp.o: /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/pawn/Natives.cpp
 CMakeFiles/DiscordBridge.dir/src/pawn/Natives.cpp.o: CMakeFiles/DiscordBridge.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build-linux/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/DiscordBridge.dir/src/pawn/Natives.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build-linux/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/DiscordBridge.dir/src/pawn/Natives.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/DiscordBridge.dir/src/pawn/Natives.cpp.o -MF CMakeFiles/DiscordBridge.dir/src/pawn/Natives.cpp.o.d -o CMakeFiles/DiscordBridge.dir/src/pawn/Natives.cpp.o -c "/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/pawn/Natives.cpp"
 
 CMakeFiles/DiscordBridge.dir/src/pawn/Natives.cpp.i: cmake_force
@@ -254,7 +268,7 @@ CMakeFiles/DiscordBridge.dir/src/pawn/Natives.cpp.s: cmake_force
 CMakeFiles/DiscordBridge.dir/src/plugin/AmxExports.cpp.o: CMakeFiles/DiscordBridge.dir/flags.make
 CMakeFiles/DiscordBridge.dir/src/plugin/AmxExports.cpp.o: /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/AmxExports.cpp
 CMakeFiles/DiscordBridge.dir/src/plugin/AmxExports.cpp.o: CMakeFiles/DiscordBridge.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build-linux/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/DiscordBridge.dir/src/plugin/AmxExports.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build-linux/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/DiscordBridge.dir/src/plugin/AmxExports.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/DiscordBridge.dir/src/plugin/AmxExports.cpp.o -MF CMakeFiles/DiscordBridge.dir/src/plugin/AmxExports.cpp.o.d -o CMakeFiles/DiscordBridge.dir/src/plugin/AmxExports.cpp.o -c "/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/plugin/AmxExports.cpp"
 
 CMakeFiles/DiscordBridge.dir/src/plugin/AmxExports.cpp.i: cmake_force
@@ -268,7 +282,7 @@ CMakeFiles/DiscordBridge.dir/src/plugin/AmxExports.cpp.s: cmake_force
 CMakeFiles/DiscordBridge.dir/src/plugin/Plugin.cpp.o: CMakeFiles/DiscordBridge.dir/flags.make
 CMakeFiles/DiscordBridge.dir/src/plugin/Plugin.cpp.o: /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/Plugin.cpp
 CMakeFiles/DiscordBridge.dir/src/plugin/Plugin.cpp.o: CMakeFiles/DiscordBridge.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build-linux/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/DiscordBridge.dir/src/plugin/Plugin.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build-linux/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/DiscordBridge.dir/src/plugin/Plugin.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/DiscordBridge.dir/src/plugin/Plugin.cpp.o -MF CMakeFiles/DiscordBridge.dir/src/plugin/Plugin.cpp.o.d -o CMakeFiles/DiscordBridge.dir/src/plugin/Plugin.cpp.o -c "/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/plugin/Plugin.cpp"
 
 CMakeFiles/DiscordBridge.dir/src/plugin/Plugin.cpp.i: cmake_force
@@ -282,7 +296,7 @@ CMakeFiles/DiscordBridge.dir/src/plugin/Plugin.cpp.s: cmake_force
 CMakeFiles/DiscordBridge.dir/external/samp-plugin-sdk/amxplugin.cpp.o: CMakeFiles/DiscordBridge.dir/flags.make
 CMakeFiles/DiscordBridge.dir/external/samp-plugin-sdk/amxplugin.cpp.o: /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/external/samp-plugin-sdk/amxplugin.cpp
 CMakeFiles/DiscordBridge.dir/external/samp-plugin-sdk/amxplugin.cpp.o: CMakeFiles/DiscordBridge.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build-linux/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/DiscordBridge.dir/external/samp-plugin-sdk/amxplugin.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build-linux/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/DiscordBridge.dir/external/samp-plugin-sdk/amxplugin.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/DiscordBridge.dir/external/samp-plugin-sdk/amxplugin.cpp.o -MF CMakeFiles/DiscordBridge.dir/external/samp-plugin-sdk/amxplugin.cpp.o.d -o CMakeFiles/DiscordBridge.dir/external/samp-plugin-sdk/amxplugin.cpp.o -c "/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amxplugin.cpp"
 
 CMakeFiles/DiscordBridge.dir/external/samp-plugin-sdk/amxplugin.cpp.i: cmake_force
@@ -305,7 +319,8 @@ DiscordBridge_OBJECTS = \
 "CMakeFiles/DiscordBridge.dir/src/discord/Modal.cpp.o" \
 "CMakeFiles/DiscordBridge.dir/src/discord/Command.cpp.o" \
 "CMakeFiles/DiscordBridge.dir/src/discord/DiscordData.cpp.o" \
-"CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.o" \
+"CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.o" \
+"CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.o" \
 "CMakeFiles/DiscordBridge.dir/src/pawn/PawnRuntime.cpp.o" \
 "CMakeFiles/DiscordBridge.dir/src/pawn/Natives.cpp.o" \
 "CMakeFiles/DiscordBridge.dir/src/plugin/AmxExports.cpp.o" \
@@ -325,7 +340,8 @@ DiscordBridge/Release/DiscordBridge.so: CMakeFiles/DiscordBridge.dir/src/discord
 DiscordBridge/Release/DiscordBridge.so: CMakeFiles/DiscordBridge.dir/src/discord/Modal.cpp.o
 DiscordBridge/Release/DiscordBridge.so: CMakeFiles/DiscordBridge.dir/src/discord/Command.cpp.o
 DiscordBridge/Release/DiscordBridge.so: CMakeFiles/DiscordBridge.dir/src/discord/DiscordData.cpp.o
-DiscordBridge/Release/DiscordBridge.so: CMakeFiles/DiscordBridge.dir/src/discord/ComponentsV2.cpp.o
+DiscordBridge/Release/DiscordBridge.so: CMakeFiles/DiscordBridge.dir/src/discord/components/ComponentsV2.cpp.o
+DiscordBridge/Release/DiscordBridge.so: CMakeFiles/DiscordBridge.dir/src/discord/components/Component.cpp.o
 DiscordBridge/Release/DiscordBridge.so: CMakeFiles/DiscordBridge.dir/src/pawn/PawnRuntime.cpp.o
 DiscordBridge/Release/DiscordBridge.so: CMakeFiles/DiscordBridge.dir/src/pawn/Natives.cpp.o
 DiscordBridge/Release/DiscordBridge.so: CMakeFiles/DiscordBridge.dir/src/plugin/AmxExports.cpp.o
@@ -334,7 +350,7 @@ DiscordBridge/Release/DiscordBridge.so: CMakeFiles/DiscordBridge.dir/external/sa
 DiscordBridge/Release/DiscordBridge.so: CMakeFiles/DiscordBridge.dir/build.make
 DiscordBridge/Release/DiscordBridge.so: /usr/lib/i386-linux-gnu/libcurl.so.4
 DiscordBridge/Release/DiscordBridge.so: CMakeFiles/DiscordBridge.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir="/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build-linux/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_17) "Linking CXX shared library DiscordBridge/Release/DiscordBridge.so"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir="/mnt/c/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build-linux/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_18) "Linking CXX shared library DiscordBridge/Release/DiscordBridge.so"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/DiscordBridge.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
