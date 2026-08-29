@@ -48,6 +48,25 @@ namespace DiscordBridge
     void Button::setEmoji(const std::string& emoji)
     {
         emoji_ = emoji;
+        emojiId_.clear();
+        emojiAnimated_ = false;
+    }
+
+    void Button::setEmojiEx(const std::string& name, const std::string& id, bool animated)
+    {
+        emoji_ = name;
+        emojiId_ = id;
+        emojiAnimated_ = animated;
+    }
+
+    void Button::setSkuId(const std::string& skuId)
+    {
+        skuId_ = skuId;
+    }
+
+    void Button::setComponentId(std::uint32_t componentId)
+    {
+        componentId_ = componentId;
     }
 
     void Button::setStyle(ButtonStyle style)
@@ -66,26 +85,36 @@ namespace DiscordBridge
         customId_.clear();
         url_.clear();
         emoji_.clear();
+        emojiId_.clear();
+        skuId_.clear();
+        componentId_ = 0;
+        emojiAnimated_ = false;
         style_ = ButtonStyle::Primary;
         disabled_ = false;
     }
 
     bool Button::empty() const
     {
-        return label_.empty() && customId_.empty() && url_.empty() && emoji_.empty();
+        return label_.empty() && customId_.empty() && url_.empty() && emoji_.empty() && emojiId_.empty() && skuId_.empty() && componentId_ == 0;
     }
 
     bool Button::isValid() const
     {
-        if (label_.empty() || label_.size() > 80) return false;
+        if (static_cast<int>(style_) < 1 || static_cast<int>(style_) > 6) return false;
+        if (label_.size() > 80 || customId_.size() > 100 || url_.size() > 512) return false;
+        if (!emojiId_.empty() && emoji_.empty()) return false;
+
+        if (style_ == ButtonStyle::Premium)
+        {
+            return !skuId_.empty() && customId_.empty() && label_.empty() && url_.empty() && emoji_.empty() && emojiId_.empty();
+        }
 
         if (style_ == ButtonStyle::Link)
         {
-            if (url_.empty() || !customId_.empty()) return false;
-            return true;
+            return !url_.empty() && customId_.empty() && skuId_.empty() && (!label_.empty() || !emoji_.empty());
         }
 
-        return !customId_.empty() && customId_.size() <= 100 && url_.empty();
+        return !customId_.empty() && url_.empty() && skuId_.empty() && (!label_.empty() || !emoji_.empty());
     }
 
     const std::string& Button::getLabel() const
@@ -108,6 +137,26 @@ namespace DiscordBridge
         return emoji_;
     }
 
+    const std::string& Button::getEmojiId() const
+    {
+        return emojiId_;
+    }
+
+    const std::string& Button::getSkuId() const
+    {
+        return skuId_;
+    }
+
+    std::uint32_t Button::getComponentId() const
+    {
+        return componentId_;
+    }
+
+    bool Button::isEmojiAnimated() const
+    {
+        return emojiAnimated_;
+    }
+
     ButtonStyle Button::getStyle() const
     {
         return style_;
@@ -122,18 +171,27 @@ namespace DiscordBridge
     {
         if (!isValid()) return {};
 
-        std::string json = "{\"type\":2,\"style\":" + std::to_string(static_cast<int>(style_)) + ",\"label\":\"" + EscapeJson(label_) + "\"";
+        std::string json = "{\"type\":2,\"style\":" + std::to_string(static_cast<int>(style_));
+
+        if (componentId_ != 0) json += ",\"id\":" + std::to_string(componentId_);
+        if (!label_.empty()) json += ",\"label\":\"" + EscapeJson(label_) + "\"";
 
         if (style_ == ButtonStyle::Link) json += ",\"url\":\"" + EscapeJson(url_) + "\"";
+        else if (style_ == ButtonStyle::Premium) json += ",\"sku_id\":\"" + EscapeJson(skuId_) + "\"";
         else json += ",\"custom_id\":\"" + EscapeJson(customId_) + "\"";
 
-        if (!emoji_.empty()) json += ",\"emoji\":{\"name\":\"" + EscapeJson(emoji_) + "\"";
-        if (!emoji_.empty()) json += "}";
+        if (!emoji_.empty())
+        {
+            json += ",\"emoji\":{";
+            bool comma = false;
+            if (!emojiId_.empty()) { json += "\"id\":\"" + EscapeJson(emojiId_) + "\""; comma = true; }
+            if (!emoji_.empty()) { if (comma) json += ','; json += "\"name\":\"" + EscapeJson(emoji_) + "\""; comma = true; }
+            if (emojiAnimated_) { if (comma) json += ','; json += "\"animated\":true"; }
+            json += '}';
+        }
 
         if (disabled_) json += ",\"disabled\":true";
-
-        json += "}";
-
+        json += '}';
         return json;
     }
 

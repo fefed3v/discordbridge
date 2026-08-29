@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Gateway.hpp"
-#include "HttpClient.hpp"
-#include "DiscordData.hpp"
+#include "../gateway/Gateway.hpp"
+#include "../http/HttpClient.hpp"
+#include "../data/DiscordData.hpp"
 
 #include <atomic>
 #include <condition_variable>
@@ -97,9 +97,9 @@ namespace DiscordBridge
         bool consumeMessageCreateEvent(std::string &userId, std::string &channelId, std::string &message);
         bool consumeGuildMemberAddEvent(std::string &guildId, std::string &userId);
         bool consumeGuildMemberRemoveEvent(std::string &guildId, std::string &userId);
-        bool consumeButtonClickEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &channelId, std::string &customId);
-        bool consumeSelectMenuEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &channelId, std::string &customId, std::string &value);
-        bool consumeModalEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &channelId, std::string &customId, std::vector<std::pair<std::string, std::string>> &values);
+        bool consumeButtonClickEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &customId);
+        bool consumeSelectMenuEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &customId, std::vector<std::string> &values);
+        bool consumeModalEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &customId, std::vector<std::pair<std::string, std::string>> &values);
         bool consumeSlashCommandEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &commandName, std::vector<std::pair<std::string, std::string>> &options);
         bool consumeAutocompleteEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &commandName, std::vector<std::pair<std::string, std::string>> &options);
         bool respondAutocomplete(const std::string &interactionId, const std::string &interactionToken, const std::string &choicesJson);

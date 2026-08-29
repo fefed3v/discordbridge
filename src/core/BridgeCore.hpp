@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../discord/Button.hpp"
-#include "../discord/DiscordClient.hpp"
-#include "../discord/Embed.hpp"
-#include "../discord/SelectMenu.hpp"
-#include "../discord/Modal.hpp"
-#include "../discord/Command.hpp"
-#include "../discord/components/ComponentsV2.hpp"
-#include "../discord/components/Component.hpp"
+#include "../discord/components/legacy/Button.hpp"
+#include "../discord/client/DiscordClient.hpp"
+#include "../discord/embeds/Embed.hpp"
+#include "../discord/components/legacy/SelectMenu.hpp"
+#include "../discord/components/legacy/Modal.hpp"
+#include "../discord/commands/Command.hpp"
+#include "../discord/components/v2/ComponentsV2.hpp"
+#include "../discord/components/v2/Component.hpp"
 #include "../pawn/PawnRuntime.hpp"
 #include <chrono>
 

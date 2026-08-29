@@ -1,6 +1,6 @@
 #include "Gateway.hpp"
-#include "../core/Limits.hpp"
-#include "../core/Metrics.hpp"
+#include "../../core/Limits.hpp"
+#include "../../core/Metrics.hpp"
 
 #include <cctype>
 #include <chrono>
@@ -483,6 +483,31 @@ namespace DiscordBridge
             return ParseJsonStringAt(json, position, value, endPosition);
         }
 
+        bool FindDirectStringArray(const std::string &json, const std::string &key, std::vector<std::string> &values)
+        {
+            values.clear();
+            std::size_t position = 0;
+            if (!FindDirectValue(json, key, position) || json[position] != '[')
+                return false;
+            ++position;
+            while (position < json.size())
+            {
+                while (position < json.size() && (std::isspace(static_cast<unsigned char>(json[position])) || json[position] == ','))
+                    ++position;
+                if (position >= json.size() || json[position] == ']')
+                    break;
+                if (json[position] != '"')
+                    return false;
+                std::string value;
+                std::size_t endPosition = position;
+                if (!ParseJsonStringAt(json, position, value, endPosition))
+                    return false;
+                values.push_back(std::move(value));
+                position = endPosition + 1;
+            }
+            return true;
+        }
+
         bool FindDirectPrimitiveString(const std::string &json, const std::string &key, std::string &value)
         {
             std::size_t position = 0;
@@ -880,7 +905,7 @@ namespace DiscordBridge
         return consumeGuildMemberEvent(guildMemberRemoveEvents_, guildId, userId);
     }
 
-    bool Gateway::consumeButtonClickEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &channelId, std::string &customId)
+    bool Gateway::consumeButtonClickEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &customId)
     {
         std::lock_guard<std::mutex> lock(eventMutex_);
 
@@ -893,13 +918,14 @@ namespace DiscordBridge
         interactionId = std::move(event.interactionId);
         interactionToken = std::move(event.interactionToken);
         userId = std::move(event.userId);
+        guildId = std::move(event.guildId);
         channelId = std::move(event.channelId);
         customId = std::move(event.customId);
 
         return true;
     }
 
-    bool Gateway::consumeSelectMenuEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &channelId, std::string &customId, std::string &value)
+    bool Gateway::consumeSelectMenuEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &customId, std::vector<std::string> &values)
     {
         std::lock_guard<std::mutex> lock(eventMutex_);
         if (selectMenuEvents_.empty())
@@ -909,13 +935,14 @@ namespace DiscordBridge
         interactionId = std::move(event.interactionId);
         interactionToken = std::move(event.interactionToken);
         userId = std::move(event.userId);
+        guildId = std::move(event.guildId);
         channelId = std::move(event.channelId);
         customId = std::move(event.customId);
-        value = std::move(event.value);
+        values = std::move(event.values);
         return true;
     }
 
-    bool Gateway::consumeModalEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &channelId, std::string &customId, std::vector<std::pair<std::string, std::string>> &values)
+    bool Gateway::consumeModalEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &customId, std::vector<std::pair<std::string, std::string>> &values)
     {
         std::lock_guard<std::mutex> lock(eventMutex_);
         if (modalEvents_.empty())
@@ -925,6 +952,7 @@ namespace DiscordBridge
         interactionId = std::move(event.interactionId);
         interactionToken = std::move(event.interactionToken);
         userId = std::move(event.userId);
+        guildId = std::move(event.guildId);
         channelId = std::move(event.channelId);
         customId = std::move(event.customId);
         values = std::move(event.modalValues);
@@ -1333,6 +1361,7 @@ namespace DiscordBridge
             ComponentEvent event;
             if (!FindDirectString(interactionJson, "id", event.interactionId) || !FindDirectString(interactionJson, "token", event.interactionToken) || !FindDirectString(interactionJson, "channel_id", event.channelId))
                 return;
+            FindDirectString(interactionJson, "guild_id", event.guildId);
 
             std::string memberJson;
             std::string userJson;
@@ -1415,7 +1444,7 @@ namespace DiscordBridge
                 }
                 else if (componentType >= 3 && componentType <= 8)
                 {
-                    FindDirectStringArrayFirst(dataJson, "values", event.value);
+                    FindDirectStringArray(dataJson, "values", event.values);
                     if (selectMenuEvents_.size() >= Limits::MaxGatewayInteractions)
                     {
                         selectMenuEvents_.pop_front();

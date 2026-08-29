@@ -77,7 +77,7 @@ void BridgeCore::process()
         count();
     }
 
-    string userId, channelId, guildId, interactionId, interactionToken, customId, value, commandName;
+    string userId, channelId, guildId, interactionId, interactionToken, customId, commandName;
     vector<pair<string, string>> commandOptions;
 
     while (canProcessCritical() && discordClient_.consumeAutocompleteEvent(interactionId, interactionToken, userId, guildId, channelId, commandName, commandOptions))
@@ -93,24 +93,25 @@ void BridgeCore::process()
         countCritical();
     }
 
-    while (canProcessCritical() && discordClient_.consumeButtonClickEvent(interactionId, interactionToken, userId, channelId, customId))
+    while (canProcessCritical() && discordClient_.consumeButtonClickEvent(interactionId, interactionToken, userId, guildId, channelId, customId))
     {
-        pawnRuntime_.dispatchButtonClick(userId, channelId, customId, interactionId, interactionToken);
+        pawnRuntime_.dispatchButtonClick(userId, guildId, channelId, customId, interactionId, interactionToken);
         discordClient_.acknowledgeInteractionAsync(interactionId, interactionToken);
         countCritical();
     }
 
-    while (canProcessCritical() && discordClient_.consumeSelectMenuEvent(interactionId, interactionToken, userId, channelId, customId, value))
+    vector<string> selectValues;
+    while (canProcessCritical() && discordClient_.consumeSelectMenuEvent(interactionId, interactionToken, userId, guildId, channelId, customId, selectValues))
     {
-        pawnRuntime_.dispatchSelectMenu(userId, channelId, customId, value, interactionId, interactionToken);
+        pawnRuntime_.dispatchSelectMenu(userId, guildId, channelId, customId, selectValues, interactionId, interactionToken);
         discordClient_.acknowledgeInteractionAsync(interactionId, interactionToken);
         countCritical();
     }
 
     vector<pair<string, string>> modalValues;
-    while (canProcessCritical() && discordClient_.consumeModalEvent(interactionId, interactionToken, userId, channelId, customId, modalValues))
+    while (canProcessCritical() && discordClient_.consumeModalEvent(interactionId, interactionToken, userId, guildId, channelId, customId, modalValues))
     {
-        pawnRuntime_.dispatchModalSubmit(userId, channelId, customId, modalValues, interactionId, interactionToken);
+        pawnRuntime_.dispatchModalSubmit(userId, guildId, channelId, customId, modalValues, interactionId, interactionToken);
         discordClient_.deferInteractionAsync(interactionId, interactionToken, true);
         countCritical();
     }

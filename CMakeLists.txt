@@ -55,17 +55,17 @@ set(DISCORD_BRIDGE_SOURCES
 
 	${SRC_DIR}/core/BridgeCore.cpp
 
-	${SRC_DIR}/discord/DiscordClient.cpp
-	${SRC_DIR}/discord/Gateway.cpp
-	${SRC_DIR}/discord/HttpClient.cpp
-	${SRC_DIR}/discord/Embed.cpp
-	${SRC_DIR}/discord/Button.cpp
-	${SRC_DIR}/discord/SelectMenu.cpp
-	${SRC_DIR}/discord/Modal.cpp
-	${SRC_DIR}/discord/Command.cpp
-	${SRC_DIR}/discord/DiscordData.cpp
-	${SRC_DIR}/discord/components/ComponentsV2.cpp
-	${SRC_DIR}/discord/components/Component.cpp
+	${SRC_DIR}/discord/client/DiscordClient.cpp
+	${SRC_DIR}/discord/gateway/Gateway.cpp
+	${SRC_DIR}/discord/http/HttpClient.cpp
+	${SRC_DIR}/discord/embeds/Embed.cpp
+	${SRC_DIR}/discord/components/legacy/Button.cpp
+	${SRC_DIR}/discord/components/legacy/SelectMenu.cpp
+	${SRC_DIR}/discord/components/legacy/Modal.cpp
+	${SRC_DIR}/discord/commands/Command.cpp
+	${SRC_DIR}/discord/data/DiscordData.cpp
+	${SRC_DIR}/discord/components/v2/ComponentsV2.cpp
+	${SRC_DIR}/discord/components/v2/Component.cpp
 
 	${SRC_DIR}/pawn/PawnRuntime.cpp
 	${SRC_DIR}/pawn/Natives.cpp

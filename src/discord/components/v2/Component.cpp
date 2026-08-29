@@ -1,5 +1,5 @@
 #include "Component.hpp"
-#include "../../core/Limits.hpp"
+#include "../../../core/Limits.hpp"
 #include <algorithm>
 #include <sstream>
 namespace DiscordBridge { namespace {

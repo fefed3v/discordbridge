@@ -1,8 +1,8 @@
 #include "DiscordClient.hpp"
-#include "../Version.hpp"
-#include "../core/Limits.hpp"
-#include "../core/Metrics.hpp"
-#include "../security/InputValidator.hpp"
+#include "../../Version.hpp"
+#include "../../core/Limits.hpp"
+#include "../../core/Metrics.hpp"
+#include "../../security/InputValidator.hpp"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -521,19 +521,19 @@ namespace DiscordBridge
         return gateway_.consumeGuildMemberRemoveEvent(guildId, userId);
     }
 
-    bool DiscordClient::consumeButtonClickEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &channelId, std::string &customId)
+    bool DiscordClient::consumeButtonClickEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &customId)
     {
-        return gateway_.consumeButtonClickEvent(interactionId, interactionToken, userId, channelId, customId);
+        return gateway_.consumeButtonClickEvent(interactionId, interactionToken, userId, guildId, channelId, customId);
     }
 
-    bool DiscordClient::consumeSelectMenuEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &channelId, std::string &customId, std::string &value)
+    bool DiscordClient::consumeSelectMenuEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &customId, std::vector<std::string> &values)
     {
-        return gateway_.consumeSelectMenuEvent(interactionId, interactionToken, userId, channelId, customId, value);
+        return gateway_.consumeSelectMenuEvent(interactionId, interactionToken, userId, guildId, channelId, customId, values);
     }
 
-    bool DiscordClient::consumeModalEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &channelId, std::string &customId, std::vector<std::pair<std::string, std::string>> &values)
+    bool DiscordClient::consumeModalEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &customId, std::vector<std::pair<std::string, std::string>> &values)
     {
-        return gateway_.consumeModalEvent(interactionId, interactionToken, userId, channelId, customId, values);
+        return gateway_.consumeModalEvent(interactionId, interactionToken, userId, guildId, channelId, customId, values);
     }
 
     bool DiscordClient::consumeSlashCommandEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &commandName, std::vector<std::pair<std::string, std::string>> &options)

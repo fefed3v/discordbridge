@@ -13,4 +13,5 @@ plugins/
 *.exe
 *.json
 *.cfg
+*.env
 *server_log.txt

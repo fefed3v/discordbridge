@@ -14,7 +14,7 @@
 #include <thread>
 #include <utility>
 #include <vector>
-#include "../security/AbuseGuard.hpp"
+#include "../../security/AbuseGuard.hpp"
 
 namespace DiscordBridge
 {
@@ -64,9 +64,10 @@ namespace DiscordBridge
             std::string interactionId;
             std::string interactionToken;
             std::string userId;
+            std::string guildId;
             std::string channelId;
             std::string customId;
-            std::string value;
+            std::vector<std::string> values;
             std::vector<std::pair<std::string, std::string>> modalValues;
         };
 
@@ -139,9 +140,9 @@ namespace DiscordBridge
         bool consumeMessageCreateEvent(std::string &userId, std::string &channelId, std::string &message);
         bool consumeGuildMemberAddEvent(std::string &guildId, std::string &userId);
         bool consumeGuildMemberRemoveEvent(std::string &guildId, std::string &userId);
-        bool consumeButtonClickEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &channelId, std::string &customId);
-        bool consumeSelectMenuEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &channelId, std::string &customId, std::string &value);
-        bool consumeModalEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &channelId, std::string &customId, std::vector<std::pair<std::string, std::string>> &values);
+        bool consumeButtonClickEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &customId);
+        bool consumeSelectMenuEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &customId, std::vector<std::string> &values);
+        bool consumeModalEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &customId, std::vector<std::pair<std::string, std::string>> &values);
         bool consumeSlashCommandEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &commandName, std::vector<std::pair<std::string, std::string>> &options);
         bool consumeAutocompleteEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &commandName, std::vector<std::pair<std::string, std::string>> &options);
         std::string getApplicationId() const;

@@ -18,7 +18,8 @@ namespace DiscordBridge
         Secondary = 2,
         Success = 3,
         Danger = 4,
-        Link = 5
+        Link = 5,
+        Premium = 6
     };
 
     class Button
@@ -28,6 +29,9 @@ namespace DiscordBridge
         void setCustomId(const std::string& customId);
         void setUrl(const std::string& url);
         void setEmoji(const std::string& emoji);
+        void setEmojiEx(const std::string& name, const std::string& id, bool animated);
+        void setSkuId(const std::string& skuId);
+        void setComponentId(std::uint32_t componentId);
         void setStyle(ButtonStyle style);
         void setDisabled(bool disabled);
 
@@ -40,6 +44,10 @@ namespace DiscordBridge
         const std::string& getCustomId() const;
         const std::string& getUrl() const;
         const std::string& getEmoji() const;
+        const std::string& getEmojiId() const;
+        const std::string& getSkuId() const;
+        std::uint32_t getComponentId() const;
+        bool isEmojiAnimated() const;
 
         ButtonStyle getStyle() const;
         bool isDisabled() const;
@@ -51,6 +59,10 @@ namespace DiscordBridge
         std::string customId_;
         std::string url_;
         std::string emoji_;
+        std::string emojiId_;
+        std::string skuId_;
+        std::uint32_t componentId_{0};
+        bool emojiAnimated_{false};
 
         ButtonStyle style_{ButtonStyle::Primary};
         bool disabled_{false};

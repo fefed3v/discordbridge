@@ -47,13 +47,16 @@ namespace DiscordBridge
         void dispatchMemberFetched(bool success, const string &guildId, const string &userId);
         void dispatchUserFetched(bool success, const string &userId);
 
-        void dispatchButtonClick(const string &userId, const string &channelId, const string &customId, const string &interactionId, const string &interactionToken);
-        void dispatchSelectMenu(const string &userId, const string &channelId, const string &customId, const string &value, const string &interactionId, const string &interactionToken);
-        void dispatchModalSubmit(const string &userId, const string &channelId, const string &customId, const vector<pair<string, string>> &values, const string &interactionId, const string &interactionToken);
+        void dispatchButtonClick(const string &userId, const string &guildId, const string &channelId, const string &customId, const string &interactionId, const string &interactionToken);
+        void dispatchSelectMenu(const string &userId, const string &guildId, const string &channelId, const string &customId, const vector<string> &values, const string &interactionId, const string &interactionToken);
+        void dispatchModalSubmit(const string &userId, const string &guildId, const string &channelId, const string &customId, const vector<pair<string, string>> &values, const string &interactionId, const string &interactionToken);
         bool getModalValue(const string &customId, string &value) const;
         void dispatchSlashCommand(const string &commandName, const string &userId, const string &guildId, const string &channelId, const vector<pair<string, string>> &options, const string &interactionId, const string &interactionToken);
         void dispatchAutocomplete(const string &commandName, const string &userId, const string &guildId, const string &channelId, const vector<pair<string, string>> &options, const string &interactionId, const string &interactionToken);
         bool getCommandValue(const string &name, string &value) const;
+        size_t getInteractionValueCount() const;
+        bool getInteractionValue(size_t index, string &value) const;
+        bool getInteractionField(const string &name, string &value) const;
 
         size_t size() const;
 
@@ -61,5 +64,6 @@ namespace DiscordBridge
         vector<AMX *> scripts_;
         const vector<pair<string, string>> *activeModalValues_{nullptr};
         const vector<pair<string, string>> *activeCommandValues_{nullptr};
+        const vector<string> *activeInteractionValues_{nullptr};
     };
 }
