@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(DiscordBridge
-	VERSION 0.0.7
+	VERSION 0.0.9
 	LANGUAGES CXX
 )
 
@@ -64,7 +64,8 @@ set(DISCORD_BRIDGE_SOURCES
 	${SRC_DIR}/discord/Modal.cpp
 	${SRC_DIR}/discord/Command.cpp
 	${SRC_DIR}/discord/DiscordData.cpp
-	${SRC_DIR}/discord/ComponentsV2.cpp
+	${SRC_DIR}/discord/components/ComponentsV2.cpp
+	${SRC_DIR}/discord/components/Component.cpp
 
 	${SRC_DIR}/pawn/PawnRuntime.cpp
 	${SRC_DIR}/pawn/Natives.cpp
@@ -219,15 +220,6 @@ if(UNIX AND NOT APPLE)
 
 	target_compile_definitions(DiscordBridge
 		PRIVATE LINUX
-	)
-
-	target_compile_options(DiscordBridge
-		PRIVATE
-			-m32
-			-fPIC
-			-Wall
-			-Wextra
-			-Wpedantic
 	)
 
 	target_link_options(DiscordBridge

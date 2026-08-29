@@ -14,6 +14,7 @@
 #include <thread>
 #include <utility>
 #include <vector>
+#include "../security/AbuseGuard.hpp"
 
 namespace DiscordBridge
 {
@@ -29,7 +30,7 @@ namespace DiscordBridge
         bool isValid() const;
     };
 
-    bool ParseGatewayInfo(const std::string& json, GatewayInfo& info);
+    bool ParseGatewayInfo(const std::string &json, GatewayInfo &info);
 
     class Gateway final
     {
@@ -75,7 +76,7 @@ namespace DiscordBridge
         HINTERNET request_{nullptr};
         HINTERNET webSocket_{nullptr};
 #else
-        void* webSocket_{nullptr};
+        void *webSocket_{nullptr};
 #endif
 
         std::thread receiveThread_;
@@ -95,6 +96,7 @@ namespace DiscordBridge
         std::deque<ComponentEvent> selectMenuEvents_;
         std::deque<ComponentEvent> modalEvents_;
         std::deque<SlashCommandEvent> slashCommandEvents_;
+        std::deque<SlashCommandEvent> autocompleteEvents_;
 
         std::atomic_bool initialized_{false};
         std::atomic_bool connected_{false};
@@ -115,17 +117,18 @@ namespace DiscordBridge
         std::string currentActivityUrl_;
         std::string token_;
         std::string applicationId_;
+        AbuseGuard abuseGuard_;
 
     public:
         Gateway() = default;
         ~Gateway();
 
-        Gateway(const Gateway&) = delete;
-        Gateway& operator=(const Gateway&) = delete;
-        Gateway(Gateway&&) = delete;
-        Gateway& operator=(Gateway&&) = delete;
+        Gateway(const Gateway &) = delete;
+        Gateway &operator=(const Gateway &) = delete;
+        Gateway(Gateway &&) = delete;
+        Gateway &operator=(Gateway &&) = delete;
 
-        bool connect(const GatewayInfo& gatewayInfo, const std::string& token);
+        bool connect(const GatewayInfo &gatewayInfo, const std::string &token);
         void disconnect();
 
         bool isInitialized() const;
@@ -133,35 +136,36 @@ namespace DiscordBridge
         bool isReady() const;
 
         bool consumeReadyEvent();
-        bool consumeMessageCreateEvent(std::string& userId, std::string& channelId, std::string& message);
-        bool consumeGuildMemberAddEvent(std::string& guildId, std::string& userId);
-        bool consumeGuildMemberRemoveEvent(std::string& guildId, std::string& userId);
-        bool consumeButtonClickEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId);
-        bool consumeSelectMenuEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId, std::string& value);
-        bool consumeModalEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& channelId, std::string& customId, std::vector<std::pair<std::string, std::string>>& values);
-        bool consumeSlashCommandEvent(std::string& interactionId, std::string& interactionToken, std::string& userId, std::string& guildId, std::string& channelId, std::string& commandName, std::vector<std::pair<std::string, std::string>>& options);
+        bool consumeMessageCreateEvent(std::string &userId, std::string &channelId, std::string &message);
+        bool consumeGuildMemberAddEvent(std::string &guildId, std::string &userId);
+        bool consumeGuildMemberRemoveEvent(std::string &guildId, std::string &userId);
+        bool consumeButtonClickEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &channelId, std::string &customId);
+        bool consumeSelectMenuEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &channelId, std::string &customId, std::string &value);
+        bool consumeModalEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &channelId, std::string &customId, std::vector<std::pair<std::string, std::string>> &values);
+        bool consumeSlashCommandEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &commandName, std::vector<std::pair<std::string, std::string>> &options);
+        bool consumeAutocompleteEvent(std::string &interactionId, std::string &interactionToken, std::string &userId, std::string &guildId, std::string &channelId, std::string &commandName, std::vector<std::pair<std::string, std::string>> &options);
         std::string getApplicationId() const;
 
         bool setStatus(int status);
-        bool setActivity(int type, const std::string& name, const std::string& state = "", const std::string& url = "");
+        bool setActivity(int type, const std::string &name, const std::string &state = "", const std::string &url = "");
         bool clearActivity();
-        bool setPresence(int status, int activityType, const std::string& name, const std::string& state = "", const std::string& url = "", bool afk = false);
+        bool setPresence(int status, int activityType, const std::string &name, const std::string &state = "", const std::string &url = "", bool afk = false);
 
     private:
         void receiveLoop();
         void heartbeatLoop();
 
-        void handlePayload(const std::string& payload);
-        void handleHello(const std::string& payload);
-        void handleDispatch(const std::string& payload);
+        void handlePayload(const std::string &payload);
+        void handleHello(const std::string &payload);
+        void handleDispatch(const std::string &payload);
 
-        bool receivePayload(std::string& payload);
-        bool sendText(const std::string& payload);
+        bool receivePayload(std::string &payload);
+        bool sendText(const std::string &payload);
         bool sendHeartbeat();
         bool sendIdentify();
         bool sendPresence();
 
-        bool consumeGuildMemberEvent(std::deque<GuildMemberEvent>& events, std::string& guildId, std::string& userId);
+        bool consumeGuildMemberEvent(std::deque<GuildMemberEvent> &events, std::string &guildId, std::string &userId);
         bool failConnection();
 
         void stopConnection();

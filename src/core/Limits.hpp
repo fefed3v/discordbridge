@@ -1,0 +1,17 @@
+#pragma once
+#include <cstddef>
+namespace DiscordBridge::Limits
+{
+    inline constexpr std::size_t MaxRestQueue = 2048;
+    inline constexpr std::size_t MaxInteractionQueue = 1024;
+    inline constexpr std::size_t MaxResultQueue = 4096;
+    inline constexpr std::size_t MaxGatewayMessages = 2048;
+    inline constexpr std::size_t MaxGatewayMembers = 1024;
+    inline constexpr std::size_t MaxGatewayInteractions = 2048;
+    inline constexpr std::size_t MaxEventsPerTick = 160;
+    inline constexpr std::size_t MaxCriticalPerTick = 80;
+    inline constexpr std::size_t MaxMessageLength = 2000;
+    inline constexpr std::size_t MaxCustomIdLength = 100;
+    inline constexpr std::size_t MaxSnowflakeLength = 20;
+    inline constexpr std::size_t MaxPayloadLength = 1024 * 1024;
+}

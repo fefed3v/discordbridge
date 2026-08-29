@@ -236,6 +236,27 @@ namespace DiscordBridge
             }
         }
 
+        void DispatchInteraction(const vector<AMX *> &scripts, int type, const string &userId, const string &guildId, const string &channelId, const string &key, const string &interactionId, const string &interactionToken)
+        {
+            for (AMX *amx : scripts)
+            {
+                int index = -1;
+                if (!FindPublic(amx, "DBridge_OnInteraction", index)) continue;
+                vector<string> values{userId, guildId, channelId, key, interactionId, interactionToken};
+                vector<cell> addresses(values.size(), 0);
+                bool ok = true;
+                for (size_t i = 0; i < values.size(); ++i) if (!PushPawnString(amx, values[i], addresses[i])) { ok = false; break; }
+                if (ok)
+                {
+                    for (auto it = addresses.rbegin(); it != addresses.rend(); ++it) amx_Push(amx, *it);
+                    amx_Push(amx, static_cast<cell>(type));
+                    cell returnValue = 0;
+                    amx_Exec(amx, &returnValue, index);
+                }
+                for (cell address : addresses) if (address) amx_Release(amx, address);
+            }
+        }
+
         void DispatchDeployResult(const vector<AMX *> &scripts, bool success, const string &guildId)
         {
             for (AMX *amx : scripts)
@@ -363,18 +384,21 @@ namespace DiscordBridge
 
     void PawnRuntime::dispatchButtonClick(const string &userId, const string &channelId, const string &customId, const string &interactionId, const string &interactionToken)
     {
+        DispatchInteraction(scripts_, 2, userId, "", channelId, customId, interactionId, interactionToken);
         DispatchThreeStrings(scripts_, "DBridge_OnButtonClick", userId, channelId, customId);
         DispatchStrings(scripts_, "DBridge_OnButtonInteraction", {userId, channelId, customId, interactionId, interactionToken});
     }
 
     void PawnRuntime::dispatchSelectMenu(const string &userId, const string &channelId, const string &customId, const string &value, const string &interactionId, const string &interactionToken)
     {
+        DispatchInteraction(scripts_, 3, userId, "", channelId, customId, interactionId, interactionToken);
         DispatchStrings(scripts_, "DBridge_OnSelectMenu", {userId, channelId, customId, value, interactionId, interactionToken});
     }
 
     void PawnRuntime::dispatchModalSubmit(const string &userId, const string &channelId, const string &customId, const vector<pair<string, string>> &values, const string &interactionId, const string &interactionToken)
     {
         activeModalValues_ = &values;
+        DispatchInteraction(scripts_, 4, userId, "", channelId, customId, interactionId, interactionToken);
         DispatchStrings(scripts_, "DBridge_OnModalSubmit", {userId, channelId, customId, interactionId, interactionToken});
         activeModalValues_ = nullptr;
     }
@@ -397,7 +421,16 @@ namespace DiscordBridge
     void PawnRuntime::dispatchSlashCommand(const string &commandName, const string &userId, const string &guildId, const string &channelId, const vector<pair<string, string>> &options, const string &interactionId, const string &interactionToken)
     {
         activeCommandValues_ = &options;
+        DispatchInteraction(scripts_, 1, userId, guildId, channelId, commandName, interactionId, interactionToken);
         DispatchStrings(scripts_, "DBridge_OnSlashCommand", {commandName, userId, guildId, channelId, interactionId, interactionToken});
+        activeCommandValues_ = nullptr;
+    }
+
+    void PawnRuntime::dispatchAutocomplete(const string &commandName, const string &userId, const string &guildId, const string &channelId, const vector<pair<string, string>> &options, const string &interactionId, const string &interactionToken)
+    {
+        activeCommandValues_ = &options;
+        DispatchInteraction(scripts_, 5, userId, guildId, channelId, commandName, interactionId, interactionToken);
+        DispatchStrings(scripts_, "DBridge_OnAutocomplete", {commandName, userId, guildId, channelId, interactionId, interactionToken});
         activeCommandValues_ = nullptr;
     }
 

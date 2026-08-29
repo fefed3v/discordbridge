@@ -6,8 +6,10 @@
 #include "../discord/SelectMenu.hpp"
 #include "../discord/Modal.hpp"
 #include "../discord/Command.hpp"
-#include "../discord/ComponentsV2.hpp"
+#include "../discord/components/ComponentsV2.hpp"
+#include "../discord/components/Component.hpp"
 #include "../pawn/PawnRuntime.hpp"
+#include <chrono>
 
 namespace DiscordBridge
 {
@@ -41,9 +43,11 @@ namespace DiscordBridge
         ModalManager &getModalManager();
         CommandManager &getCommandManager();
         ComponentsV2Manager &getV2Manager();
+        ComponentManager &getComponentManager();
 
     private:
         bool initialized_{false};
+        std::chrono::steady_clock::time_point lastDeployAttempt_{};
 
         PawnRuntime pawnRuntime_;
         DiscordClient discordClient_;
@@ -54,5 +58,6 @@ namespace DiscordBridge
         ModalManager modalManager_;
         CommandManager commandManager_;
         ComponentsV2Manager v2Manager_;
+        ComponentManager componentManager_;
     };
 }

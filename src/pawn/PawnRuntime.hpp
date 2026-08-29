@@ -52,6 +52,7 @@ namespace DiscordBridge
         void dispatchModalSubmit(const string &userId, const string &channelId, const string &customId, const vector<pair<string, string>> &values, const string &interactionId, const string &interactionToken);
         bool getModalValue(const string &customId, string &value) const;
         void dispatchSlashCommand(const string &commandName, const string &userId, const string &guildId, const string &channelId, const vector<pair<string, string>> &options, const string &interactionId, const string &interactionToken);
+        void dispatchAutocomplete(const string &commandName, const string &userId, const string &guildId, const string &channelId, const vector<pair<string, string>> &options, const string &interactionId, const string &interactionToken);
         bool getCommandValue(const string &name, string &value) const;
 
         size_t size() const;
