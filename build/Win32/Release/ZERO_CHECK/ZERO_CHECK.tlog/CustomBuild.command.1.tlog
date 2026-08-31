@@ -1,0 +1,10 @@
+^C:\USERS\PICHAU\DESKTOP\DISCORD BRIDGE\DISCORD BRIDGE\BUILD\CMAKEFILES\9FB58CCA27E008808ADF88347D3B9F54\GENERATE.STAMP.RULE
+setlocal
+C:\mingw64\bin\cmake.exe "-SC:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge" "-BC:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build" --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/DiscordBridge.slnx"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

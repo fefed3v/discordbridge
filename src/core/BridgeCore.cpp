@@ -210,7 +210,5 @@ const ActionRowManager &BridgeCore::getActionRowManager() const
 SelectMenuManager &BridgeCore::getSelectMenuManager() { return selectMenuManager_; }
 ModalManager &BridgeCore::getModalManager() { return modalManager_; }
 CommandManager &BridgeCore::getCommandManager() { return commandManager_; }
-
 ComponentsV2Manager &BridgeCore::getV2Manager() { return v2Manager_; }
-
 ComponentManager &BridgeCore::getComponentManager() { return componentManager_; }

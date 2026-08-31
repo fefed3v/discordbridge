@@ -4,42 +4,49 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+
+using namespace std;
+
 namespace DiscordBridge
 {
     class AbuseGuard
     {
     public:
-        bool allow(const std::string &key, std::size_t limit, std::chrono::milliseconds window)
+        bool allow(const string &key, size_t limit, chrono::milliseconds window)
         {
             if (key.empty())
                 return false;
-            const auto now = std::chrono::steady_clock::now();
-            std::lock_guard<std::mutex> lock(mutex_);
+
+            const auto now = chrono::steady_clock::now();
+            lock_guard<mutex> lock(mutex_);
             auto &e = entries_[key];
+
             if (e.start.time_since_epoch().count() == 0 || now - e.start >= window)
             {
                 e.start = now;
                 e.count = 1;
                 return true;
             }
+
             if (e.count >= limit)
                 return false;
+
             ++e.count;
             return true;
         }
         void clear()
         {
-            std::lock_guard<std::mutex> lock(mutex_);
+            lock_guard<mutex> lock(mutex_);
             entries_.clear();
         }
 
     private:
         struct Entry
         {
-            std::chrono::steady_clock::time_point start{};
-            std::size_t count{0};
+            chrono::steady_clock::time_point start{};
+            size_t count{0};
         };
-        std::mutex mutex_;
-        std::unordered_map<std::string, Entry> entries_;
+        mutex mutex_;
+        unordered_map<string, Entry> entries_;
     };
 }

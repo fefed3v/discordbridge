@@ -4,28 +4,28 @@
 
 extern void *pAMXFunctions;
 
-namespace DiscordBridge
+using namespace DiscordBridge;
+
+bool DiscordBridge::InitializeAmxExports(void **pluginData)
 {
-    bool InitializeAmxExports(void **pluginData)
-    {
-        if (pluginData == nullptr)
-            return false;
+    if (pluginData == nullptr)
+        return false;
 
-        void *functions = pluginData[PLUGIN_DATA_AMX_EXPORTS];
-        if (functions == nullptr)
-            return false;
+    void *functions = pluginData[PLUGIN_DATA_AMX_EXPORTS];
 
-        pAMXFunctions = functions;
-        return true;
-    }
+    if (functions == nullptr)
+        return false;
 
-    void ShutdownAmxExports()
-    {
-        pAMXFunctions = nullptr;
-    }
+    pAMXFunctions = functions;
+    return true;
+}
 
-    bool AreAmxExportsInitialized()
-    {
-        return pAMXFunctions != nullptr;
-    }
+void DiscordBridge::ShutdownAmxExports()
+{
+    pAMXFunctions = nullptr;
+}
+
+bool DiscordBridge::AreAmxExportsInitialized()
+{
+    return pAMXFunctions != nullptr;
 }

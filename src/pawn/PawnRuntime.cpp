@@ -206,9 +206,11 @@ namespace DiscordBridge
             for (AMX *amx : scripts)
             {
                 int index = -1;
-                if (!FindPublic(amx, callback, index)) continue;
+                if (!FindPublic(amx, callback, index))
+                    continue;
                 cell address = 0;
-                if (!PushPawnString(amx, id, address)) continue;
+                if (!PushPawnString(amx, id, address))
+                    continue;
                 amx_Push(amx, address);
                 amx_Push(amx, success ? 1 : 0);
                 cell returnValue = 0;
@@ -222,10 +224,16 @@ namespace DiscordBridge
             for (AMX *amx : scripts)
             {
                 int index = -1;
-                if (!FindPublic(amx, callback, index)) continue;
+                if (!FindPublic(amx, callback, index))
+                    continue;
                 cell firstAddress = 0, secondAddress = 0;
-                if (!PushPawnString(amx, first, firstAddress)) continue;
-                if (!PushPawnString(amx, second, secondAddress)) { amx_Release(amx, firstAddress); continue; }
+                if (!PushPawnString(amx, first, firstAddress))
+                    continue;
+                if (!PushPawnString(amx, second, secondAddress))
+                {
+                    amx_Release(amx, firstAddress);
+                    continue;
+                }
                 amx_Push(amx, secondAddress);
                 amx_Push(amx, firstAddress);
                 amx_Push(amx, success ? 1 : 0);
@@ -239,19 +247,28 @@ namespace DiscordBridge
         bool DispatchInteractionToAMX(AMX *amx, int type, const string &userId, const string &guildId, const string &channelId, const string &key, const string &interactionId, const string &interactionToken)
         {
             int index = -1;
-            if (!FindPublic(amx, "DBridge_OnInteraction", index)) return false;
+            if (!FindPublic(amx, "DBridge_OnInteraction", index))
+                return false;
             vector<string> values{userId, guildId, channelId, key, interactionId, interactionToken};
             vector<cell> addresses(values.size(), 0);
             bool ok = true;
-            for (size_t i = 0; i < values.size(); ++i) if (!PushPawnString(amx, values[i], addresses[i])) { ok = false; break; }
+            for (size_t i = 0; i < values.size(); ++i)
+                if (!PushPawnString(amx, values[i], addresses[i]))
+                {
+                    ok = false;
+                    break;
+                }
             if (ok)
             {
-                for (auto it = addresses.rbegin(); it != addresses.rend(); ++it) amx_Push(amx, *it);
+                for (auto it = addresses.rbegin(); it != addresses.rend(); ++it)
+                    amx_Push(amx, *it);
                 amx_Push(amx, static_cast<cell>(type));
                 cell returnValue = 0;
                 amx_Exec(amx, &returnValue, index);
             }
-            for (cell address : addresses) if (address) amx_Release(amx, address);
+            for (cell address : addresses)
+                if (address)
+                    amx_Release(amx, address);
             return true;
         }
 
@@ -260,9 +277,11 @@ namespace DiscordBridge
             for (AMX *amx : scripts)
             {
                 int index = -1;
-                if (!FindPublic(amx, "DBridge_OnCommandsDeployed", index)) continue;
+                if (!FindPublic(amx, "DBridge_OnCommandsDeployed", index))
+                    continue;
                 cell guildAddress = 0;
-                if (!PushPawnString(amx, guildId, guildAddress)) continue;
+                if (!PushPawnString(amx, guildId, guildAddress))
+                    continue;
                 amx_Push(amx, guildAddress);
                 amx_Push(amx, success ? 1 : 0);
                 cell returnValue = 0;
@@ -364,27 +383,28 @@ namespace DiscordBridge
         DispatchResult(scripts_, "DBridge_OnV2Edited", success, channelId, messageId);
     }
 
-    void PawnRuntime::dispatchChannelCreated(bool s, const string& g, const string& id) { DispatchResult(scripts_, "DBridge_OnChannelCreated", s, g, id); }
-    void PawnRuntime::dispatchChannelDeleted(bool s, const string& g, const string& id) { DispatchResult(scripts_, "DBridge_OnChannelDeleted", s, g, id); }
-    void PawnRuntime::dispatchRoleCreated(bool s, const string& g, const string& id) { DispatchResult(scripts_, "DBridge_OnRoleCreated", s, g, id); }
-    void PawnRuntime::dispatchRoleDeleted(bool s, const string& g, const string& id) { DispatchResult(scripts_, "DBridge_OnRoleDeleted", s, g, id); }
-    void PawnRuntime::dispatchMemberRoleAdded(bool s, const string& g, const string& id) { DispatchResult(scripts_, "DBridge_OnMemberRoleAdded", s, g, id); }
-    void PawnRuntime::dispatchMemberRoleRemoved(bool s, const string& g, const string& id) { DispatchResult(scripts_, "DBridge_OnMemberRoleRemoved", s, g, id); }
-    void PawnRuntime::dispatchMemberKicked(bool s, const string& g, const string& id) { DispatchResult(scripts_, "DBridge_OnMemberKicked", s, g, id); }
-    void PawnRuntime::dispatchMemberBanned(bool s, const string& g, const string& id) { DispatchResult(scripts_, "DBridge_OnMemberBanned", s, g, id); }
-    void PawnRuntime::dispatchMemberUnbanned(bool s, const string& g, const string& id) { DispatchResult(scripts_, "DBridge_OnMemberUnbanned", s, g, id); }
-    void PawnRuntime::dispatchCommandsDeployed(bool s, const string& g) { DispatchDeployResult(scripts_, s, g); }
-    void PawnRuntime::dispatchGuildFetched(bool s, const string& g) { DispatchFetchOne(scripts_, "DBridge_OnGuildFetched", s, g); }
-    void PawnRuntime::dispatchChannelFetched(bool s, const string& c) { DispatchFetchOne(scripts_, "DBridge_OnChannelFetched", s, c); }
-    void PawnRuntime::dispatchRoleFetched(bool s, const string& g, const string& r) { DispatchFetchTwo(scripts_, "DBridge_OnRoleFetched", s, g, r); }
-    void PawnRuntime::dispatchMemberFetched(bool s, const string& g, const string& u) { DispatchFetchTwo(scripts_, "DBridge_OnMemberFetched", s, g, u); }
-    void PawnRuntime::dispatchUserFetched(bool s, const string& u) { DispatchFetchOne(scripts_, "DBridge_OnUserFetched", s, u); }
+    void PawnRuntime::dispatchChannelCreated(bool s, const string &g, const string &id) { DispatchResult(scripts_, "DBridge_OnChannelCreated", s, g, id); }
+    void PawnRuntime::dispatchChannelDeleted(bool s, const string &g, const string &id) { DispatchResult(scripts_, "DBridge_OnChannelDeleted", s, g, id); }
+    void PawnRuntime::dispatchRoleCreated(bool s, const string &g, const string &id) { DispatchResult(scripts_, "DBridge_OnRoleCreated", s, g, id); }
+    void PawnRuntime::dispatchRoleDeleted(bool s, const string &g, const string &id) { DispatchResult(scripts_, "DBridge_OnRoleDeleted", s, g, id); }
+    void PawnRuntime::dispatchMemberRoleAdded(bool s, const string &g, const string &id) { DispatchResult(scripts_, "DBridge_OnMemberRoleAdded", s, g, id); }
+    void PawnRuntime::dispatchMemberRoleRemoved(bool s, const string &g, const string &id) { DispatchResult(scripts_, "DBridge_OnMemberRoleRemoved", s, g, id); }
+    void PawnRuntime::dispatchMemberKicked(bool s, const string &g, const string &id) { DispatchResult(scripts_, "DBridge_OnMemberKicked", s, g, id); }
+    void PawnRuntime::dispatchMemberBanned(bool s, const string &g, const string &id) { DispatchResult(scripts_, "DBridge_OnMemberBanned", s, g, id); }
+    void PawnRuntime::dispatchMemberUnbanned(bool s, const string &g, const string &id) { DispatchResult(scripts_, "DBridge_OnMemberUnbanned", s, g, id); }
+    void PawnRuntime::dispatchCommandsDeployed(bool s, const string &g) { DispatchDeployResult(scripts_, s, g); }
+    void PawnRuntime::dispatchGuildFetched(bool s, const string &g) { DispatchFetchOne(scripts_, "DBridge_OnGuildFetched", s, g); }
+    void PawnRuntime::dispatchChannelFetched(bool s, const string &c) { DispatchFetchOne(scripts_, "DBridge_OnChannelFetched", s, c); }
+    void PawnRuntime::dispatchRoleFetched(bool s, const string &g, const string &r) { DispatchFetchTwo(scripts_, "DBridge_OnRoleFetched", s, g, r); }
+    void PawnRuntime::dispatchMemberFetched(bool s, const string &g, const string &u) { DispatchFetchTwo(scripts_, "DBridge_OnMemberFetched", s, g, u); }
+    void PawnRuntime::dispatchUserFetched(bool s, const string &u) { DispatchFetchOne(scripts_, "DBridge_OnUserFetched", s, u); }
 
     void PawnRuntime::dispatchButtonClick(const string &userId, const string &guildId, const string &channelId, const string &customId, const string &interactionId, const string &interactionToken)
     {
         for (AMX *amx : scripts_)
         {
-            if (DispatchInteractionToAMX(amx, 2, userId, guildId, channelId, customId, interactionId, interactionToken)) continue;
+            if (DispatchInteractionToAMX(amx, 2, userId, guildId, channelId, customId, interactionId, interactionToken))
+                continue;
             DispatchThreeStrings(vector<AMX *>{amx}, "DBridge_OnButtonClick", userId, channelId, customId);
             DispatchStrings(vector<AMX *>{amx}, "DBridge_OnButtonInteraction", {userId, channelId, customId, interactionId, interactionToken});
         }
@@ -396,7 +416,8 @@ namespace DiscordBridge
         const string firstValue = values.empty() ? string{} : values.front();
         for (AMX *amx : scripts_)
         {
-            if (DispatchInteractionToAMX(amx, 3, userId, guildId, channelId, customId, interactionId, interactionToken)) continue;
+            if (DispatchInteractionToAMX(amx, 3, userId, guildId, channelId, customId, interactionId, interactionToken))
+                continue;
             DispatchStrings(vector<AMX *>{amx}, "DBridge_OnSelectMenu", {userId, channelId, customId, firstValue, interactionId, interactionToken});
         }
         activeInteractionValues_ = nullptr;
@@ -407,7 +428,8 @@ namespace DiscordBridge
         activeModalValues_ = &values;
         for (AMX *amx : scripts_)
         {
-            if (DispatchInteractionToAMX(amx, 4, userId, guildId, channelId, customId, interactionId, interactionToken)) continue;
+            if (DispatchInteractionToAMX(amx, 4, userId, guildId, channelId, customId, interactionId, interactionToken))
+                continue;
             DispatchStrings(vector<AMX *>{amx}, "DBridge_OnModalSubmit", {userId, channelId, customId, interactionId, interactionToken});
         }
         activeModalValues_ = nullptr;
@@ -427,13 +449,13 @@ namespace DiscordBridge
         return false;
     }
 
-
     void PawnRuntime::dispatchSlashCommand(const string &commandName, const string &userId, const string &guildId, const string &channelId, const vector<pair<string, string>> &options, const string &interactionId, const string &interactionToken)
     {
         activeCommandValues_ = &options;
         for (AMX *amx : scripts_)
         {
-            if (DispatchInteractionToAMX(amx, 1, userId, guildId, channelId, commandName, interactionId, interactionToken)) continue;
+            if (DispatchInteractionToAMX(amx, 1, userId, guildId, channelId, commandName, interactionId, interactionToken))
+                continue;
             DispatchStrings(vector<AMX *>{amx}, "DBridge_OnSlashCommand", {commandName, userId, guildId, channelId, interactionId, interactionToken});
         }
         activeCommandValues_ = nullptr;
@@ -444,7 +466,8 @@ namespace DiscordBridge
         activeCommandValues_ = &options;
         for (AMX *amx : scripts_)
         {
-            if (DispatchInteractionToAMX(amx, 5, userId, guildId, channelId, commandName, interactionId, interactionToken)) continue;
+            if (DispatchInteractionToAMX(amx, 5, userId, guildId, channelId, commandName, interactionId, interactionToken))
+                continue;
             DispatchStrings(vector<AMX *>{amx}, "DBridge_OnAutocomplete", {commandName, userId, guildId, channelId, interactionId, interactionToken});
         }
         activeCommandValues_ = nullptr;
@@ -452,16 +475,17 @@ namespace DiscordBridge
 
     bool PawnRuntime::getCommandValue(const string &name, string &value) const
     {
-        if (!activeCommandValues_ || name.empty()) return false;
+        if (!activeCommandValues_ || name.empty())
+            return false;
         for (const auto &entry : *activeCommandValues_)
         {
-            if (entry.first != name) continue;
+            if (entry.first != name)
+                continue;
             value = entry.second;
             return true;
         }
         return false;
     }
-
 
     size_t PawnRuntime::getInteractionValueCount() const
     {
@@ -470,7 +494,8 @@ namespace DiscordBridge
 
     bool PawnRuntime::getInteractionValue(size_t index, string &value) const
     {
-        if (!activeInteractionValues_ || index >= activeInteractionValues_->size()) return false;
+        if (!activeInteractionValues_ || index >= activeInteractionValues_->size())
+            return false;
         value = (*activeInteractionValues_)[index];
         return true;
     }

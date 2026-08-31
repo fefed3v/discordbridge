@@ -1,0 +1,31 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build-normal",
+            "type": "shell",
+            "command": "${workspaceRoot}/pawn/pawncc",
+            "runOptions": {
+                "instanceLimit": 1,
+            },
+            "args": [
+                "${file}",
+                "'-i${workspaceFolder}/pawn/include'",
+                "'-D${fileDirname}'",
+                "'-;+'",
+                "'-(+'",
+                "'-d3'"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "isBackground": false,
+            "presentation": {
+                "reveal": "always",
+                "clear": true
+            },
+            "problemMatcher": "$pawncc"
+        }
+    ],
+}

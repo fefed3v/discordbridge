@@ -1,0 +1,104 @@
+[
+{
+  "directory": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build",
+  "command": "C:\\mingw64\\bin\\c++.exe -DDiscordBridge_EXPORTS -DHAVE_STDINT_H -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amx\" -g -std=c++20 /W4 /permissive- /EHsc /utf-8 /Zc:__cplusplus /wd4005 -o CMakeFiles\\DiscordBridge.dir\\src\\core\\BridgeCore.cpp.obj -c \"C:\\Users\\Pichau\\Desktop\\Discord Bridge\\Discord Bridge\\src\\core\\BridgeCore.cpp\"",
+  "file": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/core/BridgeCore.cpp",
+  "output": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/DiscordBridge.dir/src/core/BridgeCore.cpp.obj"
+},
+{
+  "directory": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build",
+  "command": "C:\\mingw64\\bin\\c++.exe -DDiscordBridge_EXPORTS -DHAVE_STDINT_H -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amx\" -g -std=c++20 /W4 /permissive- /EHsc /utf-8 /Zc:__cplusplus /wd4005 -o CMakeFiles\\DiscordBridge.dir\\src\\discord\\client\\DiscordClient.cpp.obj -c \"C:\\Users\\Pichau\\Desktop\\Discord Bridge\\Discord Bridge\\src\\discord\\client\\DiscordClient.cpp\"",
+  "file": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/client/DiscordClient.cpp",
+  "output": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/DiscordBridge.dir/src/discord/client/DiscordClient.cpp.obj"
+},
+{
+  "directory": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build",
+  "command": "C:\\mingw64\\bin\\c++.exe -DDiscordBridge_EXPORTS -DHAVE_STDINT_H -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amx\" -g -std=c++20 /W4 /permissive- /EHsc /utf-8 /Zc:__cplusplus /wd4005 -o CMakeFiles\\DiscordBridge.dir\\src\\discord\\gateway\\Gateway.cpp.obj -c \"C:\\Users\\Pichau\\Desktop\\Discord Bridge\\Discord Bridge\\src\\discord\\gateway\\Gateway.cpp\"",
+  "file": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/gateway/Gateway.cpp",
+  "output": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/DiscordBridge.dir/src/discord/gateway/Gateway.cpp.obj"
+},
+{
+  "directory": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build",
+  "command": "C:\\mingw64\\bin\\c++.exe -DDiscordBridge_EXPORTS -DHAVE_STDINT_H -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amx\" -g -std=c++20 /W4 /permissive- /EHsc /utf-8 /Zc:__cplusplus /wd4005 -o CMakeFiles\\DiscordBridge.dir\\src\\discord\\http\\HttpClient.cpp.obj -c \"C:\\Users\\Pichau\\Desktop\\Discord Bridge\\Discord Bridge\\src\\discord\\http\\HttpClient.cpp\"",
+  "file": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/http/HttpClient.cpp",
+  "output": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/DiscordBridge.dir/src/discord/http/HttpClient.cpp.obj"
+},
+{
+  "directory": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build",
+  "command": "C:\\mingw64\\bin\\c++.exe -DDiscordBridge_EXPORTS -DHAVE_STDINT_H -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amx\" -g -std=c++20 /W4 /permissive- /EHsc /utf-8 /Zc:__cplusplus /wd4005 -o CMakeFiles\\DiscordBridge.dir\\src\\discord\\embeds\\Embed.cpp.obj -c \"C:\\Users\\Pichau\\Desktop\\Discord Bridge\\Discord Bridge\\src\\discord\\embeds\\Embed.cpp\"",
+  "file": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/embeds/Embed.cpp",
+  "output": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/DiscordBridge.dir/src/discord/embeds/Embed.cpp.obj"
+},
+{
+  "directory": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build",
+  "command": "C:\\mingw64\\bin\\c++.exe -DDiscordBridge_EXPORTS -DHAVE_STDINT_H -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amx\" -g -std=c++20 /W4 /permissive- /EHsc /utf-8 /Zc:__cplusplus /wd4005 -o CMakeFiles\\DiscordBridge.dir\\src\\discord\\components\\legacy\\Button.cpp.obj -c \"C:\\Users\\Pichau\\Desktop\\Discord Bridge\\Discord Bridge\\src\\discord\\components\\legacy\\Button.cpp\"",
+  "file": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/components/legacy/Button.cpp",
+  "output": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/DiscordBridge.dir/src/discord/components/legacy/Button.cpp.obj"
+},
+{
+  "directory": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build",
+  "command": "C:\\mingw64\\bin\\c++.exe -DDiscordBridge_EXPORTS -DHAVE_STDINT_H -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amx\" -g -std=c++20 /W4 /permissive- /EHsc /utf-8 /Zc:__cplusplus /wd4005 -o CMakeFiles\\DiscordBridge.dir\\src\\discord\\components\\legacy\\SelectMenu.cpp.obj -c \"C:\\Users\\Pichau\\Desktop\\Discord Bridge\\Discord Bridge\\src\\discord\\components\\legacy\\SelectMenu.cpp\"",
+  "file": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/components/legacy/SelectMenu.cpp",
+  "output": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/DiscordBridge.dir/src/discord/components/legacy/SelectMenu.cpp.obj"
+},
+{
+  "directory": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build",
+  "command": "C:\\mingw64\\bin\\c++.exe -DDiscordBridge_EXPORTS -DHAVE_STDINT_H -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amx\" -g -std=c++20 /W4 /permissive- /EHsc /utf-8 /Zc:__cplusplus /wd4005 -o CMakeFiles\\DiscordBridge.dir\\src\\discord\\components\\legacy\\Modal.cpp.obj -c \"C:\\Users\\Pichau\\Desktop\\Discord Bridge\\Discord Bridge\\src\\discord\\components\\legacy\\Modal.cpp\"",
+  "file": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/components/legacy/Modal.cpp",
+  "output": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/DiscordBridge.dir/src/discord/components/legacy/Modal.cpp.obj"
+},
+{
+  "directory": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build",
+  "command": "C:\\mingw64\\bin\\c++.exe -DDiscordBridge_EXPORTS -DHAVE_STDINT_H -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amx\" -g -std=c++20 /W4 /permissive- /EHsc /utf-8 /Zc:__cplusplus /wd4005 -o CMakeFiles\\DiscordBridge.dir\\src\\discord\\commands\\Command.cpp.obj -c \"C:\\Users\\Pichau\\Desktop\\Discord Bridge\\Discord Bridge\\src\\discord\\commands\\Command.cpp\"",
+  "file": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/commands/Command.cpp",
+  "output": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/DiscordBridge.dir/src/discord/commands/Command.cpp.obj"
+},
+{
+  "directory": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build",
+  "command": "C:\\mingw64\\bin\\c++.exe -DDiscordBridge_EXPORTS -DHAVE_STDINT_H -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amx\" -g -std=c++20 /W4 /permissive- /EHsc /utf-8 /Zc:__cplusplus /wd4005 -o CMakeFiles\\DiscordBridge.dir\\src\\discord\\data\\DiscordData.cpp.obj -c \"C:\\Users\\Pichau\\Desktop\\Discord Bridge\\Discord Bridge\\src\\discord\\data\\DiscordData.cpp\"",
+  "file": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/data/DiscordData.cpp",
+  "output": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/DiscordBridge.dir/src/discord/data/DiscordData.cpp.obj"
+},
+{
+  "directory": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build",
+  "command": "C:\\mingw64\\bin\\c++.exe -DDiscordBridge_EXPORTS -DHAVE_STDINT_H -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amx\" -g -std=c++20 /W4 /permissive- /EHsc /utf-8 /Zc:__cplusplus /wd4005 -o CMakeFiles\\DiscordBridge.dir\\src\\discord\\components\\v2\\ComponentsV2.cpp.obj -c \"C:\\Users\\Pichau\\Desktop\\Discord Bridge\\Discord Bridge\\src\\discord\\components\\v2\\ComponentsV2.cpp\"",
+  "file": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/components/v2/ComponentsV2.cpp",
+  "output": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/DiscordBridge.dir/src/discord/components/v2/ComponentsV2.cpp.obj"
+},
+{
+  "directory": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build",
+  "command": "C:\\mingw64\\bin\\c++.exe -DDiscordBridge_EXPORTS -DHAVE_STDINT_H -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amx\" -g -std=c++20 /W4 /permissive- /EHsc /utf-8 /Zc:__cplusplus /wd4005 -o CMakeFiles\\DiscordBridge.dir\\src\\discord\\components\\v2\\Component.cpp.obj -c \"C:\\Users\\Pichau\\Desktop\\Discord Bridge\\Discord Bridge\\src\\discord\\components\\v2\\Component.cpp\"",
+  "file": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/discord/components/v2/Component.cpp",
+  "output": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/DiscordBridge.dir/src/discord/components/v2/Component.cpp.obj"
+},
+{
+  "directory": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build",
+  "command": "C:\\mingw64\\bin\\c++.exe -DDiscordBridge_EXPORTS -DHAVE_STDINT_H -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amx\" -g -std=c++20 /W4 /permissive- /EHsc /utf-8 /Zc:__cplusplus /wd4005 -o CMakeFiles\\DiscordBridge.dir\\src\\pawn\\PawnRuntime.cpp.obj -c \"C:\\Users\\Pichau\\Desktop\\Discord Bridge\\Discord Bridge\\src\\pawn\\PawnRuntime.cpp\"",
+  "file": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/pawn/PawnRuntime.cpp",
+  "output": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/DiscordBridge.dir/src/pawn/PawnRuntime.cpp.obj"
+},
+{
+  "directory": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build",
+  "command": "C:\\mingw64\\bin\\c++.exe -DDiscordBridge_EXPORTS -DHAVE_STDINT_H -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amx\" -g -std=c++20 /W4 /permissive- /EHsc /utf-8 /Zc:__cplusplus /wd4005 -o CMakeFiles\\DiscordBridge.dir\\src\\pawn\\Natives.cpp.obj -c \"C:\\Users\\Pichau\\Desktop\\Discord Bridge\\Discord Bridge\\src\\pawn\\Natives.cpp\"",
+  "file": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/pawn/Natives.cpp",
+  "output": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/DiscordBridge.dir/src/pawn/Natives.cpp.obj"
+},
+{
+  "directory": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build",
+  "command": "C:\\mingw64\\bin\\c++.exe -DDiscordBridge_EXPORTS -DHAVE_STDINT_H -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amx\" -g -std=c++20 /W4 /permissive- /EHsc /utf-8 /Zc:__cplusplus /wd4005 -o CMakeFiles\\DiscordBridge.dir\\src\\plugin\\AmxExports.cpp.obj -c \"C:\\Users\\Pichau\\Desktop\\Discord Bridge\\Discord Bridge\\src\\plugin\\AmxExports.cpp\"",
+  "file": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/plugin/AmxExports.cpp",
+  "output": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/DiscordBridge.dir/src/plugin/AmxExports.cpp.obj"
+},
+{
+  "directory": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build",
+  "command": "C:\\mingw64\\bin\\c++.exe -DDiscordBridge_EXPORTS -DHAVE_STDINT_H -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amx\" -g -std=c++20 /W4 /permissive- /EHsc /utf-8 /Zc:__cplusplus /wd4005 -o CMakeFiles\\DiscordBridge.dir\\src\\plugin\\Plugin.cpp.obj -c \"C:\\Users\\Pichau\\Desktop\\Discord Bridge\\Discord Bridge\\src\\plugin\\Plugin.cpp\"",
+  "file": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src/plugin/Plugin.cpp",
+  "output": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/DiscordBridge.dir/src/plugin/Plugin.cpp.obj"
+},
+{
+  "directory": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build",
+  "command": "C:\\mingw64\\bin\\c++.exe -DDiscordBridge_EXPORTS -DHAVE_STDINT_H -DNOMINMAX -DWIN32_LEAN_AND_MEAN -D_CRT_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/src\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk\" -I\"C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amx\" -g -std=c++20 /W4 /permissive- /EHsc /utf-8 /Zc:__cplusplus /wd4005 -o CMakeFiles\\DiscordBridge.dir\\external\\samp-plugin-sdk\\amxplugin.cpp.obj -c \"C:\\Users\\Pichau\\Desktop\\Discord Bridge\\Discord Bridge\\external\\samp-plugin-sdk\\amxplugin.cpp\"",
+  "file": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/external/samp-plugin-sdk/amxplugin.cpp",
+  "output": "C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/DiscordBridge.dir/external/samp-plugin-sdk/amxplugin.cpp.obj"
+}
+]

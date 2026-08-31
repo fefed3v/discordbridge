@@ -1,0 +1,3 @@
+C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/DiscordBridge.dir
+C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/edit_cache.dir
+C:/Users/Pichau/Desktop/Discord Bridge/Discord Bridge/build/CMakeFiles/rebuild_cache.dir

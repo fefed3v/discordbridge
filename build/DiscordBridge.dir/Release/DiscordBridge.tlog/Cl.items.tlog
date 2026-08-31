@@ -1,0 +1,17 @@
+C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\src\core\BridgeCore.cpp;C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\build\DiscordBridge.dir\Release\BridgeCore.obj
+C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\src\discord\client\DiscordClient.cpp;C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\build\DiscordBridge.dir\Release\DiscordClient.obj
+C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\src\discord\gateway\Gateway.cpp;C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\build\DiscordBridge.dir\Release\Gateway.obj
+C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\src\discord\http\HttpClient.cpp;C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\build\DiscordBridge.dir\Release\HttpClient.obj
+C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\src\discord\embeds\Embed.cpp;C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\build\DiscordBridge.dir\Release\Embed.obj
+C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\src\discord\components\legacy\Button.cpp;C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\build\DiscordBridge.dir\Release\Button.obj
+C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\src\discord\components\legacy\SelectMenu.cpp;C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\build\DiscordBridge.dir\Release\SelectMenu.obj
+C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\src\discord\components\legacy\Modal.cpp;C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\build\DiscordBridge.dir\Release\Modal.obj
+C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\src\discord\commands\Command.cpp;C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\build\DiscordBridge.dir\Release\Command.obj
+C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\src\discord\data\DiscordData.cpp;C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\build\DiscordBridge.dir\Release\DiscordData.obj
+C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\src\discord\components\v2\ComponentsV2.cpp;C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\build\DiscordBridge.dir\Release\ComponentsV2.obj
+C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\src\discord\components\v2\Component.cpp;C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\build\DiscordBridge.dir\Release\Component.obj
+C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\src\pawn\PawnRuntime.cpp;C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\build\DiscordBridge.dir\Release\PawnRuntime.obj
+C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\src\pawn\Natives.cpp;C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\build\DiscordBridge.dir\Release\Natives.obj
+C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\src\plugin\AmxExports.cpp;C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\build\DiscordBridge.dir\Release\AmxExports.obj
+C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\src\plugin\Plugin.cpp;C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\build\DiscordBridge.dir\Release\Plugin.obj
+C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\external\samp-plugin-sdk\amxplugin.cpp;C:\Users\Pichau\Desktop\Discord Bridge\Discord Bridge\build\DiscordBridge.dir\Release\amxplugin.obj

@@ -15,6 +15,7 @@
 #include <chrono>
 #include <iostream>
 #include <thread>
+
 namespace DiscordBridge
 {
     namespace
