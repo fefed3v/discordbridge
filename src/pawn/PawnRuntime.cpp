@@ -392,6 +392,8 @@ namespace DiscordBridge
     void PawnRuntime::dispatchMemberKicked(bool s, const string &g, const string &id) { DispatchResult(scripts_, "DBridge_OnMemberKicked", s, g, id); }
     void PawnRuntime::dispatchMemberBanned(bool s, const string &g, const string &id) { DispatchResult(scripts_, "DBridge_OnMemberBanned", s, g, id); }
     void PawnRuntime::dispatchMemberUnbanned(bool s, const string &g, const string &id) { DispatchResult(scripts_, "DBridge_OnMemberUnbanned", s, g, id); }
+    void PawnRuntime::dispatchMemberNickSet(bool s, const string &g, const string &id) { DispatchResult(scripts_, "DBridge_OnMemberNickSet", s, g, id); }
+    void PawnRuntime::dispatchBotProfileSet(bool s, const string &field) { DispatchFetchOne(scripts_, "DBridge_OnBotProfileSet", s, field); }
     void PawnRuntime::dispatchCommandsDeployed(bool s, const string &g) { DispatchDeployResult(scripts_, s, g); }
     void PawnRuntime::dispatchGuildFetched(bool s, const string &g) { DispatchFetchOne(scripts_, "DBridge_OnGuildFetched", s, g); }
     void PawnRuntime::dispatchChannelFetched(bool s, const string &c) { DispatchFetchOne(scripts_, "DBridge_OnChannelFetched", s, c); }

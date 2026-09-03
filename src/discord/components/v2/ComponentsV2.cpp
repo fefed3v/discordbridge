@@ -1,3 +1,4 @@
+#include "../../../core/Limits.hpp"
 #include "ComponentsV2.hpp"
 
 #include <sstream>
@@ -275,6 +276,7 @@ namespace DiscordBridge
 
     V2Handle ComponentsV2Manager::create()
     {
+        if (messages_.size() >= Limits::MaxHandlesPerType) return 0;
         while (next_ == 0 || messages_.count(next_))
             ++next_;
         const auto handle = next_++;

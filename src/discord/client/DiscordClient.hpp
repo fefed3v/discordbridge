@@ -6,11 +6,12 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <chrono>
 #include <deque>
 #include <mutex>
 #include <string>
 #include <thread>
-#include <unordered_set>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -43,7 +44,9 @@ namespace DiscordBridge
             FetchChannel,
             FetchRole,
             FetchMember,
-            FetchUser
+            FetchUser,
+            SetMemberNick,
+            SetBotProfile
         };
 
         struct MessageOperation
@@ -135,11 +138,18 @@ namespace DiscordBridge
         bool fetchRole(const std::string &guildId, const std::string &roleId);
         bool fetchMember(const std::string &guildId, const std::string &userId);
         bool fetchUser(const std::string &userId);
+        bool setMemberNick(const std::string &guildId, const std::string &userId, const std::string &nickname);
+        bool setBotUsername(const std::string &username);
+        bool setBotAvatar(const std::string &imageData);
+        bool setBotBanner(const std::string &imageData);
+        bool isCurrentBot(const std::string &userId) const;
         bool consumeGuildFetchedEvent(bool &success, std::string &guildId);
         bool consumeChannelFetchedEvent(bool &success, std::string &channelId);
         bool consumeRoleFetchedEvent(bool &success, std::string &guildId, std::string &roleId);
         bool consumeMemberFetchedEvent(bool &success, std::string &guildId, std::string &userId);
         bool consumeUserFetchedEvent(bool &success, std::string &userId);
+        bool consumeMemberNickSetEvent(bool &success, std::string &guildId, std::string &userId);
+        bool consumeBotProfileSetEvent(bool &success, std::string &field);
         DiscordDataStore &getDataStore();
         const DiscordDataStore &getDataStore() const;
 
@@ -185,6 +195,8 @@ namespace DiscordBridge
         bool sendV2Request(const std::string &channelId, const std::string &messageJson, std::string &messageId);
         bool editV2Request(const std::string &channelId, const std::string &messageId, const std::string &messageJson);
         bool acknowledgeInteraction(const std::string &interactionId, const std::string &interactionToken);
+        bool reserveInteractionResponse(const std::string &interactionId);
+        void releaseInteractionResponse(const std::string &interactionId);
 
         HttpClient httpClient_;
         HttpClient interactionHttpClient_{true};
@@ -206,7 +218,7 @@ namespace DiscordBridge
         std::deque<MessageOperationResult> messageOperationResults_;
         std::deque<GuildOperationResult> guildOperationResults_;
         std::deque<InteractionOperation> interactionOperations_;
-        std::unordered_set<std::string> interactionResponses_;
+        std::unordered_map<std::string, std::chrono::steady_clock::time_point> interactionResponses_;
 
         std::atomic_bool initialized_{false};
         std::atomic_bool connected_{false};
@@ -214,5 +226,7 @@ namespace DiscordBridge
         std::atomic_bool interactionRunning_{false};
 
         std::string token_;
+        std::chrono::steady_clock::time_point nextReconnectAttempt_{};
+        unsigned int reconnectFailures_{0};
     };
 }

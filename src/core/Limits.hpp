@@ -17,4 +17,5 @@ namespace DiscordBridge::Limits
     inline constexpr size_t MaxCustomIdLength = 100;
     inline constexpr size_t MaxSnowflakeLength = 20;
     inline constexpr size_t MaxPayloadLength = 1024 * 1024;
+    inline constexpr size_t MaxHandlesPerType = 4096;
 }

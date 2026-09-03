@@ -40,6 +40,8 @@ namespace DiscordBridge
         void dispatchMemberKicked(bool success, const string &guildId, const string &userId);
         void dispatchMemberBanned(bool success, const string &guildId, const string &userId);
         void dispatchMemberUnbanned(bool success, const string &guildId, const string &userId);
+        void dispatchMemberNickSet(bool success, const string &guildId, const string &userId);
+        void dispatchBotProfileSet(bool success, const string &field);
         void dispatchCommandsDeployed(bool success, const string &guildId);
         void dispatchGuildFetched(bool success, const string &guildId);
         void dispatchChannelFetched(bool success, const string &channelId);

@@ -118,6 +118,9 @@ namespace DiscordBridge
         std::string currentActivityUrl_;
         std::string token_;
         std::string applicationId_;
+        std::string sessionId_;
+        std::string resumeGatewayUrl_;
+        std::atomic_bool resumePending_{false};
         AbuseGuard abuseGuard_;
 
     public:
@@ -130,6 +133,7 @@ namespace DiscordBridge
         Gateway &operator=(Gateway &&) = delete;
 
         bool connect(const GatewayInfo &gatewayInfo, const std::string &token);
+        bool reconnect(const GatewayInfo &gatewayInfo, const std::string &token);
         void disconnect();
 
         bool isInitialized() const;
@@ -164,6 +168,7 @@ namespace DiscordBridge
         bool sendText(const std::string &payload);
         bool sendHeartbeat();
         bool sendIdentify();
+        bool sendResume();
         bool sendPresence();
 
         bool consumeGuildMemberEvent(std::deque<GuildMemberEvent> &events, std::string &guildId, std::string &userId);

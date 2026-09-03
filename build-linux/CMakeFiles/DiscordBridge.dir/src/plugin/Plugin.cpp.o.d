@@ -258,8 +258,6 @@ CMakeFiles/DiscordBridge.dir/src/plugin/Plugin.cpp.o: \
  /usr/include/c++/13/variant \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/client/../http/HttpClient.hpp \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/client/../data/DiscordData.hpp \
- /usr/include/c++/13/unordered_set \
- /usr/include/c++/13/bits/unordered_set.h \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/embeds/Embed.hpp \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/components/legacy/Modal.hpp \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/plugin/../core/../discord/commands/Command.hpp \

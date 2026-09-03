@@ -255,8 +255,6 @@ CMakeFiles/DiscordBridge.dir/src/core/BridgeCore.cpp.o: \
  /usr/include/c++/13/variant \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/core/../discord/client/../http/HttpClient.hpp \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/core/../discord/client/../data/DiscordData.hpp \
- /usr/include/c++/13/unordered_set \
- /usr/include/c++/13/bits/unordered_set.h \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/core/../discord/embeds/Embed.hpp \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/core/../discord/components/legacy/Modal.hpp \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/core/../discord/commands/Command.hpp \

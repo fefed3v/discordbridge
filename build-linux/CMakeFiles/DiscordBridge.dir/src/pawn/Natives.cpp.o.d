@@ -262,8 +262,6 @@ CMakeFiles/DiscordBridge.dir/src/pawn/Natives.cpp.o: \
  /usr/include/c++/13/variant \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/pawn/../core/../discord/client/../http/HttpClient.hpp \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/pawn/../core/../discord/client/../data/DiscordData.hpp \
- /usr/include/c++/13/unordered_set \
- /usr/include/c++/13/bits/unordered_set.h \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/pawn/../core/../discord/embeds/Embed.hpp \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/pawn/../core/../discord/components/legacy/Modal.hpp \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/pawn/../core/../discord/commands/Command.hpp \
@@ -271,5 +269,7 @@ CMakeFiles/DiscordBridge.dir/src/pawn/Natives.cpp.o: \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/pawn/../core/../discord/components/v2/Component.hpp \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/pawn/../core/../pawn/PawnRuntime.hpp \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/pawn/../core/Metrics.hpp \
+ /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/pawn/../core/Debug.hpp \
+ /usr/include/c++/13/iostream \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/pawn/../plugin/Plugin.hpp \
  /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h

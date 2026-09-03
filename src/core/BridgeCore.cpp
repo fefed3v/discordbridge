@@ -140,6 +140,8 @@ void BridgeCore::process()
     DBRIDGE_DRAIN(discordClient_.consumeMemberKickedEvent(success, guildId, targetId), pawnRuntime_.dispatchMemberKicked(success, guildId, targetId));
     DBRIDGE_DRAIN(discordClient_.consumeMemberBannedEvent(success, guildId, targetId), pawnRuntime_.dispatchMemberBanned(success, guildId, targetId));
     DBRIDGE_DRAIN(discordClient_.consumeMemberUnbannedEvent(success, guildId, targetId), pawnRuntime_.dispatchMemberUnbanned(success, guildId, targetId));
+    DBRIDGE_DRAIN(discordClient_.consumeMemberNickSetEvent(success, guildId, targetId), pawnRuntime_.dispatchMemberNickSet(success, guildId, targetId));
+    DBRIDGE_DRAIN(discordClient_.consumeBotProfileSetEvent(success, targetId), pawnRuntime_.dispatchBotProfileSet(success, targetId));
     DBRIDGE_DRAIN(discordClient_.consumeCommandsDeployedEvent(success, guildId), pawnRuntime_.dispatchCommandsDeployed(success, guildId));
     DBRIDGE_DRAIN(discordClient_.consumeGuildFetchedEvent(success, guildId), pawnRuntime_.dispatchGuildFetched(success, guildId));
     DBRIDGE_DRAIN(discordClient_.consumeChannelFetchedEvent(success, channelId), pawnRuntime_.dispatchChannelFetched(success, channelId));

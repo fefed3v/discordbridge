@@ -247,10 +247,9 @@ CMakeFiles/DiscordBridge.dir/src/discord/client/DiscordClient.cpp.o: \
  /usr/include/c++/13/bits/erase_if.h \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/discord/client/../http/HttpClient.hpp \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/discord/client/../data/DiscordData.hpp \
- /usr/include/c++/13/unordered_set \
- /usr/include/c++/13/bits/unordered_set.h \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/discord/client/../../Version.hpp \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/discord/client/../../core/Limits.hpp \
  /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/discord/client/../../core/Metrics.hpp \
- /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/discord/client/../../security/InputValidator.hpp \
- /usr/include/c++/13/iostream
+ /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/discord/client/../../core/Debug.hpp \
+ /usr/include/c++/13/iostream \
+ /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/discord/client/../../security/InputValidator.hpp

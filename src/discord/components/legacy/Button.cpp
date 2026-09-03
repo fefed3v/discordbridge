@@ -1,3 +1,4 @@
+#include "../../../core/Limits.hpp"
 #include "Button.hpp"
 
 #include <algorithm>
@@ -197,6 +198,7 @@ namespace DiscordBridge
 
     ButtonHandle ButtonManager::create()
     {
+        if (buttons_.size() >= Limits::MaxHandlesPerType) return 0;
         if (nextHandle_ == 0) nextHandle_ = 1;
 
         const ButtonHandle start = nextHandle_;
@@ -336,6 +338,7 @@ namespace DiscordBridge
 
     ActionRowHandle ActionRowManager::create()
     {
+        if (rows_.size() >= Limits::MaxHandlesPerType) return 0;
         if (nextHandle_ == 0) nextHandle_ = 1;
 
         const ActionRowHandle start = nextHandle_;

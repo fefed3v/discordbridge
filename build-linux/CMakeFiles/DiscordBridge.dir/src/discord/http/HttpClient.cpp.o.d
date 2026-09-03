@@ -159,6 +159,7 @@ CMakeFiles/DiscordBridge.dir/src/discord/http/HttpClient.cpp.o: \
  /usr/include/c++/13/bits/basic_string.tcc \
  /usr/include/c++/13/bits/memory_resource.h /usr/include/c++/13/cstddef \
  /usr/include/c++/13/bits/uses_allocator_args.h \
+ /mnt/c/Users/Pichau/Desktop/Discord\ Bridge/Discord\ Bridge/src/discord/http/../../core/Limits.hpp \
  /usr/include/c++/13/vector /usr/include/c++/13/bits/stl_uninitialized.h \
  /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \

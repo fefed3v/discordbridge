@@ -53,11 +53,24 @@ namespace DiscordBridge
         bool getMemberRoleCount(const std::string& guildId, const std::string& userId, int& value) const;
         bool getMemberRole(const std::string& guildId, const std::string& userId, int index, std::string& value) const;
         bool getMemberAvatarUrl(const std::string& guildId, const std::string& userId, std::string& value) const;
+        bool getMemberPending(const std::string& guildId, const std::string& userId, bool& value) const;
+        bool getMemberMuted(const std::string& guildId, const std::string& userId, bool& value) const;
+        bool getMemberDeaf(const std::string& guildId, const std::string& userId, bool& value) const;
+        bool getMemberTimeout(const std::string& guildId, const std::string& userId, std::string& value) const;
+        bool getMemberPremium(const std::string& guildId, const std::string& userId, std::string& value) const;
+        bool isGuildOwner(const std::string& guildId, const std::string& userId) const;
 
         bool getUserName(const std::string& userId, std::string& value) const;
         bool getUserGlobalName(const std::string& userId, std::string& value) const;
         bool getUserAvatar(const std::string& userId, std::string& value) const;
         bool isUserBot(const std::string& userId, bool& value) const;
+        bool isUserSystem(const std::string& userId, bool& value) const;
+        bool getUserBanner(const std::string& userId, std::string& value) const;
+        bool getUserBannerUrl(const std::string& userId, std::string& value) const;
+        bool getUserFlags(const std::string& userId, int& value) const;
+        bool isMemberBot(const std::string& guildId, const std::string& userId, bool& value) const;
+        bool hasMember(const std::string& guildId, const std::string& userId) const;
+        bool hasUser(const std::string& userId) const;
         bool getUserAvatarUrl(const std::string& userId, std::string& value) const;
 
         static bool findObjectById(const std::string& jsonArray, const std::string& id, std::string& objectJson);

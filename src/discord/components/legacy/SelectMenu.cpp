@@ -1,3 +1,4 @@
+#include "../../../core/Limits.hpp"
 #include "SelectMenu.hpp"
 
 #include <algorithm>
@@ -88,6 +89,7 @@ namespace DiscordBridge
     }
     SelectMenuHandle SelectMenuManager::create()
     {
+        if (items_.size() >= Limits::MaxHandlesPerType) return 0;
         while (next_ == 0 || items_.count(next_))
             ++next_;
         const auto handle = next_++;

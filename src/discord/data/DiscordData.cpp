@@ -271,10 +271,39 @@ namespace DiscordBridge
         value="https://cdn.discordapp.com/avatars/"+u+"/"+hash+"."+cdnExtension(hash)+"?size=1024"; return true;
     }
 
+    bool DiscordDataStore::getMemberPending(const std::string& g,const std::string& u,bool& value) const { std::lock_guard<std::mutex> lock(mutex_); auto it=members_.find(makePairKey(g,u)); return it!=members_.end() && getBool(it->second,"pending",value); }
+    bool DiscordDataStore::getMemberMuted(const std::string& g,const std::string& u,bool& value) const { std::lock_guard<std::mutex> lock(mutex_); auto it=members_.find(makePairKey(g,u)); return it!=members_.end() && getBool(it->second,"mute",value); }
+    bool DiscordDataStore::getMemberDeaf(const std::string& g,const std::string& u,bool& value) const { std::lock_guard<std::mutex> lock(mutex_); auto it=members_.find(makePairKey(g,u)); return it!=members_.end() && getBool(it->second,"deaf",value); }
+    bool DiscordDataStore::getMemberTimeout(const std::string& g,const std::string& u,std::string& value) const { std::lock_guard<std::mutex> lock(mutex_); auto it=members_.find(makePairKey(g,u)); return it!=members_.end() && getString(it->second,"communication_disabled_until",value); }
+    bool DiscordDataStore::getMemberPremium(const std::string& g,const std::string& u,std::string& value) const { std::lock_guard<std::mutex> lock(mutex_); auto it=members_.find(makePairKey(g,u)); return it!=members_.end() && getString(it->second,"premium_since",value); }
+    bool DiscordDataStore::isGuildOwner(const std::string& g,const std::string& u) const { std::lock_guard<std::mutex> lock(mutex_); auto it=guilds_.find(g); if(it==guilds_.end()) return false; std::string owner; return getString(it->second,"owner_id",owner) && owner==u; }
+
     bool DiscordDataStore::getUserName(const std::string& u,std::string& value) const { DB_GET_STRING(users_,u,"username"); }
     bool DiscordDataStore::getUserGlobalName(const std::string& u,std::string& value) const { DB_GET_STRING(users_,u,"global_name"); }
     bool DiscordDataStore::getUserAvatar(const std::string& u,std::string& value) const { DB_GET_STRING(users_,u,"avatar"); }
     bool DiscordDataStore::isUserBot(const std::string& u,bool& value) const { std::lock_guard<std::mutex> lock(mutex_); auto it=users_.find(u); return it!=users_.end() && getBool(it->second,"bot",value); }
+    bool DiscordDataStore::isUserSystem(const std::string& u,bool& value) const { std::lock_guard<std::mutex> lock(mutex_); auto it=users_.find(u); return it!=users_.end() && getBool(it->second,"system",value); }
+    bool DiscordDataStore::getUserBanner(const std::string& u,std::string& value) const { DB_GET_STRING(users_,u,"banner"); }
+    bool DiscordDataStore::getUserFlags(const std::string& u,int& value) const { DB_GET_INT(users_,u,"public_flags"); }
+    bool DiscordDataStore::getUserBannerUrl(const std::string& u,std::string& value) const
+    {
+        std::string hash; if(!getUserBanner(u,hash) || hash.empty()) return false;
+        value="https://cdn.discordapp.com/banners/"+u+"/"+hash+"."+cdnExtension(hash)+"?size=1024"; return true;
+    }
+    bool DiscordDataStore::isMemberBot(const std::string& g,const std::string& u,bool& value) const
+    {
+        std::lock_guard<std::mutex> lock(mutex_); auto it=members_.find(makePairKey(g,u)); if(it==members_.end()) return false;
+        std::string user; return getObject(it->second,"user",user) && getBool(user,"bot",value);
+    }
+    bool DiscordDataStore::hasMember(const std::string& g,const std::string& u) const
+    {
+        std::lock_guard<std::mutex> lock(mutex_); return members_.find(makePairKey(g,u)) != members_.end();
+    }
+    bool DiscordDataStore::hasUser(const std::string& u) const
+    {
+        std::lock_guard<std::mutex> lock(mutex_); return users_.find(u) != users_.end();
+    }
+
     bool DiscordDataStore::getUserAvatarUrl(const std::string& u,std::string& value) const
     {
         std::string hash; if(!getUserAvatar(u,hash) || hash.empty()) return false;

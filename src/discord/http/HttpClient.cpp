@@ -1,4 +1,5 @@
 #include "HttpClient.hpp"
+#include "../../core/Limits.hpp"
 
 #include <vector>
 #ifndef _WIN32
@@ -12,7 +13,7 @@ namespace DiscordBridge
 {
     namespace
     {
-        constexpr wchar_t USER_AGENT[] = L"DiscordBridge/0.0.9";
+        constexpr wchar_t USER_AGENT[] = L"DiscordBridge/1.0.0";
 
         void CloseHandle(HINTERNET &handle)
         {
@@ -167,6 +168,12 @@ namespace DiscordBridge
                     break;
                 }
 
+                if (response.body.size() + bytesRead > Limits::MaxPayloadLength)
+                {
+                    response.body.clear();
+                    available = 0;
+                    break;
+                }
                 response.body.append(buffer.data(), bytesRead);
                 available -= bytesRead;
             }
@@ -192,11 +199,22 @@ namespace DiscordBridge
             std::wstring_convert<std::codecvt_utf8<wchar_t>> convert;
             return convert.to_bytes(value);
         }
+        struct CurlWriteContext
+        {
+            std::string *output{};
+            bool overflow{false};
+        };
         size_t WriteCallback(char *data, size_t size, size_t count, void *userdata)
         {
-            auto *output = static_cast<std::string *>(userdata);
-            output->append(data, size * count);
-            return size * count;
+            auto *context = static_cast<CurlWriteContext *>(userdata);
+            const size_t bytes = size * count;
+            if (!context || !context->output || bytes > Limits::MaxPayloadLength || context->output->size() > Limits::MaxPayloadLength - bytes)
+            {
+                if (context) context->overflow = true;
+                return 0;
+            }
+            context->output->append(data, bytes);
+            return bytes;
         }
     }
 
@@ -238,11 +256,12 @@ namespace DiscordBridge
             return response;
         const std::string url = "https://" + Narrow(host) + Narrow(path);
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, "DiscordBridge/0.0.9");
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, "DiscordBridge/1.0.0");
         curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, 5000L);
         curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 10000L);
+        CurlWriteContext writeContext{&response.body, false};
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response.body);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &writeContext);
         const std::string methodText = Narrow(method);
         if (methodText != "GET")
             curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, methodText.c_str());
@@ -267,10 +286,11 @@ namespace DiscordBridge
         if (list)
             curl_easy_setopt(curl, CURLOPT_HTTPHEADER, list);
         const CURLcode code = curl_easy_perform(curl);
+        if (writeContext.overflow) response.body.clear();
         long status = 0;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
         response.statusCode = static_cast<unsigned long>(status);
-        response.success = code == CURLE_OK && status >= 200 && status < 300;
+        response.success = !writeContext.overflow && code == CURLE_OK && status >= 200 && status < 300;
         if (list)
             curl_slist_free_all(list);
         curl_easy_cleanup(curl);

@@ -9,6 +9,7 @@
 #include "../discord/commands/Command.hpp"
 #include "../discord/components/v2/Component.hpp"
 #include "../core/Metrics.hpp"
+#include "../core/Debug.hpp"
 #include "../plugin/Plugin.hpp"
 
 #include <cstdint>
@@ -1102,6 +1103,25 @@ namespace DiscordBridge
             return SetPawnString(amx, params[2], params[3], value) ? 1 : 0;
         }
 
+        cell AMX_NATIVE_CALL Native_SetMemberNick(AMX *amx, cell *params)
+        {
+            if (!HasParams(params, 3)) return 0; string g,u,n;
+            if (!GetPawnString(amx,params[1],g,false) || !GetPawnString(amx,params[2],u,false) || !GetPawnString(amx,params[3],n,true)) return 0;
+            auto *d=GetDiscord(); return d && d->setMemberNick(g,u,n) ? 1 : 0;
+        }
+        cell AMX_NATIVE_CALL Native_SetBotUsername(AMX *amx, cell *params)
+        {
+            if (!HasParams(params,1)) return 0; string v; if(!GetPawnString(amx,params[1],v,false)) return 0; auto *d=GetDiscord(); return d && d->setBotUsername(v) ? 1 : 0;
+        }
+        cell AMX_NATIVE_CALL Native_SetBotAvatar(AMX *amx, cell *params)
+        {
+            if (!HasParams(params,1)) return 0; string v; if(!GetPawnString(amx,params[1],v,false)) return 0; auto *d=GetDiscord(); return d && d->setBotAvatar(v) ? 1 : 0;
+        }
+        cell AMX_NATIVE_CALL Native_SetBotBanner(AMX *amx, cell *params)
+        {
+            if (!HasParams(params,1)) return 0; string v; if(!GetPawnString(amx,params[1],v,false)) return 0; auto *d=GetDiscord(); return d && d->setBotBanner(v) ? 1 : 0;
+        }
+
         cell AMX_NATIVE_CALL Native_CreateChannel(AMX *amx, cell *params)
         {
             if (!HasParams(params, 3))
@@ -1310,13 +1330,13 @@ namespace DiscordBridge
             return 1;
         }
 
-        cell AMX_NATIVE_CALL Native_CommandSetNumberRange(AMX *, cell *params)
+        cell AMX_NATIVE_CALL Native_CommandSetNumberRange(AMX *amx, cell *params)
         {
             if (!HasParams(params, 4))
                 return 0;
             auto *core = GetCore();
             auto *command = core ? core->getCommandManager().get(params[1]) : nullptr;
-            if (!command || !command->setNumberRange(params[2], static_cast<double>(params[3]), static_cast<double>(params[4])))
+            if (!command || !command->setNumberRange(params[2], static_cast<double>(amx_ctof(params[3])), static_cast<double>(amx_ctof(params[4]))))
                 return 0;
             core->getCommandManager().markDirty();
             return 1;
@@ -1974,6 +1994,9 @@ namespace DiscordBridge
                        : 0;
         }
 
+        cell AMX_NATIVE_CALL Native_GetUserBanner(AMX *a, cell *p) { return SetDataString(a,p,1,[](DiscordDataStore &d,const std::vector<string>&i,string&v){return d.getUserBanner(i[0],v);}) ? 1 : 0; }
+        cell AMX_NATIVE_CALL Native_GetUserBannerUrl(AMX *a, cell *p) { return SetDataString(a,p,1,[](DiscordDataStore &d,const std::vector<string>&i,string&v){return d.getUserBannerUrl(i[0],v);}) ? 1 : 0; }
+
         cell AMX_NATIVE_CALL Native_GetGuildMembers(AMX *amx, cell *params)
         {
             if (!HasParams(params, 1))
@@ -2050,6 +2073,14 @@ namespace DiscordBridge
             auto *d = GetDiscord();
             return d && d->getDataStore().memberHasRole(g, u, r) ? 1 : 0;
         }
+        cell MemberBoolField(AMX *amx, cell *params, bool (DiscordDataStore::*getter)(const std::string&, const std::string&, bool&) const) { if(!HasParams(params,2)) return 0; string g,u; if(!GetPawnString(amx,params[1],g,false)||!GetPawnString(amx,params[2],u,false)) return 0; auto*d=GetDiscord(); bool v=false; return d&&(d->getDataStore().*getter)(g,u,v)&&v?1:0; }
+        cell AMX_NATIVE_CALL Native_IsMemberPending(AMX *a, cell *p) { return MemberBoolField(a,p,&DiscordDataStore::getMemberPending); }
+        cell AMX_NATIVE_CALL Native_IsMemberMuted(AMX *a, cell *p) { return MemberBoolField(a,p,&DiscordDataStore::getMemberMuted); }
+        cell AMX_NATIVE_CALL Native_IsMemberDeaf(AMX *a, cell *p) { return MemberBoolField(a,p,&DiscordDataStore::getMemberDeaf); }
+        cell AMX_NATIVE_CALL Native_GetMemberTimeout(AMX *a, cell *p) { return SetDataString(a,p,2,[](DiscordDataStore &d,const std::vector<string>&i,string&v){return d.getMemberTimeout(i[0],i[1],v);})?1:0; }
+        cell AMX_NATIVE_CALL Native_GetMemberPremium(AMX *a, cell *p) { return SetDataString(a,p,2,[](DiscordDataStore &d,const std::vector<string>&i,string&v){return d.getMemberPremium(i[0],i[1],v);})?1:0; }
+        cell AMX_NATIVE_CALL Native_IsGuildOwner(AMX *a, cell *p) { if(!HasParams(p,2)) return 0; string g,u; if(!GetPawnString(a,p[1],g,false)||!GetPawnString(a,p[2],u,false)) return 0; auto*d=GetDiscord(); return d&&d->getDataStore().isGuildOwner(g,u)?1:0; }
+
         cell AMX_NATIVE_CALL Native_IsUserBot(AMX *amx, cell *params)
         {
             if (!HasParams(params, 1))
@@ -2061,6 +2092,22 @@ namespace DiscordBridge
             bool v = false;
             return d && d->getDataStore().isUserBot(u, v) && v ? 1 : 0;
         }
+        cell AMX_NATIVE_CALL Native_IsUserSystem(AMX *amx, cell *params) { if(!HasParams(params,1)) return 0; string u; if(!GetPawnString(amx,params[1],u,false)) return 0; auto*d=GetDiscord(); bool v=false; return d&&d->getDataStore().isUserSystem(u,v)&&v?1:0; }
+        cell AMX_NATIVE_CALL Native_IsCurrentBot(AMX *amx, cell *params) { if(!HasParams(params,1)) return 0; string u; if(!GetPawnString(amx,params[1],u,false)) return 0; auto*d=GetDiscord(); return d&&d->isCurrentBot(u)?1:0; }
+        cell AMX_NATIVE_CALL Native_IsMemberBot(AMX *amx, cell *params) { if(!HasParams(params,2)) return 0; string g,u; if(!GetPawnString(amx,params[1],g,false)||!GetPawnString(amx,params[2],u,false)) return 0; auto*d=GetDiscord(); bool v=false; return d&&d->getDataStore().isMemberBot(g,u,v)&&v?1:0; }
+        cell AMX_NATIVE_CALL Native_IsGuildMember(AMX *amx, cell *params) { if(!HasParams(params,2)) return 0; string g,u; if(!GetPawnString(amx,params[1],g,false)||!GetPawnString(amx,params[2],u,false)) return 0; auto*d=GetDiscord(); return d&&d->getDataStore().hasMember(g,u)?1:0; }
+        cell AMX_NATIVE_CALL Native_GetUserFlags(AMX *amx, cell *params) { if(!HasParams(params,1)) return -1; string u; if(!GetPawnString(amx,params[1],u,false)) return -1; auto*d=GetDiscord(); int v=-1; return d&&d->getDataStore().getUserFlags(u,v)?static_cast<cell>(v):-1; }
+        cell UserBoolState(AMX *amx, cell *params, bool (DiscordDataStore::*getter)(const std::string&, bool&) const) { if(!HasParams(params,1)) return -1; string u; if(!GetPawnString(amx,params[1],u,false)) return -1; auto*d=GetDiscord(); bool v=false; return d&&(d->getDataStore().*getter)(u,v)?(v?1:0):-1; }
+        cell MemberBoolState(AMX *amx, cell *params, bool (DiscordDataStore::*getter)(const std::string&, const std::string&, bool&) const) { if(!HasParams(params,2)) return -1; string g,u; if(!GetPawnString(amx,params[1],g,false)||!GetPawnString(amx,params[2],u,false)) return -1; auto*d=GetDiscord(); bool v=false; return d&&(d->getDataStore().*getter)(g,u,v)?(v?1:0):-1; }
+        cell AMX_NATIVE_CALL Native_GetUserBotState(AMX *a, cell *p) { return UserBoolState(a,p,&DiscordDataStore::isUserBot); }
+        cell AMX_NATIVE_CALL Native_GetUserSystemState(AMX *a, cell *p) { return UserBoolState(a,p,&DiscordDataStore::isUserSystem); }
+        cell AMX_NATIVE_CALL Native_GetMemberBotState(AMX *a, cell *p) { return MemberBoolState(a,p,&DiscordDataStore::isMemberBot); }
+        cell AMX_NATIVE_CALL Native_GetMemberPendingState(AMX *a, cell *p) { return MemberBoolState(a,p,&DiscordDataStore::getMemberPending); }
+        cell AMX_NATIVE_CALL Native_GetMemberMutedState(AMX *a, cell *p) { return MemberBoolState(a,p,&DiscordDataStore::getMemberMuted); }
+        cell AMX_NATIVE_CALL Native_GetMemberDeafState(AMX *a, cell *p) { return MemberBoolState(a,p,&DiscordDataStore::getMemberDeaf); }
+        cell AMX_NATIVE_CALL Native_IsUserCached(AMX *a, cell *p) { if(!HasParams(p,1)) return 0; string u; if(!GetPawnString(a,p[1],u,false)) return 0; auto*d=GetDiscord(); return d&&d->getDataStore().hasUser(u)?1:0; }
+        cell AMX_NATIVE_CALL Native_IsMemberCached(AMX *a, cell *p) { if(!HasParams(p,2)) return 0; string g,u; if(!GetPawnString(a,p[1],g,false)||!GetPawnString(a,p[2],u,false)) return 0; auto*d=GetDiscord(); return d&&d->getDataStore().hasMember(g,u)?1:0; }
+
         cell AMX_NATIVE_CALL Native_GetChannelPosition(AMX *amx, cell *params)
         {
             if (!HasParams(params, 1))
@@ -2312,6 +2359,11 @@ namespace DiscordBridge
         cell AMX_NATIVE_CALL Native_GetDroppedEvents(AMX *, cell *) { return static_cast<cell>(GlobalMetrics().droppedGatewayEvents.load()); }
         cell AMX_NATIVE_CALL Native_GetDroppedRequests(AMX *, cell *) { return static_cast<cell>(GlobalMetrics().droppedRestRequests.load() + GlobalMetrics().droppedInteractionRequests.load()); }
         cell AMX_NATIVE_CALL Native_GetProcessedEvents(AMX *, cell *) { return static_cast<cell>(GlobalMetrics().processedEvents.load()); }
+        cell AMX_NATIVE_CALL Native_GetRateLimits(AMX *, cell *) { return static_cast<cell>(GlobalMetrics().rateLimitedRequests.load()); }
+        cell AMX_NATIVE_CALL Native_GetReconnects(AMX *, cell *) { return static_cast<cell>(GlobalMetrics().reconnectAttempts.load()); }
+        cell AMX_NATIVE_CALL Native_GetHttpErrors(AMX *, cell *) { return static_cast<cell>(GlobalMetrics().httpServerErrors.load()); }
+        cell AMX_NATIVE_CALL Native_SetDebug(AMX *, cell *params) { if (!HasParams(params, 1)) return 0; DebugLog::setEnabled(params[1] != 0); DebugLog::info("Core", "Debug mode enabled"); return 1; }
+        cell AMX_NATIVE_CALL Native_IsDebug(AMX *, cell *) { return DebugLog::isEnabled() ? 1 : 0; }
 
         cell AMX_NATIVE_CALL Native_GetVersionMajor(AMX *, cell *)
         {
@@ -2477,6 +2529,10 @@ namespace DiscordBridge
                 {"DBridge_FetchRole", Native_FetchRole},
                 {"DBridge_FetchMember", Native_FetchMember},
                 {"DBridge_FetchUser", Native_FetchUser},
+                {"DBridge_SetMemberNick", Native_SetMemberNick},
+                {"DBridge_SetBotUsername", Native_SetBotUsername},
+                {"DBridge_SetBotAvatar", Native_SetBotAvatar},
+                {"DBridge_SetBotBanner", Native_SetBotBanner},
                 {"DBridge_GetGuildName", Native_GetGuildName},
                 {"DBridge_GetGuildOwner", Native_GetGuildOwner},
                 {"DBridge_GetGuildIcon", Native_GetGuildIcon},
@@ -2509,12 +2565,33 @@ namespace DiscordBridge
                 {"DBridge_GetMemberRoleCount", Native_GetMemberRoleCount},
                 {"DBridge_GetMemberRole", Native_GetMemberRole},
                 {"DBridge_MemberHasRole", Native_MemberHasRole},
+                {"DBridge_IsMemberPending", Native_IsMemberPending},
+                {"DBridge_IsMemberMuted", Native_IsMemberMuted},
+                {"DBridge_IsMemberDeaf", Native_IsMemberDeaf},
+                {"DBridge_GetMemberTimeout", Native_GetMemberTimeout},
+                {"DBridge_GetMemberPremium", Native_GetMemberPremium},
+                {"DBridge_IsGuildOwner", Native_IsGuildOwner},
                 {"DBridge_GetUserName", Native_GetUserName},
                 {"DBridge_GetUserGlobal", Native_GetUserGlobal},
                 {"DBridge_GetUserGlobalName", Native_GetUserGlobal},
                 {"DBridge_GetUserAvatar", Native_GetUserAvatar},
                 {"DBridge_GetUserAvatarUrl", Native_GetUserAvatarUrl},
                 {"DBridge_IsUserBot", Native_IsUserBot},
+                {"DBridge_IsUserSystem", Native_IsUserSystem},
+                {"DBridge_IsCurrentBot", Native_IsCurrentBot},
+                {"DBridge_IsMemberBot", Native_IsMemberBot},
+                {"DBridge_IsGuildMember", Native_IsGuildMember},
+                {"DBridge_GetUserBanner", Native_GetUserBanner},
+                {"DBridge_GetUserBannerUrl", Native_GetUserBannerUrl},
+                {"DBridge_GetUserFlags", Native_GetUserFlags},
+                {"DBridge_GetUserBotState", Native_GetUserBotState},
+                {"DBridge_GetUserSystemState", Native_GetUserSystemState},
+                {"DBridge_GetMemberBotState", Native_GetMemberBotState},
+                {"DBridge_GetMemberPendingState", Native_GetMemberPendingState},
+                {"DBridge_GetMemberMutedState", Native_GetMemberMutedState},
+                {"DBridge_GetMemberDeafState", Native_GetMemberDeafState},
+                {"DBridge_IsUserCached", Native_IsUserCached},
+                {"DBridge_IsMemberCached", Native_IsMemberCached},
 
                 {"DBridge_CreateComponent", Native_CreateComponent},
                 {"DBridge_DestroyComponent", Native_DestroyComponent},
@@ -2546,6 +2623,11 @@ namespace DiscordBridge
                 {"DBridge_GetDroppedEvents", Native_GetDroppedEvents},
                 {"DBridge_GetDroppedRequests", Native_GetDroppedRequests},
                 {"DBridge_GetProcessedEvents", Native_GetProcessedEvents},
+                {"DBridge_GetRateLimits", Native_GetRateLimits},
+                {"DBridge_GetReconnects", Native_GetReconnects},
+                {"DBridge_GetHttpErrors", Native_GetHttpErrors},
+                {"DBridge_SetDebug", Native_SetDebug},
+                {"DBridge_IsDebug", Native_IsDebug},
 
                 {"DBridge_GetVersionMajor", Native_GetVersionMajor},
                 {"DBridge_GetVersionMinor", Native_GetVersionMinor},

@@ -1,3 +1,4 @@
+#include "../../core/Limits.hpp"
 #include "Embed.hpp"
 
 namespace DiscordBridge
@@ -251,6 +252,7 @@ namespace DiscordBridge
 
     EmbedHandle EmbedManager::create()
     {
+        if (embeds_.size() >= Limits::MaxHandlesPerType) return 0;
         if (nextHandle_ == 0) nextHandle_ = 1;
 
         const EmbedHandle start = nextHandle_;

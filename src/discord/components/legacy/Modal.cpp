@@ -1,3 +1,4 @@
+#include "../../../core/Limits.hpp"
 #include "Modal.hpp"
 
 namespace DiscordBridge
@@ -90,6 +91,7 @@ namespace DiscordBridge
     }
     ModalHandle ModalManager::create()
     {
+        if (items_.size() >= Limits::MaxHandlesPerType) return 0;
         while (next_ == 0 || items_.count(next_))
             ++next_;
         const auto handle = next_++;

@@ -19,7 +19,7 @@ namespace DiscordBridge
 #ifdef _WIN32
         constexpr wchar_t GATEWAY_HOST[] = L"gateway.discord.gg";
         constexpr wchar_t GATEWAY_PATH[] = L"/?v=10&encoding=json";
-        constexpr wchar_t USER_AGENT[] = L"DiscordBridge/0.0.9";
+        constexpr wchar_t USER_AGENT[] = L"DiscordBridge/1.0.0";
 #else
         constexpr char GATEWAY_URL[] = "wss://gateway.discord.gg/?v=10&encoding=json";
 #endif
@@ -745,7 +745,8 @@ namespace DiscordBridge
             return false;
 
         token_ = token;
-        resetState();
+        if (!resumePending_)
+            resetState();
 
 #ifdef _WIN32
         session_ = WinHttpOpen(USER_AGENT, WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
@@ -786,7 +787,7 @@ namespace DiscordBridge
         if (!socket)
             return failConnection();
         curl_easy_setopt(socket, CURLOPT_URL, GATEWAY_URL);
-        curl_easy_setopt(socket, CURLOPT_USERAGENT, "DiscordBridge/0.0.9");
+        curl_easy_setopt(socket, CURLOPT_USERAGENT, "DiscordBridge/1.0.0");
         curl_easy_setopt(socket, CURLOPT_CONNECT_ONLY, 2L);
         curl_easy_setopt(socket, CURLOPT_CONNECTTIMEOUT_MS, 10000L);
         if (curl_easy_perform(socket) != CURLE_OK)
@@ -811,6 +812,22 @@ namespace DiscordBridge
         }
 
         return true;
+    }
+
+    bool Gateway::reconnect(const GatewayInfo &gatewayInfo, const std::string &token)
+    {
+        const std::string savedSession = sessionId_;
+        const std::string savedResumeUrl = resumeGatewayUrl_;
+        const std::int64_t savedSequence = sequence_.load();
+        disconnect();
+        if (!savedSession.empty() && savedSequence >= 0)
+        {
+            sessionId_ = savedSession;
+            resumeGatewayUrl_ = savedResumeUrl;
+            sequence_ = savedSequence;
+            resumePending_ = true;
+        }
+        return connect(gatewayInfo, token);
     }
 
     void Gateway::disconnect()
@@ -1210,6 +1227,14 @@ namespace DiscordBridge
         return sendText(payload);
     }
 
+    bool Gateway::sendResume()
+    {
+        if (!running_ || token_.empty() || sessionId_.empty() || sequence_.load() < 0)
+            return false;
+        const std::string payload = "{\"op\":6,\"d\":{\"token\":\"" + EscapeJson(token_) + "\",\"session_id\":\"" + EscapeJson(sessionId_) + "\",\"seq\":" + std::to_string(sequence_.load()) + "}}";
+        return sendText(payload);
+    }
+
     bool Gateway::sendPresence()
     {
         if (!running_ || !ready_)
@@ -1281,6 +1306,25 @@ namespace DiscordBridge
                 stopConnection();
             break;
 
+        case 7:
+            resumePending_ = !sessionId_.empty() && sequence_.load() >= 0;
+            stopConnection();
+            break;
+
+        case 9:
+        {
+            const bool resumable = payload.find("\"d\":true") != std::string::npos;
+            if (!resumable)
+            {
+                sessionId_.clear();
+                resumeGatewayUrl_.clear();
+                sequence_ = -1;
+                resumePending_ = false;
+            }
+            stopConnection();
+            break;
+        }
+
         case 10:
             handleHello(payload);
             break;
@@ -1316,7 +1360,8 @@ namespace DiscordBridge
 
         heartbeatCondition_.notify_all();
 
-        if (!sendIdentify())
+        const bool sent = resumePending_ ? sendResume() : sendIdentify();
+        if (!sent)
             stopConnection();
     }
 
@@ -1331,7 +1376,12 @@ namespace DiscordBridge
         {
             std::string readyJson;
             std::string applicationJson;
-            if (FindDirectObject(payload, "d", readyJson) && FindDirectObject(readyJson, "application", applicationJson))
+            if (FindDirectObject(payload, "d", readyJson))
+            {
+                FindDirectString(readyJson, "session_id", sessionId_);
+                FindDirectString(readyJson, "resume_gateway_url", resumeGatewayUrl_);
+            }
+            if (!readyJson.empty() && FindDirectObject(readyJson, "application", applicationJson))
             {
                 std::string applicationId;
                 if (FindDirectString(applicationJson, "id", applicationId))
@@ -1341,6 +1391,17 @@ namespace DiscordBridge
                 }
             }
 
+            resumePending_ = false;
+            ready_ = true;
+            connected_ = true;
+            readyEventPending_ = true;
+            sendPresence();
+            return;
+        }
+
+        if (eventName == "RESUMED")
+        {
+            resumePending_ = false;
             ready_ = true;
             connected_ = true;
             readyEventPending_ = true;
@@ -1605,6 +1666,9 @@ namespace DiscordBridge
         heartbeatAck_ = true;
         heartbeatInterval_ = 0;
         sequence_ = -1;
+        sessionId_.clear();
+        resumeGatewayUrl_.clear();
+        resumePending_ = false;
 
         std::lock_guard<std::mutex> lock(eventMutex_);
 
